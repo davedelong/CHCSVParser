@@ -20,9 +20,12 @@ CHCSVParser relies on knowing the encoding of the CSV file.  It should work with
  - NSUTF32LittleEndianStringEncoding
  
 CHCSVParser is conscious of low-memory environments, such as the iPhone or iPad.  It can safely parse very large CSV files, because it only loads portions of the file into memory at a single time.
+
+CHCSVParser uses code to discover file encoding that was provided by [Rainer Brockerhoff][2].
  
 ##Credits
 
 CHCSVParser was written by [Dave DeLong][1].
 
   [1]: http://davedelong.com
+  [2]: http://brockerhoff.net/
