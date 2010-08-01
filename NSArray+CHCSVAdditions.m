@@ -66,7 +66,11 @@
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error {
-	CHCSVParser * parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFile encoding:encoding];
+	CHCSVParser * parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFile encoding:encoding error:error];
+	if (error && *error) {
+		[parser release];
+		return [self init];
+	}
 	NSArrayCHCSVAggregator * delegate = [[NSArrayCHCSVAggregator alloc] init];
 	[parser setParserDelegate:delegate];
 	
@@ -92,7 +96,11 @@
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
-	CHCSVParser * parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFile usedEncoding:usedEncoding];
+	CHCSVParser * parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFile usedEncoding:usedEncoding error:error];
+	if (error && *error) {
+		[parser release];
+		return [self init];
+	}
 	NSArrayCHCSVAggregator * delegate = [[NSArrayCHCSVAggregator alloc] init];
 	[parser setParserDelegate:delegate];
 	

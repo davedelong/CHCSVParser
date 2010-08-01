@@ -30,9 +30,8 @@
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	NSString * file = @"/Users/dave/Developer/Cocoa/CHCSVParser/Test.csv";
-//	file = @"/Users/dave/Developer/Cocoa/CHCSVParser/SetupAssistant.csv";
 	NSStringEncoding encoding = 0;
-	CHCSVParser * p = [[CHCSVParser alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding];
+	CHCSVParser * p = [[CHCSVParser alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding error:nil];
 	
 	NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
 	

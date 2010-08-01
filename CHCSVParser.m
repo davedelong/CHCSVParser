@@ -67,12 +67,14 @@ enum {
 @implementation CHCSVParser
 @synthesize parserDelegate, currentChunk, error, csvFile;
 
-- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding {
+- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding error:(NSError **)anError {
 	if (self = [super init]) {
 		csvFile = [aCSVFile copy];
 		csvFileHandle = [[NSFileHandle fileHandleForReadingAtPath:csvFile] retain];
 		if (csvFileHandle == nil) {
-			NSLog(@"Unable to open file for reading");
+			if (anError) {
+				*anError = [NSError errorWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unable to open file for reading" forKey:NSLocalizedDescriptionKey]];
+			}
 			[self release];
 			return nil;
 		}
@@ -92,8 +94,8 @@ enum {
 	return self;
 }
 
-- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding {
-	if (self = [self initWithContentsOfCSVFile:aCSVFile encoding:NSUTF8StringEncoding]) {
+- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
+	if (self = [self initWithContentsOfCSVFile:aCSVFile encoding:NSUTF8StringEncoding error:anError]) {
 		[self discoverTextEncoding];		
 		
 		if (usedEncoding) {
