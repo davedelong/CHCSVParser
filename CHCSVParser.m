@@ -169,7 +169,6 @@ enum {
 			nextChunk = [csvFileHandle readDataOfLength:CHUNK_SIZE];
 		}
 		@catch (NSException * e) {
-			NSLog(@"Exception reading from file: %@", e);
 			error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
 																						   e, NSUnderlyingErrorKey,
 																						   [e reason], NSLocalizedDescriptionKey,
@@ -222,7 +221,6 @@ enum {
 	}
 	
 	if ([currentField length] > 0 && state == CHCSVParserStateInsideField) {
-		NSLog(@"current field: --%@-- (%lu)", currentField, [currentField length]);
 		[self finishCurrentField];
 	}
 	if (state == CHCSVParserStateInsideLine) {
