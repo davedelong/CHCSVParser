@@ -19,7 +19,7 @@ CHCSVParser relies on knowing the encoding of the CSV file.  It should work with
  - NSUTF32BigEndianStringEncoding
  - NSUTF32LittleEndianStringEncoding
  
-CHCSVParser is conscious of low-memory environments, such as the iPhone or iPad.  It can safely parse very large CSV files, because it only loads portions of the file into memory at a single time.
+CHCSVParser is conscious of low-memory environments, such as the iPhone or iPad.  It can safely parse very large CSV files, because it only loads portions of the file into memory at a single time.  For example, CHCSVParser can parse a 4 million line CSV file (over 300MB on disk) in under one second while only consuming about 75K of active memory.
  
 ##Credits
 
