@@ -1,6 +1,6 @@
 #CHCSVParser
 
-CHCSVParser is a parser for CSV files written in Objective-C.
+CHCSVParser is an Objective-C parser for CSV files.
 
 ##Supported Platforms
 
