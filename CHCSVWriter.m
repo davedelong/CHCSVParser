@@ -40,6 +40,7 @@
 }
 
 - (void) dealloc {
+	[self closeFile];
 	[destinationFile release];
 	[handleFile release];
 	[outputHandle release];
@@ -82,20 +83,22 @@
 }
 
 - (void) closeFile {
-	[outputHandle closeFile];
-	[outputHandle release], outputHandle = nil;
-	
-	if (atomically == YES && [handleFile isEqual:destinationFile] == NO) {
-		if ([[NSFileManager defaultManager] fileExistsAtPath:destinationFile]) {
-			NSError *err = nil;
-			[[NSFileManager defaultManager] removeItemAtPath:destinationFile error:&err];
-			if (err != nil) {
-				error = [err retain];
-				return;
-			}
-			[[NSFileManager defaultManager] moveItemAtPath:handleFile toPath:destinationFile error:&err];
-			if (err != nil) {
-				error = [err retain];
+	if (outputHandle) {
+		[outputHandle closeFile];
+		[outputHandle release], outputHandle = nil;
+		
+		if (atomically == YES && [handleFile isEqual:destinationFile] == NO) {
+			if ([[NSFileManager defaultManager] fileExistsAtPath:destinationFile]) {
+				NSError *err = nil;
+				[[NSFileManager defaultManager] removeItemAtPath:destinationFile error:&err];
+				if (err != nil) {
+					error = [err retain];
+					return;
+				}
+				[[NSFileManager defaultManager] moveItemAtPath:handleFile toPath:destinationFile error:&err];
+				if (err != nil) {
+					error = [err retain];
+				}
 			}
 		}
 	}
