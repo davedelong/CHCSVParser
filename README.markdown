@@ -1,6 +1,6 @@
 #CHCSVParser
 
-CHCSVParser is an Objective-C parser for CSV files.
+`CHCSVParser` is an Objective-C parser for CSV files.
 
 ##Supported Platforms
 
@@ -9,23 +9,51 @@ CHCSVParser is an Objective-C parser for CSV files.
 
 ##Usage
 
-To use CHCSVParser, you must include at least `CHCSVParser.h` and `CHCSVParser.m` into your project.  If you'd like to use some convenience methods on `NSArray`, you may also include `NSArray+CHCSVAdditions.*` as well.
 
-CHCSVParser relies on knowing the encoding of the CSV file.  It should work with pretty much any kind of file encoding, if you can provide what that encoding is.  If you do not know the encoding of the file, then CHCSVParser can make a naïve guess.  CHCSVParser will try to guess the encoding of the file from among these options:
+###Parsing
+In order to parse CSV files, you'll need `CHCSVParser.h` and `CHCSVParser.m`.  A `CHCSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
 
- - NSUTF8StringEncoding (the default/fallback encoding)
- - NSUTF16BigEndianStringEncoding
- - NSUTF16LittleEndianStringEncoding
- - NSUTF32BigEndianStringEncoding
- - NSUTF32LittleEndianStringEncoding
+###Writing
+In order to write data to a CSV file, you'll need `CHCSVWriter.h` and `CHCSVWriter.m`.  A `CHCSVWriter` has 2 primary methods (beyond the designated initializer): `writeField:` and `writeLine`.
+
+`writeField:` accepts an object and writes its `-description` (after being properly escaped) out to the CSV file.  It will also write field seperator (`,`) if necessary.  You may pass an empty string (`@""`) or `nil` to write an empty field.
+
+`writeLine` is used to terminate the current CSV line.  If you do not invoke `writeLine`, then all of your CSV fields will be on a single line.
+
+###Convenience Methods
+Included in the code is an `NSArray` category to simplify reading from and writing to CSV files.  In order to use these methods, you must include `CHCSVParser.*`, `CHCSVWriter.*`, and `NSArray+CHCSVAdditions.*` in your project (all six files).  This category adds 5 methods to `NSArray`: two class methods, two initializers, and one write method:
+
+
+- `+ (id) arrayWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error;`
+- `- (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error;`
+
+- `+ (id) arrayWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error;`
+- `- (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error;`
+
+- `- (BOOL) writeToCSVFile:(NSString *)csvFile atomically:(BOOL)atomically;`
+
+All of the initializers (both class and instance versions) return an `NSArray` of `NSArray` objects.
+
+The `writeToCSVFile:` method expects the same structure (an `NSArray` of `NSArray` objects).
+
+##Data Encoding
+`CHCSVParser` relies on knowing the encoding of the CSV file.  It should work with pretty much any kind of file encoding, if you can provide what that encoding is.  If you do not know the encoding of the file, then `CHCSVParser` can make a naïve guess.  `CHCSVParser` will try to guess the encoding of the file from among these options:
+
+ - `NSUTF8StringEncoding` (the default/fallback encoding)
+ - `NSUTF16BigEndianStringEncoding`
+ - `NSUTF16LittleEndianStringEncoding`
+ - `NSUTF32BigEndianStringEncoding`
+ - `NSUTF32LittleEndianStringEncoding`
  
-CHCSVParser is conscious of low-memory environments, such as the iPhone or iPad.  It can safely parse very large CSV files, because it only loads portions of the file into memory at a single time.  For example, CHCSVParser can parse a 4 million line CSV file (over 300MB on disk) in under one second while only consuming about 75K of active memory.
+ 
+##Performance
+`CHCSVParser` is conscious of low-memory environments, such as the iPhone or iPad.  It can safely parse very large CSV files, because it only loads portions of the file into memory at a single time.  For example, `CHCSVParser` can parse a 4 million line CSV file (over 300MB on disk) in under one second while only consuming about 75K of active memory.
  
 ##Credits
 
-CHCSVParser was written by [Dave DeLong][1].
+`CHCSVParser` was written by [Dave DeLong][1].
 
-CHCSVParser uses code to discover file encoding that was provided by [Rainer Brockerhoff][2].
+`CHCSVParser` uses code to discover file encoding that was provided by [Rainer Brockerhoff][2].
 
   [1]: http://davedelong.com
   [2]: http://brockerhoff.net/
