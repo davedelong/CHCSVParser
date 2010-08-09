@@ -174,6 +174,7 @@
 			}
 			
 			[outputFileHandle writeData:[field dataUsingEncoding:encoding]];
+			[field release];
 			
 			if (currentFieldIndex != (numberOfFieldsInRow - 1)) {
 				//if we're not at the last field, write a comma
