@@ -50,7 +50,7 @@
 	
 	NSString * tempFile = [NSTemporaryDirectory() stringByAppendingPathComponent:@"test.csv"];
 	NSLog(@"Writing to file: %@", tempFile);
-	BOOL writtenToFile = [expectedFields writeToCSVFile:tempFile atomically:NO];
+	BOOL writtenToFile = [expectedFields writeToCSVFile:tempFile atomically:YES];
 	
 	STAssertTrue(writtenToFile, @"Unable to write to temporary file");
 	

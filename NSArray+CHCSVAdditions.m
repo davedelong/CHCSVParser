@@ -129,20 +129,20 @@
 	
 	BOOL ok = YES;
 	
-	NSFileHandle * outputFile = nil;
-	NSString * temporaryFile = nil;
+	NSFileHandle * outputFileHandle = nil;
+	NSString * outputFile = csvFile;
 	if (atomically) {
 		//generate a random file name
-		temporaryFile = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%d-%@", arc4random(), [csvFile lastPathComponent]]];
-		ok = [[NSFileManager defaultManager] createFileAtPath:temporaryFile contents:nil attributes:nil];
-		outputFile = [[NSFileHandle fileHandleForWritingAtPath:temporaryFile] retain];
-	} else {
-		ok = [[NSFileManager defaultManager] createFileAtPath:csvFile contents:nil attributes:nil];
-		outputFile = [[NSFileHandle fileHandleForWritingAtPath:csvFile] retain];
+		outputFile = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%d-%@", arc4random(), [csvFile lastPathComponent]]];
 	}
 	
+	ok = [[NSFileManager defaultManager] createFileAtPath:outputFile contents:nil attributes:nil];
+	
 	if (!ok) { return NO; }
-	if (outputFile == nil) { return NO; }
+	
+	outputFileHandle = [[NSFileHandle fileHandleForWritingAtPath:outputFile] retain];
+	
+	if (outputFileHandle == nil) { return NO; }
 	
 	//any field with a comma, double quote, or newline character must be escaped
 	NSMutableCharacterSet * escapableSet = [NSMutableCharacterSet newlineCharacterSet];
@@ -173,24 +173,25 @@
 				[field appendString:@"\""];
 			}
 			
-			[outputFile writeData:[field dataUsingEncoding:encoding]];
+			[outputFileHandle writeData:[field dataUsingEncoding:encoding]];
 			
 			if (currentFieldIndex != (numberOfFieldsInRow - 1)) {
 				//if we're not at the last field, write a comma
-				[outputFile writeData:[fieldDelimiter dataUsingEncoding:encoding]];
+				[outputFileHandle writeData:[fieldDelimiter dataUsingEncoding:encoding]];
 			}
 		}
-		[outputFile writeData:[lineDelimiter dataUsingEncoding:encoding]];
+		[outputFileHandle writeData:[lineDelimiter dataUsingEncoding:encoding]];
 		
 		[pool release];
 	}
 	
-	[outputFile closeFile];
-	[outputFile release];
+	[outputFileHandle closeFile];
+	[outputFileHandle release];
 	
 	if (atomically) {
+		[[NSFileManager defaultManager] removeItemAtPath:csvFile error:nil];
 		NSError * error = nil;
-		ok = [[NSFileManager defaultManager] moveItemAtPath:temporaryFile toPath:csvFile error:&error];
+		ok = [[NSFileManager defaultManager] moveItemAtPath:outputFile toPath:csvFile error:&error];
 		if (error != nil) {
 			ok = NO;
 		}
