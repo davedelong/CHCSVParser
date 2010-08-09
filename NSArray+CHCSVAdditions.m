@@ -8,6 +8,7 @@
 
 #import "NSArray+CHCSVAdditions.h"
 #import "CHCSVParser.h"
+#import "CHCSVWriter.h"
 
 @interface NSArrayCHCSVAggregator : NSObject <CHCSVParserDelegate> {
 	NSMutableArray * lines;
@@ -129,74 +130,16 @@
 	
 	BOOL ok = YES;
 	
-	NSFileHandle * outputFileHandle = nil;
-	NSString * outputFile = csvFile;
-	if (atomically) {
-		//generate a random file name
-		outputFile = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%d-%@", arc4random(), [csvFile lastPathComponent]]];
-	}
-	
-	ok = [[NSFileManager defaultManager] createFileAtPath:outputFile contents:nil attributes:nil];
-	
-	if (!ok) { return NO; }
-	
-	outputFileHandle = [[NSFileHandle fileHandleForWritingAtPath:outputFile] retain];
-	
-	if (outputFileHandle == nil) { return NO; }
-	
-	//any field with a comma, double quote, or newline character must be escaped
-	NSMutableCharacterSet * escapableSet = [NSMutableCharacterSet newlineCharacterSet];
-	[escapableSet addCharactersInString:@",\"\\"];
-	NSString * fieldDelimiter = @",";
-	NSString * lineDelimiter = @"\n";
-	
-	NSStringEncoding encoding = 0;
-	
+	CHCSVWriter * writer = [[CHCSVWriter alloc] initWithCSVFile:csvFile atomic:atomically];
 	for (NSArray * row in self) {
-		NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-		NSUInteger numberOfFieldsInRow = [row count];
-		NSUInteger currentFieldIndex = 0;
-		
-		for (currentFieldIndex = 0; currentFieldIndex < numberOfFieldsInRow; ++currentFieldIndex) {
-			NSMutableString * field = [[[row objectAtIndex:currentFieldIndex] description] mutableCopy];
-			if (encoding == 0) {
-				encoding = [field fastestEncoding];
-			}
-			
-			//process this field:
-			if ([field rangeOfCharacterFromSet:escapableSet].location != NSNotFound ||
-				[field hasPrefix:@"#"]) {
-				//there are bad characters!
-				[field replaceOccurrencesOfString:@"\"" withString:@"\"\"" options:NSLiteralSearch range:NSMakeRange(0, [field length])];
-				[field replaceOccurrencesOfString:@"\\" withString:@"\\\\" options:NSLiteralSearch range:NSMakeRange(0, [field length])];
-				[field insertString:@"\"" atIndex:0];
-				[field appendString:@"\""];
-			}
-			
-			[outputFileHandle writeData:[field dataUsingEncoding:encoding]];
-			[field release];
-			
-			if (currentFieldIndex != (numberOfFieldsInRow - 1)) {
-				//if we're not at the last field, write a comma
-				[outputFileHandle writeData:[fieldDelimiter dataUsingEncoding:encoding]];
-			}
+		for (NSArray * field in row) {
+			[writer writeField:field];
 		}
-		[outputFileHandle writeData:[lineDelimiter dataUsingEncoding:encoding]];
-		
-		[pool release];
+		[writer writeLine];
 	}
 	
-	[outputFileHandle closeFile];
-	[outputFileHandle release];
-	
-	if (atomically) {
-		[[NSFileManager defaultManager] removeItemAtPath:csvFile error:nil];
-		NSError * error = nil;
-		ok = [[NSFileManager defaultManager] moveItemAtPath:outputFile toPath:csvFile error:&error];
-		if (error != nil) {
-			ok = NO;
-		}
-	}
+	ok = ([writer error] == nil);
+	[writer release];
 	
 	return ok;
 }
