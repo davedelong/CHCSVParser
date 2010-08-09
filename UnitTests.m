@@ -48,6 +48,26 @@
 		STAssertTrue([actualLine isEqualToArray:expectedLine], @"lines differ.  Expected %@, given %@", expectedLine, actualLine);
 	}
 	
+	NSString * tempFile = [NSTemporaryDirectory() stringByAppendingPathComponent:@"test.csv"];
+	NSLog(@"Writing to file: %@", tempFile);
+	BOOL writtenToFile = [expectedFields writeToCSVFile:tempFile atomically:NO];
+	
+	STAssertTrue(writtenToFile, @"Unable to write to temporary file");
+	
+	error = nil;
+	NSArray * readFromFile = [NSArray arrayWithContentsOfCSVFile:tempFile encoding:encoding error:&error];
+	
+	STAssertNil(error, @"Unexpected error reading from temporary file: %@", error);
+	
+	NSUInteger readCount = [readFromFile count];
+	STAssertTrue(readCount == expectedCount, @"Incorrect number of lines read.  Expected %lu, read %lu", expectedCount, readCount);
+	
+	for (int i = 0; i < MIN(expectedCount, readCount); ++i) {
+		NSArray * readLine = [readFromFile objectAtIndex:i];
+		NSArray * expectedLine = [expectedFields objectAtIndex:i];
+		
+		STAssertTrue([expectedLine isEqualToArray:readLine], @"lines differ.  Expected %@, read %@", expectedLine, readLine);
+	}
 }
 
 @end

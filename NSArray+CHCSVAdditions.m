@@ -121,4 +121,82 @@
 	return [self initWithArray:lines];
 }
 
+- (BOOL) writeToCSVFile:(NSString *)csvFile atomically:(BOOL)atomically {
+	//first, verify that this is (at least) an NSArray of NSArrays:
+	for (id object in self) {
+		if ([object isKindOfClass:[NSArray class]] == NO) { return NO; }
+	}
+	
+	BOOL ok = YES;
+	
+	NSFileHandle * outputFile = nil;
+	NSString * temporaryFile = nil;
+	if (atomically) {
+		//generate a random file name
+		temporaryFile = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%d-%@", arc4random(), [csvFile lastPathComponent]]];
+		ok = [[NSFileManager defaultManager] createFileAtPath:temporaryFile contents:nil attributes:nil];
+		outputFile = [[NSFileHandle fileHandleForWritingAtPath:temporaryFile] retain];
+	} else {
+		ok = [[NSFileManager defaultManager] createFileAtPath:csvFile contents:nil attributes:nil];
+		outputFile = [[NSFileHandle fileHandleForWritingAtPath:csvFile] retain];
+	}
+	
+	if (!ok) { return NO; }
+	if (outputFile == nil) { return NO; }
+	
+	//any field with a comma, double quote, or newline character must be escaped
+	NSMutableCharacterSet * escapableSet = [NSMutableCharacterSet newlineCharacterSet];
+	[escapableSet addCharactersInString:@",\"\\"];
+	NSString * fieldDelimiter = @",";
+	NSString * lineDelimiter = @"\n";
+	
+	NSStringEncoding encoding = 0;
+	
+	for (NSArray * row in self) {
+		NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+		NSUInteger numberOfFieldsInRow = [row count];
+		NSUInteger currentFieldIndex = 0;
+		
+		for (currentFieldIndex = 0; currentFieldIndex < numberOfFieldsInRow; ++currentFieldIndex) {
+			NSMutableString * field = [[[row objectAtIndex:currentFieldIndex] description] mutableCopy];
+			if (encoding == 0) {
+				encoding = [field fastestEncoding];
+			}
+			
+			//process this field:
+			if ([field rangeOfCharacterFromSet:escapableSet].location != NSNotFound ||
+				[field hasPrefix:@"#"]) {
+				//there are bad characters!
+				[field replaceOccurrencesOfString:@"\"" withString:@"\"\"" options:NSLiteralSearch range:NSMakeRange(0, [field length])];
+				[field replaceOccurrencesOfString:@"\\" withString:@"\\\\" options:NSLiteralSearch range:NSMakeRange(0, [field length])];
+				[field insertString:@"\"" atIndex:0];
+				[field appendString:@"\""];
+			}
+			
+			[outputFile writeData:[field dataUsingEncoding:encoding]];
+			
+			if (currentFieldIndex != (numberOfFieldsInRow - 1)) {
+				//if we're not at the last field, write a comma
+				[outputFile writeData:[fieldDelimiter dataUsingEncoding:encoding]];
+			}
+		}
+		[outputFile writeData:[lineDelimiter dataUsingEncoding:encoding]];
+		
+		[pool release];
+	}
+	
+	[outputFile closeFile];
+	[outputFile release];
+	
+	if (atomically) {
+		NSError * error = nil;
+		ok = [[NSFileManager defaultManager] moveItemAtPath:temporaryFile toPath:csvFile error:&error];
+		if (error != nil) {
+			ok = NO;
+		}
+	}
+	
+	return ok;
+}
+
 @end
