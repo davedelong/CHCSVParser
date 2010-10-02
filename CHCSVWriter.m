@@ -105,18 +105,19 @@
 		[outputHandle release], outputHandle = nil;
 		
 		if (atomically == YES && [handleFile isEqual:destinationFile] == NO) {
+			NSError *err = nil;
 			if ([[NSFileManager defaultManager] fileExistsAtPath:destinationFile]) {
-				NSError *err = nil;
 				[[NSFileManager defaultManager] removeItemAtPath:destinationFile error:&err];
 				if (err != nil) {
 					error = [err retain];
 					return;
 				}
-				[[NSFileManager defaultManager] moveItemAtPath:handleFile toPath:destinationFile error:&err];
-				if (err != nil) {
-					error = [err retain];
-				}
 			}
+			[[NSFileManager defaultManager] moveItemAtPath:handleFile toPath:destinationFile error:&err];
+			if (err != nil) {
+				error = [err retain];
+			}
+			[[NSFileManager defaultManager] removeItemAtPath:handleFile error:nil];
 		}
 	}
 }

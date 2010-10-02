@@ -26,56 +26,7 @@
 #import "NSArray+CHCSVAdditions.h"
 #import "CHCSVParser.h"
 #import "CHCSVWriter.h"
-
-@interface NSArrayCHCSVAggregator : NSObject <CHCSVParserDelegate> {
-	NSMutableArray * lines;
-	NSMutableArray * currentLine;
-	NSError * error;
-}
-
-@property (readonly) NSArray * lines;
-@property (readonly) NSError * error;
-
-@end
-
-@implementation NSArrayCHCSVAggregator
-@synthesize lines, error;
-
-- (void) dealloc {
-	[lines release];
-	[currentLine release];
-	[error release];
-	[super dealloc];
-}
-
-- (void) parser:(CHCSVParser *)parser didStartDocument:(NSString *)csvFile {
-	lines = [[NSMutableArray alloc] init];
-}
-
-- (void) parser:(CHCSVParser *)parser didStartLine:(NSUInteger)lineNumber {
-	currentLine = [[NSMutableArray alloc] init];
-}
-
-- (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber {
-	[lines addObject:currentLine];
-	[currentLine release], currentLine = nil;
-}
-
-- (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field {
-	[currentLine addObject:field];
-}
-
-- (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile {
-
-}
-
-- (void) parser:(CHCSVParser *)parser didFailWithError:(NSError *)anError {
-	error = [anError retain];
-}
-
-@end
-
-
+#import "CHCSVSupport.h"
 
 @implementation NSArray (CHCSVAdditions)
 
@@ -149,13 +100,14 @@
 	
 	CHCSVWriter * writer = [[CHCSVWriter alloc] initWithCSVFile:csvFile atomic:atomically];
 	for (NSArray * row in self) {
-		for (NSArray * field in row) {
-			[writer writeField:field];
+		for (id field in row) {
+			[writer writeField:[field description]];
 		}
 		[writer writeLine];
 	}
 	
 	ok = ([writer error] == nil);
+	[writer closeFile];
 	[writer release];
 	
 	return ok;

@@ -13,6 +13,8 @@
 ###Parsing
 In order to parse CSV files, you'll need `CHCSVParser.h` and `CHCSVParser.m`.  A `CHCSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
 
+A `CHCSVParser` can be created either with a path to a CSV file, or with an `NSString` of CSV data.
+
 ###Writing
 In order to write data to a CSV file, you'll need `CHCSVWriter.h` and `CHCSVWriter.m`.  A `CHCSVWriter` has 2 primary methods (beyond the designated initializer): `writeField:` and `writeLine`.
 
@@ -35,6 +37,26 @@ Included in the code is an `NSArray` category to simplify reading from and writi
 All of the initializers (both class and instance versions) return an `NSArray` of `NSArray` objects.
 
 The `writeToCSVFile:` method expects the same structure (an `NSArray` of `NSArray` objects).
+
+There is also an `NSString` category to parse an `NSString` of CSV data into an `NSArray` of `NSArray` objects.  This method is:
+
+- `- (NSArray *) CSVComponents;`
+
+Both the `NSArray` and `NSString` categories require including the `CHCSVSupport.h` and `CHCSVSupport.m` files in your project.
+
+###General Use
+
+The simplest use of `CHCSVParser` is to include all of the files in your project:
+
+- `CHCSV.h`
+- `CHCSVParser.h` and `CHCSVParser.m`
+- `CHCSVWriter.h` and `CHCSVWriter.m`
+- `NSArray+CHCSVAdditions.h` and `NSArray+CHCSVAdditions.m`
+- `NSString+CHCSVAdditions.h` and `NSString+CHCSVAdditions.m`
+- `CHCSVSupport.h` and `CHCSVSupport.m`
+
+Then to use any of the CSV parsing or writing functionality, simply `#import "CHCSV.h"` and use any of the classes and categories as you'd like.
+
 
 ##Data Encoding
 `CHCSVParser` relies on knowing the encoding of the CSV file.  It should work with pretty much any kind of file encoding, if you can provide what that encoding is.  If you do not know the encoding of the file, then `CHCSVParser` can make a naïve guess.  `CHCSVParser` will try to guess the encoding of the file from among these options:

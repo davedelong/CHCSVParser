@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5516BCB512578CFC0025F235 /* NSString+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 5516BCB412578CFC0025F235 /* NSString+CHCSVAdditions.m */; };
+		5516BCB912578D750025F235 /* CHCSVSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 5516BCB812578D750025F235 /* CHCSVSupport.m */; };
+		5516BCBB12578EA90025F235 /* NSString+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 5516BCB412578CFC0025F235 /* NSString+CHCSVAdditions.m */; };
+		5516BCBC12578EAD0025F235 /* CHCSVSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 5516BCB812578D750025F235 /* CHCSVSupport.m */; };
 		551981D61203715400FBE033 /* CHCSVParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 551981D51203715400FBE033 /* CHCSVParser.m */; };
 		557FCEB61203F938009FCDBA /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557FCEB51203F938009FCDBA /* CoreServices.framework */; };
 		557FD0431204A45D009FCDBA /* NSArray+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD0421204A45D009FCDBA /* NSArray+CHCSVAdditions.m */; };
@@ -37,6 +41,11 @@
 		08FB7796FE84155DC02AAC07 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32A70AAB03705E1F00C91783 /* CHCSVParser_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParser_Prefix.pch; sourceTree = "<group>"; };
+		5516BCB312578CFC0025F235 /* NSString+CHCSVAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+CHCSVAdditions.h"; sourceTree = "<group>"; };
+		5516BCB412578CFC0025F235 /* NSString+CHCSVAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+CHCSVAdditions.m"; sourceTree = "<group>"; };
+		5516BCB612578D480025F235 /* CHCSV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSV.h; sourceTree = "<group>"; };
+		5516BCB712578D750025F235 /* CHCSVSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVSupport.h; sourceTree = "<group>"; };
+		5516BCB812578D750025F235 /* CHCSVSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVSupport.m; sourceTree = "<group>"; };
 		551981D41203715400FBE033 /* CHCSVParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParser.h; sourceTree = "<group>"; };
 		551981D51203715400FBE033 /* CHCSVParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVParser.m; sourceTree = "<group>"; };
 		551981EE1203800300FBE033 /* Test.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Test.csv; sourceTree = "<group>"; };
@@ -91,12 +100,7 @@
 			children = (
 				32A70AAB03705E1F00C91783 /* CHCSVParser_Prefix.pch */,
 				08FB7796FE84155DC02AAC07 /* main.m */,
-				551981D41203715400FBE033 /* CHCSVParser.h */,
-				551981D51203715400FBE033 /* CHCSVParser.m */,
-				55EFC7B71210608C0070B303 /* CHCSVWriter.h */,
-				55EFC7B81210608C0070B303 /* CHCSVWriter.m */,
-				557FD0411204A45D009FCDBA /* NSArray+CHCSVAdditions.h */,
-				557FD0421204A45D009FCDBA /* NSArray+CHCSVAdditions.m */,
+				5516BCBA12578DA90025F235 /* CHCSVParser */,
 				551981EE1203800300FBE033 /* Test.csv */,
 				557FD05A1204A72B009FCDBA /* UnitTests.h */,
 				557FD05B1204A72B009FCDBA /* UnitTests.m */,
@@ -119,6 +123,24 @@
 				557FD0531204A70D009FCDBA /* Unit Tests.octest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5516BCBA12578DA90025F235 /* CHCSVParser */ = {
+			isa = PBXGroup;
+			children = (
+				5516BCB612578D480025F235 /* CHCSV.h */,
+				551981D41203715400FBE033 /* CHCSVParser.h */,
+				551981D51203715400FBE033 /* CHCSVParser.m */,
+				55EFC7B71210608C0070B303 /* CHCSVWriter.h */,
+				55EFC7B81210608C0070B303 /* CHCSVWriter.m */,
+				5516BCB712578D750025F235 /* CHCSVSupport.h */,
+				5516BCB812578D750025F235 /* CHCSVSupport.m */,
+				557FD0411204A45D009FCDBA /* NSArray+CHCSVAdditions.h */,
+				557FD0421204A45D009FCDBA /* NSArray+CHCSVAdditions.m */,
+				5516BCB312578CFC0025F235 /* NSString+CHCSVAdditions.h */,
+				5516BCB412578CFC0025F235 /* NSString+CHCSVAdditions.m */,
+			);
+			name = CHCSVParser;
 			sourceTree = "<group>";
 		};
 		C6859EA2029092E104C91782 /* Documentation */ = {
@@ -175,7 +197,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "CHCSVParser" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* CHCSVParser */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -222,6 +251,8 @@
 				557FD0591204A71C009FCDBA /* NSArray+CHCSVAdditions.m in Sources */,
 				557FD05D1204A731009FCDBA /* UnitTests.m in Sources */,
 				55EFC7B91210608C0070B303 /* CHCSVWriter.m in Sources */,
+				5516BCB512578CFC0025F235 /* NSString+CHCSVAdditions.m in Sources */,
+				5516BCB912578D750025F235 /* CHCSVSupport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,6 +263,8 @@
 				8DD76F9A0486AA7600D96B5E /* main.m in Sources */,
 				551981D61203715400FBE033 /* CHCSVParser.m in Sources */,
 				557FD0431204A45D009FCDBA /* NSArray+CHCSVAdditions.m in Sources */,
+				5516BCBB12578EA90025F235 /* NSString+CHCSVAdditions.m in Sources */,
+				5516BCBC12578EAD0025F235 /* CHCSVSupport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

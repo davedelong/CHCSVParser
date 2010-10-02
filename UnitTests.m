@@ -25,8 +25,36 @@
 
 #import "UnitTests.h"
 #import "NSArray+CHCSVAdditions.h"
+#import "NSString+CHCSVAdditions.h"
 
 @implementation UnitTests
+
+- (void) setUp {
+	testPool = [[NSAutoreleasePool alloc] init];
+}
+
+- (void) tearDown {
+	[testPool drain], testPool = nil;
+}
+
+- (NSArray *) expectedFields {
+	return [NSArray arrayWithObjects:
+			[NSArray arrayWithObjects:@"This",@"is",@"a",@"simple",@"line",nil],
+			[NSArray arrayWithObjects:@"This",@"is",@"a",@"quoted",@"line",nil],
+			[NSArray arrayWithObjects:@"This",@"is",@"a",@"mixed",@"line",nil],
+			[NSArray arrayWithObjects:@"This",@"has",@"a\nmultiline\nfield",nil],
+			[NSArray arrayWithObjects:@"#This",@"line",@"should",@"not",@"be",@"ignored",nil],
+			[NSArray arrayWithObjects:@"This",@"has",@"\"escaped\"",@"quotes",nil],
+			[NSArray arrayWithObjects:@"This",@"has",@"\"escaped\"",@"quotes",nil],
+			[NSArray arrayWithObjects:@"This",@"has",@"empty",@"fields",@"",@"",@"",nil],
+			[NSArray arrayWithObjects:@"This",@"has",@"escaped",@"escapes\\",nil],
+			[NSArray arrayWithObjects:@"This",@"has",@"escaped",@"commas,",nil],
+			[NSArray arrayWithObjects:@"This",@"has",@"quoted",@"commas,",nil],
+			[NSArray arrayWithObjects:@"This",@"has",@"empty",@"quoted",@"fields",@"",@"",nil],
+			[NSArray arrayWithObjects:@"This",@"has",@"mixed",@"\"escaped quotes\"", nil],
+			[NSArray arrayWithObjects:@"This",@"is",@"the",@"last",@"line",nil],
+			nil];
+}
 
 - (void) testCSV {
 	NSString * file = [[NSBundle bundleForClass:[self class]] pathForResource:@"Test" ofType:@"csv"];
@@ -38,22 +66,7 @@
 	STAssertTrue(encoding == NSUTF8StringEncoding, @"Wrong encoding; given %@ (%lu)", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)), encoding);
 	STAssertNil(error, @"Unexpected error: %@", error);
 	
-	NSArray * expectedFields = [NSArray arrayWithObjects:
-								[NSArray arrayWithObjects:@"This",@"is",@"a",@"simple",@"line",nil],
-								[NSArray arrayWithObjects:@"This",@"is",@"a",@"quoted",@"line",nil],
-								[NSArray arrayWithObjects:@"This",@"is",@"a",@"mixed",@"line",nil],
-								[NSArray arrayWithObjects:@"This",@"has",@"a\nmultiline\nfield",nil],
-								[NSArray arrayWithObjects:@"#This",@"line",@"should",@"not",@"be",@"ignored",nil],
-								[NSArray arrayWithObjects:@"This",@"has",@"\"escaped\"",@"quotes",nil],
-								[NSArray arrayWithObjects:@"This",@"has",@"\"escaped\"",@"quotes",nil],
-								[NSArray arrayWithObjects:@"This",@"has",@"empty",@"fields",@"",@"",@"",nil],
-								[NSArray arrayWithObjects:@"This",@"has",@"escaped",@"escapes\\",nil],
-								[NSArray arrayWithObjects:@"This",@"has",@"escaped",@"commas,",nil],
-								[NSArray arrayWithObjects:@"This",@"has",@"quoted",@"commas,",nil],
-								[NSArray arrayWithObjects:@"This",@"has",@"empty",@"quoted",@"fields",@"",@"",nil],
-								[NSArray arrayWithObjects:@"This",@"has",@"mixed",@"\"escaped quotes\"", nil],
-								[NSArray arrayWithObjects:@"This",@"is",@"the",@"last",@"line",nil],
-								nil];	
+	NSArray * expectedFields = [self expectedFields];
 	
 	NSUInteger expectedCount = [expectedFields count];
 	NSUInteger actualCount = [fields count];
@@ -65,7 +78,8 @@
 		STAssertTrue([actualLine isEqualToArray:expectedLine], @"lines differ.  Expected %@, given %@", expectedLine, actualLine);
 	}
 	
-	NSString * tempFile = [NSTemporaryDirectory() stringByAppendingPathComponent:@"test.csv"];
+	NSString * tempFileName = [NSString stringWithFormat:@"%d-test.csv", arc4random()];
+	NSString * tempFile = [NSTemporaryDirectory() stringByAppendingPathComponent:tempFileName];
 	NSLog(@"Writing to file: %@", tempFile);
 	BOOL writtenToFile = [expectedFields writeToCSVFile:tempFile atomically:YES];
 	
@@ -84,6 +98,27 @@
 		NSArray * expectedLine = [expectedFields objectAtIndex:i];
 		
 		STAssertTrue([expectedLine isEqualToArray:readLine], @"lines differ.  Expected %@, read %@", expectedLine, readLine);
+	}
+}
+
+- (void) testCSVString {
+	NSString * file = [[NSBundle bundleForClass:[self class]] pathForResource:@"Test" ofType:@"csv"];
+	
+	NSStringEncoding encoding = 0;
+	NSString * csv = [NSString stringWithContentsOfFile:file usedEncoding:&encoding error:nil];
+	NSArray * fields = [csv CSVComponents];
+	NSLog(@"fields: %@", fields);
+	
+	NSArray * expectedFields = [self expectedFields];
+	
+	NSUInteger expectedCount = [expectedFields count];
+	NSUInteger actualCount = [fields count];
+	STAssertTrue(expectedCount == actualCount, @"incorrect number of lines parsed.  expected %lu, given %lu", expectedCount, actualCount);
+	for (int i = 0; i < MIN(expectedCount, actualCount); ++i) {
+		NSArray * actualLine = [fields objectAtIndex:i];
+		NSArray * expectedLine = [expectedFields objectAtIndex:i];
+		
+		STAssertTrue([actualLine isEqualToArray:expectedLine], @"lines differ.  Expected %@, given %@", expectedLine, actualLine);
 	}
 }
 

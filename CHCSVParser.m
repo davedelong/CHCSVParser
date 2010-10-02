@@ -66,7 +66,7 @@ enum {
 
 @property (retain) NSString * currentChunk;
 
-- (void) discoverTextEncoding;
+- (NSStringEncoding) textEncodingForData:(NSData *)chunkToSniff offset:(NSUInteger *)offset;
 
 - (NSString *) nextCharacter;
 - (void) runParseLoop;
@@ -90,6 +90,7 @@ enum {
 		csvFileHandle = [[NSFileHandle fileHandleForReadingAtPath:csvFile] retain];
 		if (csvFileHandle == nil) {
 			if (anError) {
+				NSLog(@"error for file: %@", csvFile);
 				*anError = [NSError errorWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unable to open file for reading" forKey:NSLocalizedDescriptionKey]];
 			}
 			[self release];
@@ -113,11 +114,35 @@ enum {
 
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
 	if (self = [self initWithContentsOfCSVFile:aCSVFile encoding:NSUTF8StringEncoding error:anError]) {
-		[self discoverTextEncoding];		
+		
+		NSData * chunk = [csvFileHandle readDataOfLength:CHUNK_SIZE];
+		NSUInteger seekOffset = 0;
+		fileEncoding = [self textEncodingForData:chunk offset:&seekOffset];
+		[csvFileHandle seekToFileOffset:seekOffset];
 		
 		if (usedEncoding) {
 			*usedEncoding = fileEncoding;
 		}
+	}
+	return self;
+}
+
+- (id) initWithCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)anError {
+	if (self = [super init]) {
+		csvFile = nil;
+		csvFileHandle = nil;
+		fileEncoding = encoding;
+		
+		balancedQuotes = YES;
+		balancedEscapes = YES;
+		
+		currentLine = 0;
+		currentField = [[NSMutableString alloc] init];
+		
+		currentChunk = [csvString copy];
+		chunkIndex = 0;
+		
+		state = CHCSVParserStateInsideFile;
 	}
 	return self;
 }
@@ -132,51 +157,51 @@ enum {
 	[super dealloc];
 }
 
-- (void) discoverTextEncoding {
-	NSData * chunkToSniff = [csvFileHandle readDataOfLength:CHUNK_SIZE];
+- (NSStringEncoding) textEncodingForData:(NSData *)chunkToSniff offset:(NSUInteger *)offset {
 	NSUInteger length = [chunkToSniff length];
-	NSUInteger offset = 0;
+	*offset = 0;
+	NSStringEncoding encoding = NSUTF8StringEncoding;
 	
 	if (length > 0) {
 		UInt8* bytes = (UInt8*)[chunkToSniff bytes];
-		fileEncoding = CFStringConvertEncodingToNSStringEncoding(CFStringGetSystemEncoding());
+		encoding = CFStringConvertEncodingToNSStringEncoding(CFStringGetSystemEncoding());
 		switch (bytes[0]) {
 			case 0x00:
 				if (length>3 && bytes[1]==0x00 && bytes[2]==0xFE && bytes[3]==0xFF) {
-					fileEncoding = NSUTF32BigEndianStringEncoding;
-					offset = 4;
+					encoding = NSUTF32BigEndianStringEncoding;
+					*offset = 4;
 				}
 				break;
 			case 0xEF:
 				if (length>2 && bytes[1]==0xBB && bytes[2]==0xBF) {
-					fileEncoding = NSUTF8StringEncoding;
-					offset = 3;
+					encoding = NSUTF8StringEncoding;
+					*offset = 3;
 				}
 				break;
 			case 0xFE:
 				if (length>1 && bytes[1]==0xFF) {
-					fileEncoding = NSUTF16BigEndianStringEncoding;
-					offset = 2;
+					encoding = NSUTF16BigEndianStringEncoding;
+					*offset = 2;
 				}
 				break;
 			case 0xFF:
 				if (length>1 && bytes[1]==0xFE) {
 					if (length>3 && bytes[2]==0x00 && bytes[3]==0x00) {
-						fileEncoding = NSUTF32LittleEndianStringEncoding;
-						offset = 4;
+						encoding = NSUTF32LittleEndianStringEncoding;
+						*offset = 4;
 					} else {
-						fileEncoding = NSUTF16LittleEndianStringEncoding;
-						offset = 2;
+						encoding = NSUTF16LittleEndianStringEncoding;
+						*offset = 2;
 					}
 				}
 				break;
 			default:
-				fileEncoding = NSUTF8StringEncoding; // fall back on UTF8
+				encoding = NSUTF8StringEncoding; // fall back on UTF8
 				break;
 		}
 	}
-	[csvFileHandle seekToFileOffset:offset];
-	return;
+	
+	return encoding;
 }
 
 #pragma mark Parsing methods
