@@ -90,7 +90,6 @@ enum {
 		csvFileHandle = [[NSFileHandle fileHandleForReadingAtPath:csvFile] retain];
 		if (csvFileHandle == nil) {
 			if (anError) {
-				NSLog(@"error for file: %@", csvFile);
 				*anError = [NSError errorWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unable to open file for reading" forKey:NSLocalizedDescriptionKey]];
 			}
 			[self release];
