@@ -40,6 +40,8 @@
 	NSError * error;
 }
 
+@property (nonatomic) NSStringEncoding encoding;
+
 - (id) initWithCSVFile:(NSString *)outputFile atomic:(BOOL)atomicWrite;
 - (NSError *) error;
 
