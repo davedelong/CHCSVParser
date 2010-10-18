@@ -195,7 +195,13 @@ enum {
 				}
 				break;
 			default:
-				encoding = NSUTF8StringEncoding; // fall back on UTF8
+				if ([[[NSString alloc] initWithData:chunkToSniff encoding:NSUTF8StringEncoding] autorelease] == nil) {
+					NSLog(@"unable to determine file encoding; assuming MacOSRoman");
+					encoding = NSMacOSRomanStringEncoding;
+				} else {
+					NSLog(@"unable to determine file encoding; assuming UTF8");
+					encoding = NSUTF8StringEncoding; // fall back on UTF8
+				}
 				break;
 		}
 	}

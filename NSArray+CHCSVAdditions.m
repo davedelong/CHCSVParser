@@ -65,7 +65,12 @@
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
-	CHCSVParser * parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFile usedEncoding:usedEncoding error:error];
+	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile usedEncoding:usedEncoding error:error];
+	if ((error && *error) || rawCSV == nil) {
+		return [self init];
+	}
+	
+	CHCSVParser * parser = [[CHCSVParser alloc] initWithCSVString:rawCSV encoding:(usedEncoding ? *usedEncoding : NSMacOSRomanStringEncoding) error:error];
 	if (error && *error) {
 		[parser release];
 		return [self init];
