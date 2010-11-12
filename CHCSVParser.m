@@ -366,6 +366,7 @@ enum {
 }
 
 - (void) finishCurrentField {
+	[currentField trimCharactersInSet_csv:[NSCharacterSet newlineCharacterSet]];
 	if ([currentField hasPrefix:STRING_QUOTE] && [currentField hasSuffix:STRING_QUOTE]) {
 		[currentField trimString_csv:STRING_QUOTE];
 	}
