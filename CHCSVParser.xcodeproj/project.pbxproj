@@ -18,6 +18,7 @@
 		557FD0591204A71C009FCDBA /* NSArray+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD0421204A45D009FCDBA /* NSArray+CHCSVAdditions.m */; };
 		557FD05D1204A731009FCDBA /* UnitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD05B1204A72B009FCDBA /* UnitTests.m */; };
 		557FD05E1204A736009FCDBA /* Test.csv in Resources */ = {isa = PBXBuildFile; fileRef = 551981EE1203800300FBE033 /* Test.csv */; };
+		55BB40E612A367A500A1BB33 /* CHCSVWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 55EFC7B81210608C0070B303 /* CHCSVWriter.m */; };
 		55EFC7B91210608C0070B303 /* CHCSVWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 55EFC7B81210608C0070B303 /* CHCSVWriter.m */; };
 		8DD76F9A0486AA7600D96B5E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8DD76F9C0486AA7600D96B5E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB779EFE84155DC02AAC07 /* Foundation.framework */; };
@@ -265,6 +266,7 @@
 				557FD0431204A45D009FCDBA /* NSArray+CHCSVAdditions.m in Sources */,
 				5516BCBB12578EA90025F235 /* NSString+CHCSVAdditions.m in Sources */,
 				5516BCBC12578EAD0025F235 /* CHCSVSupport.m in Sources */,
+				55BB40E612A367A500A1BB33 /* CHCSVWriter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
