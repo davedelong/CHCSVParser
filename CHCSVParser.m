@@ -261,13 +261,32 @@ enum {
 	NSString * previousCharacter = nil;
 	NSString * previousPreviousCharacter = nil;
 	
+	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	unsigned short counter = 0;
+	
 	while (error == nil && 
 		   (currentCharacter = [self nextCharacter]) && 
 		   currentCharacter != nil) {
 		[self processComposedCharacter:currentCharacter previousCharacter:previousCharacter previousPreviousCharacter:previousPreviousCharacter];
 		previousPreviousCharacter = previousCharacter;
 		previousCharacter = currentCharacter;
+		
+		counter++;
+		if (counter == 0) { //this happens every 65,536 (2**16) iterations when the unsigned short overflows
+			[currentCharacter retain];
+			[previousCharacter retain];
+			[previousPreviousCharacter retain];
+			
+			[pool drain];
+			pool = [[NSAutoreleasePool alloc] init];
+			
+			[currentCharacter autorelease];
+			[previousCharacter autorelease];
+			[previousPreviousCharacter autorelease];
+		}
 	}
+	
+	[pool drain];
 	
 	if ([currentField length] > 0 && state == CHCSVParserStateInsideField) {
 		[self finishCurrentField];
