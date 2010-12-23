@@ -33,9 +33,12 @@
 	__weak id<CHCSVParserDelegate> parserDelegate;
 	NSFileHandle * csvFileHandle;
 	NSString * csvFile;
-	NSString * currentChunk;
 	NSStringEncoding fileEncoding;
+	
+	NSMutableData * currentChunk;
+	NSString * currentChunkString;
 	NSUInteger chunkIndex;
+	BOOL doneReadingFile;
 	
 	BOOL balancedQuotes;
 	BOOL balancedEscapes;

@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "CHCSVParser.h"
+#import "CHCSV.h"
 
 @interface Delegate : NSObject <CHCSVParserDelegate>
 @end
@@ -42,6 +42,9 @@ int main (int argc, const char * argv[]) {
 	
 	[d release];
 	[p release];
+	
+	NSArray * rows = [NSArray arrayWithContentsOfCSVFile:file usedEncoding:&encoding error:nil];
+	NSLog(@"%@", rows);
     
 	[pool drain];
     return 0;

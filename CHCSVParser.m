@@ -24,7 +24,7 @@
  **/
 
 #import "CHCSVParser.h"
-#define CHUNK_SIZE 1024
+#define CHUNK_SIZE 32
 #define STRING_QUOTE @"\""
 #define STRING_COMMA @","
 #define STRING_BACKSLASH @"\\"
@@ -64,7 +64,7 @@ enum {
 
 @interface CHCSVParser ()
 
-@property (retain) NSString * currentChunk;
+@property (retain) NSMutableData * currentChunk;
 
 - (NSStringEncoding) textEncodingForData:(NSData *)chunkToSniff offset:(NSUInteger *)offset;
 
@@ -103,7 +103,8 @@ enum {
 		currentLine = 0;
 		currentField = [[NSMutableString alloc] init];
 		
-		currentChunk = nil;
+		currentChunk = [[NSMutableData alloc] init];
+		doneReadingFile = NO;
 		chunkIndex = 0;
 		
 		state = CHCSVParserStateInsideFile;
@@ -138,7 +139,8 @@ enum {
 		currentLine = 0;
 		currentField = [[NSMutableString alloc] init];
 		
-		currentChunk = [csvString copy];
+		currentChunkString = [csvString copy];
+		doneReadingFile = YES;
 		chunkIndex = 0;
 		
 		state = CHCSVParserStateInsideFile;
@@ -151,6 +153,7 @@ enum {
 	[csvFile release];
 	[currentField release];
 	[currentChunk release];
+	[currentChunkString release];
 	[error release];
 	
 	[super dealloc];
@@ -212,7 +215,7 @@ enum {
 #pragma mark Parsing methods
 
 - (NSString *) nextCharacter {
-	if (chunkIndex >= [currentChunk length]) {
+	if (doneReadingFile == NO && chunkIndex >= [currentChunk length]/2) {
 		NSData * nextChunk = nil;
 		@try {
 			nextChunk = [csvFileHandle readDataOfLength:CHUNK_SIZE];
@@ -225,21 +228,25 @@ enum {
 			nextChunk = nil;
 		}
 		
-		if (nextChunk != nil) {
-			NSString * chunkString = [[NSString alloc] initWithData:nextChunk encoding:fileEncoding];
-			[self setCurrentChunk:chunkString];
-			[chunkString release];
+		if ([nextChunk length] > 0) {
+			[currentChunkString release], currentChunkString = nil;
+			[[self currentChunk] appendData:nextChunk];
+			[[self currentChunk] replaceBytesInRange:NSMakeRange(0, chunkIndex) withBytes:NULL length:0];
+			currentChunkString = [[NSString alloc] initWithData:[self currentChunk] encoding:fileEncoding];
+//			NSLog(@"currentChunkString: %@", currentChunkString);
+			
 			chunkIndex = 0;
-		} else {
-			[self setCurrentChunk:nil];
+		}
+		if ([nextChunk length] < CHUNK_SIZE) {
+			doneReadingFile = YES;
 		}
 	}
 	
-	//return nil to indicate EOF or error
-	if ([currentChunk length] == 0) { return nil; }
+	if (chunkIndex >= [currentChunkString length]) { return nil; }
+	if ([currentChunkString length] == 0) { return nil; }
 	
-	NSRange charRange = [currentChunk rangeOfComposedCharacterSequenceAtIndex:chunkIndex];
-	NSString * nextChar = [currentChunk substringWithRange:charRange];
+	NSRange charRange = [currentChunkString rangeOfComposedCharacterSequenceAtIndex:chunkIndex];
+	NSString * nextChar = [currentChunkString substringWithRange:charRange];
 	chunkIndex = charRange.location + charRange.length;
 	return nextChar;
 }

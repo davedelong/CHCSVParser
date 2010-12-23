@@ -62,6 +62,7 @@
 	NSStringEncoding encoding = 0;
 	NSError * error = nil;
 	NSArray * fields = [NSArray arrayWithContentsOfCSVFile:file usedEncoding:&encoding error:&error];
+	NSLog(@"read: %@", fields);
 	
 	STAssertTrue(encoding == NSUTF8StringEncoding, @"Wrong encoding; given %@ (%lu)", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)), encoding);
 	STAssertNil(error, @"Unexpected error: %@", error);
