@@ -23,14 +23,16 @@ In order to write data to a CSV file, you'll need `CHCSVWriter.h` and `CHCSVWrit
 `writeLine` is used to terminate the current CSV line.  If you do not invoke `writeLine`, then all of your CSV fields will be on a single line.
 
 ###Convenience Methods
-Included in the code is an `NSArray` category to simplify reading from and writing to CSV files.  In order to use these methods, you must include `CHCSVParser.*`, `CHCSVWriter.*`, and `NSArray+CHCSVAdditions.*` in your project (all six files).  This category adds 5 methods to `NSArray`: two class methods, two initializers, and one write method:
-
+Included in the code is an `NSArray` category to simplify reading from and writing to CSV files.  In order to use these methods, you must include `CHCSVParser.*`, `CHCSVWriter.*`, and `NSArray+CHCSVAdditions.*` in your project (all six files).  This category adds 7 methods to `NSArray`: three class methods, three initializers, and one write method:
 
 - `+ (id) arrayWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error;`
 - `- (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error;`
 
 - `+ (id) arrayWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error;`
 - `- (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error;`
+
+- `+ (id) arrayWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error;`
+- `- (id) initWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error;`
 
 - `- (BOOL) writeToCSVFile:(NSString *)csvFile atomically:(BOOL)atomically;`
 
