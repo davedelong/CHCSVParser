@@ -30,20 +30,7 @@
 @implementation NSString (CHCSVAdditions)
 
 - (NSArray *) CSVComponents {
-	
-	CHCSVParser * parser = [[CHCSVParser alloc] initWithCSVString:self encoding:[self fastestEncoding] error:nil];
-	NSArrayCHCSVAggregator * delegate = [[NSArrayCHCSVAggregator alloc] init];
-	[parser setParserDelegate:delegate];
-	[parser parse];
-	[parser release];
-	
-	NSArray * results = nil;
-	if ([parser error] == nil) {
-		results = [[[delegate lines] retain] autorelease];
-	}
-	[delegate release];
-	
-	return results;
+	return [NSArray arrayWithContentsOfCSVString:self encoding:[self fastestEncoding] error:nil];
 }
 
 @end
