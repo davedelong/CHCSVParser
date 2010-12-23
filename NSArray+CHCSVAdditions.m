@@ -35,29 +35,11 @@
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error {
-	CHCSVParser * parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFile encoding:encoding error:error];
-	if (error && *error) {
-		[parser release];
+	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:encoding error:error];
+	if ((error && *error) || rawCSV == nil) {
 		return [self init];
 	}
-	NSArrayCHCSVAggregator * delegate = [[NSArrayCHCSVAggregator alloc] init];
-	[parser setParserDelegate:delegate];
-	
-	[parser parse];
-	[parser release];
-	
-	NSArray * lines = [[[delegate lines] retain] autorelease];
-	NSError * parserError = [[[delegate error] retain] autorelease];
-	
-	[delegate release];
-	
-	if (parserError) {
-		if (error) {
-			*error = parserError;
-			return [self init];
-		}
-	}
-	return [self initWithArray:lines];
+	return [self initWithContentsOfCSVString:rawCSV encoding:encoding error:error];
 }
 
 + (id) arrayWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
@@ -70,7 +52,15 @@
 		return [self init];
 	}
 	
-	CHCSVParser * parser = [[CHCSVParser alloc] initWithCSVString:rawCSV encoding:(usedEncoding ? *usedEncoding : NSMacOSRomanStringEncoding) error:error];
+	return [self initWithContentsOfCSVString:rawCSV encoding:(usedEncoding ? *usedEncoding : NSMacOSRomanStringEncoding) error:error];
+}
+
++ (id) arrayWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error {
+	return [[[self alloc] initWithContentsOfCSVString:csvString encoding:encoding error:error] autorelease];
+}
+
+- (id) initWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error {
+	CHCSVParser * parser = [[CHCSVParser alloc] initWithCSVString:csvString encoding:encoding error:error];
 	if (error && *error) {
 		[parser release];
 		return [self init];
