@@ -45,7 +45,9 @@
 }
 
 - (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber {
-	[lines addObject:currentLine];
+	if ([currentLine count] > 0) {
+		[lines addObject:currentLine];
+	}
 	[currentLine release], currentLine = nil;
 }
 
