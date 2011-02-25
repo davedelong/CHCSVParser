@@ -36,8 +36,8 @@
 	NSStringEncoding fileEncoding;
 	
 	NSMutableData * currentChunk;
-	NSString * currentChunkString;
-	NSUInteger chunkIndex;
+	NSMutableString * currentChunkString;
+	NSUInteger stringIndex;
 	BOOL doneReadingFile;
 	
 	BOOL balancedQuotes;

@@ -49,6 +49,10 @@
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
 	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile usedEncoding:usedEncoding error:error];
 	if ((error && *error) || rawCSV == nil) {
+		if (error) { *error = nil; }
+		rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:NSMacOSRomanStringEncoding error:error];
+	}
+	if ((error && *error) || rawCSV == nil) {
 		return [self init];
 	}
 	

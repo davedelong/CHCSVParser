@@ -43,6 +43,7 @@
 			[NSArray arrayWithObjects:@"This",@"is",@"a",@"quoted",@"line",nil],
 			[NSArray arrayWithObjects:@"This",@"is",@"a",@"mixed",@"line",nil],
 			[NSArray arrayWithObjects:@"This",@"has",@"a\nmultiline\nfield",nil],
+            [NSArray arrayWithObjects:@"This",@"has",@"single",@"apostrophes",@"ma'am",nil];
 			[NSArray arrayWithObjects:@"#This",@"line",@"should",@"not",@"be",@"ignored",nil],
 			[NSArray arrayWithObjects:@"This",@"has",@"\"escaped\"",@"quotes",nil],
 			[NSArray arrayWithObjects:@"This",@"has",@"\"escaped\"",@"quotes",nil],

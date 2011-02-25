@@ -4,6 +4,7 @@ This,is,a,simple,line
 "This",has,"a
 multiline
 field"
+"This",has,single,apostrophes,ma'am
 #this,line,should,be,ignored
 \#This,line,should,not,be,ignored
 This,has,"""escaped""",quotes

@@ -29,7 +29,7 @@
 
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	NSString * file = @"/Users/dave/Developer/Cocoa/CHCSVParser/Test.csv";
+	NSString * file = @"/Users/dave/Downloads/test2.csv";
 	NSStringEncoding encoding = 0;
 	CHCSVParser * p = [[CHCSVParser alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding error:nil];
 	
@@ -43,7 +43,14 @@ int main (int argc, const char * argv[]) {
 	[d release];
 	[p release];
 	
-	NSArray * rows = [NSArray arrayWithContentsOfCSVFile:file usedEncoding:&encoding error:nil];
+	NSError * error = nil;
+	NSArray * rows = [NSArray arrayWithContentsOfCSVFile:file usedEncoding:&encoding error:&error];
+	if ([rows count] == 0) {
+		NSLog(@"error: %@", error);
+		error = nil;
+		rows = [NSArray arrayWithContentsOfCSVFile:file encoding:NSUTF8StringEncoding error:&error];
+	}
+	NSLog(@"error: %@", error);
 	NSLog(@"%@", rows);
     
 	[pool drain];

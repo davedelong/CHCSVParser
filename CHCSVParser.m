@@ -85,7 +85,8 @@ enum {
 @synthesize parserDelegate, currentChunk, error, csvFile;
 
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding error:(NSError **)anError {
-	if (self = [super init]) {
+    self = [super init];
+	if (self) {
 		csvFile = [aCSVFile copy];
 		csvFileHandle = [[NSFileHandle fileHandleForReadingAtPath:csvFile] retain];
 		if (csvFileHandle == nil) {
@@ -105,7 +106,8 @@ enum {
 		
 		currentChunk = [[NSMutableData alloc] init];
 		doneReadingFile = NO;
-		chunkIndex = 0;
+        currentChunkString = [[NSMutableString alloc] init];
+		stringIndex = 0;
 		
 		state = CHCSVParserStateInsideFile;
 	}
@@ -113,7 +115,8 @@ enum {
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
-	if (self = [self initWithContentsOfCSVFile:aCSVFile encoding:NSUTF8StringEncoding error:anError]) {
+    self = [self initWithContentsOfCSVFile:aCSVFile encoding:NSUTF8StringEncoding error:anError];
+	if (self) {
 		
 		NSData * chunk = [csvFileHandle readDataOfLength:CHUNK_SIZE];
 		NSUInteger seekOffset = 0;
@@ -128,7 +131,8 @@ enum {
 }
 
 - (id) initWithCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)anError {
-	if (self = [super init]) {
+    self = [super init];
+	if (self) {
 		csvFile = nil;
 		csvFileHandle = nil;
 		fileEncoding = encoding;
@@ -139,9 +143,9 @@ enum {
 		currentLine = 0;
 		currentField = [[NSMutableString alloc] init];
 		
-		currentChunkString = [csvString copy];
+		currentChunkString = [csvString mutableCopy];
 		doneReadingFile = YES;
-		chunkIndex = 0;
+		stringIndex = 0;
 		
 		state = CHCSVParserStateInsideFile;
 	}
@@ -214,40 +218,60 @@ enum {
 
 #pragma mark Parsing methods
 
+- (void) readNextChunk {
+    NSData * nextChunk = nil;
+    @try {
+        nextChunk = [csvFileHandle readDataOfLength:CHUNK_SIZE];
+    }
+    @catch (NSException * e) {
+        error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                                                       e, NSUnderlyingErrorKey,
+                                                                                       [e reason], NSLocalizedDescriptionKey,
+                                                                                       nil]];
+        nextChunk = nil;
+    }
+    
+    if ([nextChunk length] > 0) {
+        // we were able to read something!
+        [currentChunk appendData:nextChunk];
+        
+        NSUInteger readLength = [currentChunk length];
+        do {
+            NSString *readString = [[NSString alloc] initWithBytes:[currentChunk bytes] length:readLength encoding:fileEncoding];
+            if (readString == nil) {
+                readLength--;
+                if (readLength == 0) {
+                    error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                                                                   @"unable to interpret current chunk as a string", NSLocalizedDescriptionKey,
+                                                                                                   nil]];
+                    break;
+                }
+            } else {
+                [currentChunkString appendString:readString];
+                [readString release];
+                break;
+            }
+        } while (1);
+        
+        
+        [currentChunk replaceBytesInRange:NSMakeRange(0, readLength) withBytes:NULL length:0];
+    }
+    if ([nextChunk length] < CHUNK_SIZE) {
+        doneReadingFile = YES;
+    }
+}
+
 - (NSString *) nextCharacter {
-	if (doneReadingFile == NO && chunkIndex >= [currentChunk length]/2) {
-		NSData * nextChunk = nil;
-		@try {
-			nextChunk = [csvFileHandle readDataOfLength:CHUNK_SIZE];
-		}
-		@catch (NSException * e) {
-			error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-																						   e, NSUnderlyingErrorKey,
-																						   [e reason], NSLocalizedDescriptionKey,
-																						   nil]];
-			nextChunk = nil;
-		}
-		
-		if ([nextChunk length] > 0) {
-			[currentChunkString release], currentChunkString = nil;
-			[[self currentChunk] appendData:nextChunk];
-			[[self currentChunk] replaceBytesInRange:NSMakeRange(0, chunkIndex) withBytes:NULL length:0];
-			currentChunkString = [[NSString alloc] initWithData:[self currentChunk] encoding:fileEncoding];
-//			NSLog(@"currentChunkString: %@", currentChunkString);
-			
-			chunkIndex = 0;
-		}
-		if ([nextChunk length] < CHUNK_SIZE) {
-			doneReadingFile = YES;
-		}
+	if (doneReadingFile == NO && stringIndex >= [currentChunkString length]/2) {
+        [self readNextChunk];
 	}
 	
-	if (chunkIndex >= [currentChunkString length]) { return nil; }
+	if (stringIndex >= [currentChunkString length]) { return nil; }
 	if ([currentChunkString length] == 0) { return nil; }
 	
-	NSRange charRange = [currentChunkString rangeOfComposedCharacterSequenceAtIndex:chunkIndex];
+	NSRange charRange = [currentChunkString rangeOfComposedCharacterSequenceAtIndex:stringIndex];
 	NSString * nextChar = [currentChunkString substringWithRange:charRange];
-	chunkIndex = charRange.location + charRange.length;
+	stringIndex = charRange.location + charRange.length;
 	return nextChar;
 }
 
