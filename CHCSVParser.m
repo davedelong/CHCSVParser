@@ -33,7 +33,8 @@ enum {
 	CHCSVParserStateInsideFile = 0,
 	CHCSVParserStateInsideLine = 1,
 	CHCSVParserStateInsideField = 2,
-	CHCSVParserStateInsideComment = 3
+	CHCSVParserStateInsideComment = 3,
+    CHCSVParserStateCancelled = 4
 };
 
 @interface NSMutableString (CHCSVAdditions)
@@ -79,7 +80,7 @@ enum {
 
 @end
 
-
+#define SETSTATE(_s) if (state != CHCSVParserStateCancelled) { state = _s; }
 
 @implementation CHCSVParser
 @synthesize parserDelegate, currentChunk, error, csvFile;
@@ -109,7 +110,7 @@ enum {
         currentChunkString = [[NSMutableString alloc] init];
 		stringIndex = 0;
 		
-		state = CHCSVParserStateInsideFile;
+        SETSTATE(CHCSVParserStateInsideFile)
 	}
 	return self;
 }
@@ -147,7 +148,7 @@ enum {
 		doneReadingFile = YES;
 		stringIndex = 0;
 		
-		state = CHCSVParserStateInsideFile;
+        SETSTATE(CHCSVParserStateInsideFile)
 	}
 	return self;
 }
@@ -299,6 +300,9 @@ enum {
 		   (currentCharacter = [self nextCharacter]) && 
 		   currentCharacter != nil) {
 		[self processComposedCharacter:currentCharacter previousCharacter:previousCharacter previousPreviousCharacter:previousPreviousCharacter];
+        
+        if (state == CHCSVParserStateCancelled) { break; }
+        
 		previousPreviousCharacter = previousCharacter;
 		previousCharacter = currentCharacter;
 		
@@ -334,7 +338,7 @@ enum {
 		if ([currentCharacter isEqual:@"#"] == NO) {
 			[self beginCurrentLine];
 		} else {
-			state = CHCSVParserStateInsideComment;
+            SETSTATE(CHCSVParserStateInsideComment)
 		}
 	}
 	
@@ -377,7 +381,7 @@ enum {
 				[self finishCurrentField];
 				[self finishCurrentLine];
 			} else {
-				state = CHCSVParserStateInsideFile;
+                SETSTATE(CHCSVParserStateInsideFile)
 			}
 		}
 	} else {
@@ -390,7 +394,7 @@ enum {
 			if (state != CHCSVParserStateInsideField) {
 				[self beginCurrentField];
 			}
-			state = CHCSVParserStateInsideField;
+            SETSTATE(CHCSVParserStateInsideField)
 			if (balancedEscapes == NO) {
 				balancedEscapes = YES;
 			}
@@ -405,14 +409,14 @@ enum {
 - (void) beginCurrentLine {
 	currentLine++;
 	[[self parserDelegate] parser:self didStartLine:currentLine];
-	state = CHCSVParserStateInsideLine;
+    SETSTATE(CHCSVParserStateInsideLine)
 }
 
 - (void) beginCurrentField {
 	[currentField setString:@""];
 	balancedQuotes = YES;
 	balancedEscapes = YES;
-	state = CHCSVParserStateInsideField;
+    SETSTATE(CHCSVParserStateInsideField)
 }
 
 - (void) finishCurrentField {
@@ -444,12 +448,18 @@ enum {
 	
 	[currentField setString:@""];
 	
-	state = CHCSVParserStateInsideLine;
+    SETSTATE(CHCSVParserStateInsideLine)
 }
 
 - (void) finishCurrentLine {
 	[[self parserDelegate] parser:self didEndLine:currentLine];
-	state = CHCSVParserStateInsideFile;
+    SETSTATE(CHCSVParserStateInsideFile)
+}
+
+#pragma Cancelling
+
+- (void) cancelParsing {
+    SETSTATE(CHCSVParserStateCancelled)
 }
 
 @end

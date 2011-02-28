@@ -60,6 +60,7 @@
 - (id) initWithCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)anError;
 
 - (void) parse;
+- (void) cancelParsing;
 
 @end
 
