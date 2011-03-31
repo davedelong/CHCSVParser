@@ -27,7 +27,7 @@
 
 
 @implementation CHCSVWriter
-@synthesize encoding;
+@synthesize encoding, delimiter;
 
 - (id) initWithCSVFile:(NSString *)outputFile atomic:(BOOL)atomicWrite {
 	if (self = [super init]) {
@@ -49,10 +49,9 @@
 		outputHandle = [[NSFileHandle fileHandleForWritingAtPath:handleFile] retain];
 		
 		encoding = 0;
+		hasStarted = NO;
 		
-		NSMutableCharacterSet * bad = [NSMutableCharacterSet newlineCharacterSet];
-		[bad addCharactersInString:@",\"\\"];
-		illegalCharacters = [bad retain];
+		[self setDelimiter:@","];
 	}
 	return self;
 }
@@ -60,6 +59,7 @@
 - (void) dealloc {
 	[self closeFile];
 	[destinationFile release];
+	[delimiter release];
 	[handleFile release];
 	[outputHandle release];
 	[illegalCharacters release];
@@ -70,14 +70,47 @@
 	return error;
 }
 
+- (void) setDelimiter:(NSString *)newDelimiter {
+	if (hasStarted) {
+		[NSException raise:NSInvalidArgumentException format:@"You cannot set a delimiter after writing has started"];
+		return;
+	}
+	
+	// the delimiter cannot be
+	BOOL shouldThrow = ([newDelimiter length] != 1);
+	if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[newDelimiter characterAtIndex:0]]) {
+		shouldThrow = YES;
+	}
+	if ([newDelimiter hasPrefix:@"#"]) { shouldThrow = YES; }
+	if ([newDelimiter hasPrefix:@"\""]) { shouldThrow = YES; }
+	if ([newDelimiter hasPrefix:@"\\"]) { shouldThrow = YES; }
+	
+	if (shouldThrow) {
+		[NSException raise:NSInvalidArgumentException format:@"%@ cannot be used as a delimiter", newDelimiter];
+		return;
+	}
+	
+	if (newDelimiter != delimiter) {
+		[delimiter release];
+		delimiter = [newDelimiter copy];
+		
+		[illegalCharacters release];
+		NSMutableCharacterSet * bad = [NSMutableCharacterSet newlineCharacterSet];
+		[bad addCharactersInString:@"\"\\"];
+		[bad addCharactersInString:delimiter];
+		illegalCharacters = [bad copy];
+	}
+}
+
 - (void) writeField:(id)field {
+	hasStarted = YES;
 	NSMutableString * write = [[field description] mutableCopy];
 	if (encoding == 0) {
 		encoding = [write fastestEncoding];
 	}
 	
 	if (currentField > 0) {
-		[outputHandle writeData:[@"," dataUsingEncoding:encoding]];
+		[outputHandle writeData:[delimiter dataUsingEncoding:encoding]];
 	}
 	
 	if ([write rangeOfCharacterFromSet:illegalCharacters].location != NSNotFound || [write hasPrefix:@"#"]) {
@@ -92,12 +125,53 @@
 	currentField++;
 }
 
+- (void) writeFields:(id)field, ... {
+	if (field == nil) { return; }
+	
+	[self writeField:field];
+	
+	va_list args;
+	va_start(args, field);
+	id next = nil;
+	while ((next = va_arg(args, id))) {
+		[self writeField:next];
+	}
+	va_end(args);
+}
+
 - (void) writeLine {
 	if (encoding == 0) {
 		encoding = NSUTF8StringEncoding;
 	}
 	[outputHandle writeData:[@"\n" dataUsingEncoding:encoding]];
 	currentField = 0;
+}
+
+- (void) writeLineOfFields:(id)field, ... {
+	if (field == nil) { return; }
+	NSMutableArray *fields = [NSMutableArray arrayWithObject:field];
+	va_list args;
+	va_start(args, field);
+	id next = nil;
+	while ((next = va_arg(args, id))) {
+		[fields addObject:next];
+	}
+	[self writeLineWithFields:fields];
+	va_end(args);
+}
+
+- (void) writeLineWithFields:(NSArray *)fields {
+	for (id field in fields) {
+		[self writeField:field];
+	}
+	[self writeLine];
+}
+
+- (void) writeCommentLine:(id)comment {
+	if (currentField > 0) { [self writeLine]; }
+	[outputHandle writeData:[@"#" dataUsingEncoding:encoding]];
+	[outputHandle writeData:[comment dataUsingEncoding:encoding]];
+	[self writeLine];
 }
 
 - (void) closeFile {

@@ -29,9 +29,10 @@
 
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	NSString * file = @"/Users/dave/Downloads/test2.csv";
+	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/test.tsv";
 	NSStringEncoding encoding = 0;
 	CHCSVParser * p = [[CHCSVParser alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding error:nil];
+	[p setDelimiter:@"\t"];
 	
 	NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
 	
@@ -44,7 +45,7 @@ int main (int argc, const char * argv[]) {
 	[p release];
 	
 	NSError * error = nil;
-	NSArray * rows = [NSArray arrayWithContentsOfCSVFile:file usedEncoding:&encoding error:&error];
+	NSArray * rows = [[NSArray alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding delimiter:@"\t" error:&error];
 	if ([rows count] == 0) {
 		NSLog(@"error: %@", error);
 		error = nil;
@@ -52,7 +53,16 @@ int main (int argc, const char * argv[]) {
 	}
 	NSLog(@"error: %@", error);
 	NSLog(@"%@", rows);
+	
+	CHCSVWriter *w = [[CHCSVWriter alloc] initWithCSVFile:[NSTemporaryDirectory() stringByAppendingPathComponent:@"test.tsv"] atomic:NO];
+	[w setDelimiter:@"\t"];
+	for (NSArray *row in rows) {
+		[w writeLineWithFields:row];
+	}
+	[w closeFile];
+	[w release];
     
+	[rows release];
 	[pool drain];
     return 0;
 }

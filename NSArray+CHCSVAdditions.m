@@ -35,11 +35,15 @@
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error {
+	return [self initWithContentsOfCSVFile:csvFile encoding:encoding delimiter:@"," error:error];
+}
+
+- (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
 	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:encoding error:error];
 	if ((error && *error) || rawCSV == nil) {
 		return [self init];
 	}
-	return [self initWithContentsOfCSVString:rawCSV encoding:encoding error:error];
+	return [self initWithContentsOfCSVString:rawCSV encoding:encoding delimiter:delimiter error:error];
 }
 
 + (id) arrayWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
@@ -47,16 +51,21 @@
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
+	return [self initWithContentsOfCSVFile:csvFile usedEncoding:usedEncoding delimiter:@"," error:error];
+}
+
+- (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding delimiter:(NSString *)delimiter error:(NSError **)error {
 	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile usedEncoding:usedEncoding error:error];
 	if ((error && *error) || rawCSV == nil) {
 		if (error) { *error = nil; }
 		rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:NSMacOSRomanStringEncoding error:error];
+		if (usedEncoding) { *usedEncoding = NSMacOSRomanStringEncoding; }
 	}
 	if ((error && *error) || rawCSV == nil) {
 		return [self init];
 	}
 	
-	return [self initWithContentsOfCSVString:rawCSV encoding:(usedEncoding ? *usedEncoding : NSMacOSRomanStringEncoding) error:error];
+	return [self initWithContentsOfCSVString:rawCSV encoding:(usedEncoding ? *usedEncoding : NSMacOSRomanStringEncoding) delimiter:delimiter error:error];
 }
 
 + (id) arrayWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error {
@@ -64,7 +73,13 @@
 }
 
 - (id) initWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error {
+	return [self initWithContentsOfCSVString:csvString encoding:encoding delimiter:@"," error:error];
+}
+
+- (id) initWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
 	CHCSVParser * parser = [[CHCSVParser alloc] initWithCSVString:csvString encoding:encoding error:error];
+	[parser setDelimiter:delimiter];
+	
 	if (error && *error) {
 		[parser release];
 		return [self init];
@@ -89,7 +104,11 @@
 	return [self initWithArray:lines];
 }
 
-- (BOOL) writeToCSVFile:(NSString *)csvFile atomically:(BOOL)atomically {
+- (BOOL) writeToCSVFile:(NSString *)csvFile atomically:(BOOL)atomically error:(NSError **)error {
+	return [self writeToCSVFile:csvFile withDelimiter:@"," atomically:atomically error:error];
+}
+
+- (BOOL) writeToCSVFile:(NSString *)csvFile withDelimiter:(NSString *)delimiter atomically:(BOOL)atomically error:(NSError **)error {
 	//first, verify that this is (at least) an NSArray of NSArrays:
 	for (id object in self) {
 		if ([object isKindOfClass:[NSArray class]] == NO) { return NO; }
@@ -98,14 +117,15 @@
 	BOOL ok = YES;
 	
 	CHCSVWriter * writer = [[CHCSVWriter alloc] initWithCSVFile:csvFile atomic:atomically];
+	[writer setDelimiter:delimiter];
 	for (NSArray * row in self) {
-		for (id field in row) {
-			[writer writeField:[field description]];
-		}
-		[writer writeLine];
+		[writer writeLineWithFields:row];
 	}
 	
 	ok = ([writer error] == nil);
+	if (!ok && error) {
+		*error = [[[writer error] retain] autorelease];
+	}
 	[writer closeFile];
 	[writer release];
 	

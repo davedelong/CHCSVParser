@@ -35,6 +35,9 @@
 	NSString * csvFile;
 	NSStringEncoding fileEncoding;
 	
+	BOOL hasStarted;
+	NSString * delimiter;
+	
 	NSMutableData * currentChunk;
 	NSMutableString * currentChunkString;
 	NSUInteger stringIndex;
@@ -53,6 +56,7 @@
 @property (assign) __weak id<CHCSVParserDelegate> parserDelegate;
 @property (readonly) NSError * error;
 @property (readonly) NSString * csvFile;
+@property (nonatomic, copy) NSString *delimiter;
 
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding error:(NSError **)anError;
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError;

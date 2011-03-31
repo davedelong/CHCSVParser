@@ -26,7 +26,6 @@
 #import "CHCSVParser.h"
 #define CHUNK_SIZE 32
 #define STRING_QUOTE @"\""
-#define STRING_COMMA @","
 #define STRING_BACKSLASH @"\\"
 
 enum {
@@ -83,7 +82,7 @@ enum {
 #define SETSTATE(_s) if (state != CHCSVParserStateCancelled) { state = _s; }
 
 @implementation CHCSVParser
-@synthesize parserDelegate, currentChunk, error, csvFile;
+@synthesize parserDelegate, currentChunk, error, csvFile, delimiter;
 
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding error:(NSError **)anError {
     self = [super init];
@@ -110,6 +109,8 @@ enum {
         currentChunkString = [[NSMutableString alloc] init];
 		stringIndex = 0;
 		
+		[self setDelimiter:@","];
+		
         SETSTATE(CHCSVParserStateInsideFile)
 	}
 	return self;
@@ -123,6 +124,8 @@ enum {
 		NSUInteger seekOffset = 0;
 		fileEncoding = [self textEncodingForData:chunk offset:&seekOffset];
 		[csvFileHandle seekToFileOffset:seekOffset];
+		
+		[self setDelimiter:@","];
 		
 		if (usedEncoding) {
 			*usedEncoding = fileEncoding;
@@ -148,6 +151,8 @@ enum {
 		doneReadingFile = YES;
 		stringIndex = 0;
 		
+		[self setDelimiter:@","];
+		
         SETSTATE(CHCSVParserStateInsideFile)
 	}
 	return self;
@@ -160,6 +165,7 @@ enum {
 	[currentChunk release];
 	[currentChunkString release];
 	[error release];
+	[delimiter release];
 	
 	[super dealloc];
 }
@@ -215,6 +221,32 @@ enum {
 	}
 	
 	return encoding;
+}
+
+- (void) setDelimiter:(NSString *)newDelimiter {
+	if (hasStarted) {
+		[NSException raise:NSInvalidArgumentException format:@"You cannot set a delimiter after parsing has started"];
+		return;
+	}
+	
+	// the delimiter cannot be
+	BOOL shouldThrow = ([newDelimiter length] != 1);
+	if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[newDelimiter characterAtIndex:0]]) {
+		shouldThrow = YES;
+	}
+	if ([newDelimiter hasPrefix:@"#"]) { shouldThrow = YES; }
+	if ([newDelimiter hasPrefix:@"\""]) { shouldThrow = YES; }
+	if ([newDelimiter hasPrefix:@"\\"]) { shouldThrow = YES; }
+	
+	if (shouldThrow) {
+		[NSException raise:NSInvalidArgumentException format:@"%@ cannot be used as a delimiter", newDelimiter];
+		return;
+	}
+	
+	if (newDelimiter != delimiter) {
+		[delimiter release];
+		delimiter = [newDelimiter copy];
+	}
 }
 
 #pragma mark Parsing methods
@@ -277,6 +309,7 @@ enum {
 }
 
 - (void) parse {
+	hasStarted = YES;
 	[[self parserDelegate] parser:self didStartDocument:[self csvFile]];
 	
 	[self runParseLoop];
@@ -286,6 +319,7 @@ enum {
 	} else {
 		[[self parserDelegate] parser:self didEndDocument:[self csvFile]];
 	}
+	hasStarted = NO;
 }
 
 - (void) runParseLoop {
@@ -357,7 +391,7 @@ enum {
 				balancedQuotes = !balancedQuotes;
 			}
 		}
-	} else if ([currentCharacter isEqual:STRING_COMMA]) {
+	} else if ([currentCharacter isEqual:delimiter]) {
 		if (state == CHCSVParserStateInsideLine) {
 			[self beginCurrentField];
 			[self finishCurrentField];
@@ -424,8 +458,8 @@ enum {
 	if ([currentField hasPrefix:STRING_QUOTE] && [currentField hasSuffix:STRING_QUOTE]) {
 		[currentField trimString_csv:STRING_QUOTE];
 	}
-	if ([currentField hasPrefix:STRING_COMMA]) {
-		[currentField replaceCharactersInRange:NSMakeRange(0, [STRING_COMMA length]) withString:@""];
+	if ([currentField hasPrefix:delimiter]) {
+		[currentField replaceCharactersInRange:NSMakeRange(0, [delimiter length]) withString:@""];
 	}
 	
 	[currentField trimCharactersInSet_csv:[NSCharacterSet whitespaceAndNewlineCharacterSet]];

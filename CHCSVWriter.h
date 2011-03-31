@@ -31,9 +31,11 @@
 	NSString * handleFile;
 	NSFileHandle * outputHandle;
 	BOOL atomically;
+	BOOL hasStarted;
 	
 	NSUInteger currentField;
 	NSStringEncoding encoding;
+	NSString *delimiter;
 	
 	NSCharacterSet * illegalCharacters;
 	
@@ -41,12 +43,19 @@
 }
 
 @property (nonatomic) NSStringEncoding encoding;
+@property (nonatomic, copy) NSString *delimiter;
 
 - (id) initWithCSVFile:(NSString *)outputFile atomic:(BOOL)atomicWrite;
 - (NSError *) error;
 
 - (void) writeField:(id)field;
+- (void) writeFields:(id)field, ... NS_REQUIRES_NIL_TERMINATION;
+
 - (void) writeLine;
+- (void) writeLineOfFields:(id)field, ... NS_REQUIRES_NIL_TERMINATION;
+- (void) writeLineWithFields:(NSArray *)fields;
+
+- (void) writeCommentLine:(id)comment;
 
 - (void) closeFile;
 
