@@ -30,7 +30,7 @@
 @synthesize encoding, delimiter;
 
 - (id) initWithCSVFile:(NSString *)outputFile atomic:(BOOL)atomicWrite {
-	if (self = [super init]) {
+	if ((self = [super init])) {
 		atomically = atomicWrite;
 		
 		destinationFile = [outputFile retain];
