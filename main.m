@@ -6,19 +6,19 @@
 @implementation Delegate
 
 - (void) parser:(CHCSVParser *)parser didStartDocument:(NSString *)csvFile {
-	NSLog(@"parser started: %@", csvFile);
+//	NSLog(@"parser started: %@", csvFile);
 }
 - (void) parser:(CHCSVParser *)parser didStartLine:(NSUInteger)lineNumber {
-	NSLog(@"Starting line: %lu", lineNumber);
+//	NSLog(@"Starting line: %lu", lineNumber);
 }
 - (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field {
-	NSLog(@"   field: %@", field);
+//	NSLog(@"   field: %@", field);
 }
 - (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber {
-	NSLog(@"Ending line: %lu", lineNumber);
+//	NSLog(@"Ending line: %lu", lineNumber);
 }
 - (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile {
-	NSLog(@"parser ended: %@", csvFile);
+//	NSLog(@"parser ended: %@", csvFile);
 }
 - (void) parser:(CHCSVParser *)parser didFailWithError:(NSError *)error {
 	NSLog(@"ERROR: %@", error);
@@ -29,20 +29,23 @@
 
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/test.tsv";
-	NSStringEncoding encoding = 0;
-	CHCSVParser * p = [[CHCSVParser alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding error:nil];
-	[p setDelimiter:@"\t"];
+	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/giant.csv";
 	
-	NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
+	/**
+	CHCSVWriter *big = [[CHCSVWriter alloc] initWithCSVFile:file atomic:NO];
+	for (int i = 0; i < 1000000; ++i) {
+		NSAutoreleasePool *inner = [[NSAutoreleasePool alloc] init];
+		for (int j = 0; j < 10; ++j) {
+			[big writeField:[NSString stringWithFormat:@"%d-%d", i, j]];
+		}
+		[big writeLine];
+		[inner drain];
+	}
+	[big closeFile];
+	[big release];
+	**/
 	
-	Delegate * d = [[Delegate alloc] init];
-	[p setParserDelegate:d];
-	
-	[p parse];
-	
-	[d release];
-	[p release];
+	/**
 	
 	NSError * error = nil;
 	NSArray * rows = [[NSArray alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding delimiter:@"\t" error:&error];
@@ -63,6 +66,26 @@ int main (int argc, const char * argv[]) {
 	[w release];
     
 	[rows release];
+	 **/
+	
+	NSLog(@"Beginning...");
+	NSStringEncoding encoding = 0;
+	CHCSVParser * p = [[CHCSVParser alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding error:nil];
+	
+	NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
+	
+	Delegate * d = [[Delegate alloc] init];
+	[p setParserDelegate:d];
+	
+	NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
+	[p parse];
+	NSTimeInterval end = [NSDate timeIntervalSinceReferenceDate];
+	
+	NSLog(@"raw difference: %f", (end-start));
+	
+	[d release];
+	[p release];
+	
 	[pool drain];
     return 0;
 }

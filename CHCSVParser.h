@@ -37,6 +37,7 @@
 	
 	BOOL hasStarted;
 	NSString * delimiter;
+	unichar delimiterCharacter;
 	
 	NSMutableData * currentChunk;
 	NSMutableString * currentChunkString;

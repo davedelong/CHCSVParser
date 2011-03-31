@@ -24,9 +24,12 @@
  **/
 
 #import "CHCSVParser.h"
-#define CHUNK_SIZE 32
+#define CHUNK_SIZE 2048
 #define STRING_QUOTE @"\""
 #define STRING_BACKSLASH @"\\"
+
+#define UNICHAR_QUOTE '"'
+#define UNICHAR_BACKSLASH '\\'
 
 enum {
 	CHCSVParserStateInsideFile = 0,
@@ -246,6 +249,7 @@ enum {
 	if (newDelimiter != delimiter) {
 		[delimiter release];
 		delimiter = [newDelimiter copy];
+		delimiterCharacter = [delimiter characterAtIndex:0];
 	}
 }
 
@@ -328,7 +332,7 @@ enum {
 	NSString * previousPreviousCharacter = nil;
 	
 	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	unsigned short counter = 0;
+	unsigned char counter = 0;
 	
 	while (error == nil && 
 		   (currentCharacter = [self nextCharacter]) && 
@@ -341,7 +345,7 @@ enum {
 		previousCharacter = currentCharacter;
 		
 		counter++;
-		if (counter == 0) { //this happens every 65,536 (2**16) iterations when the unsigned short overflows
+		if (counter == 0) { //this happens every 256 (2**8) iterations when the unsigned short overflows
 			[currentCharacter retain];
 			[previousCharacter retain];
 			[previousPreviousCharacter retain];
@@ -378,8 +382,9 @@ enum {
 	
 	unichar currentUnichar = [currentCharacter characterAtIndex:0];
 	unichar previousUnichar = [previousCharacter characterAtIndex:0];
+	unichar previousPreviousUnichar = [previousPreviousCharacter characterAtIndex:0];
 	
-	if ([currentCharacter isEqual:STRING_QUOTE]) {
+	if (currentUnichar == UNICHAR_QUOTE) {
 		if (state == CHCSVParserStateInsideLine) {
 			//beginning a quoted field
 			[self beginCurrentField];
@@ -391,7 +396,7 @@ enum {
 				balancedQuotes = !balancedQuotes;
 			}
 		}
-	} else if ([currentCharacter isEqual:delimiter]) {
+	} else if (currentUnichar == delimiterCharacter) {
 		if (state == CHCSVParserStateInsideLine) {
 			[self beginCurrentField];
 			[self finishCurrentField];
@@ -402,7 +407,7 @@ enum {
 				[self finishCurrentField];
 			}
 		}
-	} else if ([currentCharacter isEqual:STRING_BACKSLASH]) {
+	} else if (currentUnichar == UNICHAR_BACKSLASH) {
 		if (state == CHCSVParserStateInsideField) {
 			balancedEscapes = !balancedEscapes;
 		} else if (state == CHCSVParserStateInsideLine) {
@@ -419,7 +424,7 @@ enum {
 			}
 		}
 	} else {
-		if ([previousCharacter isEqual:STRING_QUOTE] && [previousPreviousCharacter isEqual:STRING_BACKSLASH] == NO && balancedQuotes == YES && balancedEscapes == YES) {
+		if (previousUnichar == UNICHAR_QUOTE && previousPreviousUnichar != UNICHAR_QUOTE && balancedQuotes == YES && balancedEscapes == YES) {
 			NSString * reason = [NSString stringWithFormat:@"Invalid CSV format on line #%lu immediately after \"%@\"", currentLine, currentField];
 			error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]];
 			return;
