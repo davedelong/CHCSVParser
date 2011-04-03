@@ -43,7 +43,7 @@
 			[NSArray arrayWithObjects:@"This",@"is",@"a",@"quoted",@"line",nil],
 			[NSArray arrayWithObjects:@"This",@"is",@"a",@"mixed",@"line",nil],
 			[NSArray arrayWithObjects:@"This",@"has",@"a\nmultiline\nfield",nil],
-            [NSArray arrayWithObjects:@"This",@"has",@"single",@"apostrophes",@"ma'am",nil];
+            [NSArray arrayWithObjects:@"This",@"has",@"single",@"apostrophes",@"ma'am",nil],
 			[NSArray arrayWithObjects:@"#This",@"line",@"should",@"not",@"be",@"ignored",nil],
 			[NSArray arrayWithObjects:@"This",@"has",@"\"escaped\"",@"quotes",nil],
 			[NSArray arrayWithObjects:@"This",@"has",@"\"escaped\"",@"quotes",nil],
@@ -83,8 +83,11 @@
 	NSString * tempFileName = [NSString stringWithFormat:@"%d-test.csv", arc4random()];
 	NSString * tempFile = [NSTemporaryDirectory() stringByAppendingPathComponent:tempFileName];
 	NSLog(@"Writing to file: %@", tempFile);
-	BOOL writtenToFile = [expectedFields writeToCSVFile:tempFile atomically:YES];
+
+    error = nil;
+	BOOL writtenToFile = [expectedFields writeToCSVFile:tempFile atomically:YES error:&error];
 	
+    STAssertNil(error, @"Unexpected error writing to temporary file: %@", error);
 	STAssertTrue(writtenToFile, @"Unable to write to temporary file");
 	
 	error = nil;
