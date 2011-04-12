@@ -41,7 +41,8 @@
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
 	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:encoding error:error];
 	if ((error && *error) || rawCSV == nil) {
-		return [self init];
+		[self release];
+		return nil;
 	}
 	return [self initWithContentsOfCSVString:rawCSV encoding:encoding delimiter:delimiter error:error];
 }
@@ -62,7 +63,8 @@
 		if (usedEncoding) { *usedEncoding = NSMacOSRomanStringEncoding; }
 	}
 	if ((error && *error) || rawCSV == nil) {
-		return [self init];
+		[self release];
+		return nil;
 	}
 	
 	return [self initWithContentsOfCSVString:rawCSV encoding:(usedEncoding ? *usedEncoding : NSMacOSRomanStringEncoding) delimiter:delimiter error:error];
@@ -82,7 +84,8 @@
 	
 	if (error && *error) {
 		[parser release];
-		return [self init];
+		[self release];
+		return nil;
 	}
 	NSArrayCHCSVAggregator * delegate = [[NSArrayCHCSVAggregator alloc] init];
 	[parser setParserDelegate:delegate];
@@ -98,8 +101,9 @@
 	if (parserError) {
 		if (error) {
 			*error = parserError;
-			return [self init];
 		}
+		[self release];
+		return nil;
 	}
 	return [self initWithArray:lines];
 }
