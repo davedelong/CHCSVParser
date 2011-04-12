@@ -424,7 +424,7 @@ enum {
 			}
 		}
 	} else {
-		if (previousUnichar == UNICHAR_QUOTE && previousPreviousUnichar != UNICHAR_QUOTE && balancedQuotes == YES && balancedEscapes == YES) {
+		if (previousUnichar == UNICHAR_QUOTE && previousPreviousUnichar != UNICHAR_BACKSLASH && balancedQuotes == YES && balancedEscapes == YES) {
 			NSString * reason = [NSString stringWithFormat:@"Invalid CSV format on line #%lu immediately after \"%@\"", currentLine, currentField];
 			error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]];
 			return;
