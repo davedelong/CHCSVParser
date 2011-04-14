@@ -478,6 +478,7 @@ enum {
 		
 		NSRange nextSearchRange = NSMakeRange(nextSlash.location + nextSlash.length, 0);
 		nextSearchRange.length = [currentField length] - nextSearchRange.location;
+        if (nextSearchRange.location >= [currentField length]) { break; }
 		nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:nextSearchRange];
 	}
 	

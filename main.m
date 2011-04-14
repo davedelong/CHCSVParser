@@ -29,7 +29,7 @@
 
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/giant.csv";
+	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/Test.csv";
 	
 	/**
 	CHCSVWriter *big = [[CHCSVWriter alloc] initWithCSVFile:file atomic:NO];
