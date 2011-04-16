@@ -39,6 +39,7 @@
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
+    if (error) { *error = nil; }
 	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:encoding error:error];
 	if ((error && *error) || rawCSV == nil) {
 		[self release];
@@ -56,13 +57,16 @@
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding delimiter:(NSString *)delimiter error:(NSError **)error {
-	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile usedEncoding:usedEncoding error:error];
-	if ((error && *error) || rawCSV == nil) {
-		if (error) { *error = nil; }
-		rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:NSMacOSRomanStringEncoding error:error];
+    NSError *localError = nil;
+	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile usedEncoding:usedEncoding error:&localError];
+	if (rawCSV == nil) {
+		if (error) { *error = [[localError retain] autorelease]; }
 		if (usedEncoding) { *usedEncoding = NSMacOSRomanStringEncoding; }
+        
+		rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:NSMacOSRomanStringEncoding error:&localError];
 	}
-	if ((error && *error) || rawCSV == nil) {
+	if (rawCSV == nil) {
+		if (error) { *error = [[localError retain] autorelease]; }
 		[self release];
 		return nil;
 	}
@@ -81,12 +85,6 @@
 - (id) initWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
 	CHCSVParser * parser = [[CHCSVParser alloc] initWithCSVString:csvString encoding:encoding error:error];
 	[parser setDelimiter:delimiter];
-	
-	if (error && *error) {
-		[parser release];
-		[self release];
-		return nil;
-	}
 	NSArrayCHCSVAggregator * delegate = [[NSArrayCHCSVAggregator alloc] init];
 	[parser setParserDelegate:delegate];
 	
@@ -115,7 +113,12 @@
 - (BOOL) writeToCSVFile:(NSString *)csvFile withDelimiter:(NSString *)delimiter atomically:(BOOL)atomically error:(NSError **)error {
 	//first, verify that this is (at least) an NSArray of NSArrays:
 	for (id object in self) {
-		if ([object isKindOfClass:[NSArray class]] == NO) { return NO; }
+		if ([object isKindOfClass:[NSArray class]] == NO) {
+            if (error != NULL) {
+                *error = [NSError errorWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Invalid array structure" forKey:NSLocalizedDescriptionKey]];
+            }
+            return NO;
+        }
 	}
 	
 	BOOL ok = YES;
