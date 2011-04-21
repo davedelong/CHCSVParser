@@ -43,4 +43,7 @@
 - (BOOL) writeToCSVFile:(NSString *)csvFile atomically:(BOOL)atomically error:(NSError **)error;
 - (BOOL) writeToCSVFile:(NSString *)csvFile withDelimiter:(NSString *)delimiter atomically:(BOOL)atomically error:(NSError **)error;
 
+- (NSString *) CSVString;
+- (NSString *) CSVStringWithDelimiter:(NSString *)delimiter error:(NSError **)error;
+
 @end

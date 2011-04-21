@@ -84,6 +84,12 @@ int main (int argc, const char * argv[]) {
 	NSLog(@"raw difference: %f", (end-start));
 	
 	[d release];
+    
+    
+    NSArray *a = [NSArray arrayWithContentsOfCSVFile:file encoding:encoding error:nil];
+    NSString *s = [a CSVString];
+    NSLog(@"%@", s);
+    
 	[p release];
 	
 	[pool drain];

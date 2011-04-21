@@ -31,6 +31,7 @@
 	NSString * handleFile;
 	NSFileHandle * outputHandle;
 	BOOL atomically;
+    NSMutableString *stringValue;
 	BOOL hasStarted;
 	
 	NSUInteger currentField;
@@ -42,10 +43,14 @@
 	NSError * error;
 }
 
-@property (nonatomic) NSStringEncoding encoding;
-@property (nonatomic, copy) NSString *delimiter;
+@property (nonatomic) NSStringEncoding encoding; //defaults to NSUTF8StringEncoding
+@property (nonatomic, copy) NSString *delimiter; //defaults to ,
 
 - (id) initWithCSVFile:(NSString *)outputFile atomic:(BOOL)atomicWrite;
+
+- (id) initForWritingToString;
+- (NSString *) stringValue;
+
 - (NSError *) error;
 
 - (void) writeField:(id)field;

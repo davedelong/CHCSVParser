@@ -139,4 +139,23 @@
 	return ok;
 }
 
+- (NSString *) CSVString {
+    NSError *error = nil;
+    return [self CSVStringWithDelimiter:@"," error:&error];
+}
+
+- (NSString *) CSVStringWithDelimiter:(NSString *)delimiter error:(NSError **)error {
+    CHCSVWriter *writer = [[CHCSVWriter alloc] initForWritingToString];
+    [writer setDelimiter:delimiter];
+    for (NSArray *array in self) {
+        [writer writeLineWithFields:array];
+    }
+    NSString *string = [writer stringValue];
+    if (!string && error) {
+        *error = [[[writer error] retain] autorelease];
+    }
+    [writer release];
+    return string;
+}
+
 @end
