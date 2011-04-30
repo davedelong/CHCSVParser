@@ -31,33 +31,37 @@
 
 	@private
 	__weak id<CHCSVParserDelegate> parserDelegate;
-	NSFileHandle * csvFileHandle;
-	NSString * csvFile;
+    NSInputStream *csvReadStream;
+	BOOL endOfStreamReached;
 	NSStringEncoding fileEncoding;
+    
+	NSString *csvFile;
 	
 	BOOL hasStarted;
-	NSString * delimiter;
+	NSString *delimiter;
 	unichar delimiterCharacter;
 	
-	NSMutableData * currentChunk;
-	NSMutableString * currentChunkString;
+	NSMutableData *currentChunk;
+	NSMutableString *currentChunkString;
 	NSUInteger stringIndex;
-	BOOL doneReadingFile;
 	
 	BOOL balancedQuotes;
 	BOOL balancedEscapes;
 	
-	NSMutableString * currentField;
+	NSMutableString *currentField;
 	NSUInteger currentLine;
 	
 	NSUInteger state;
-	NSError * error;
+	NSError *error;
 }
 
 @property (assign) __weak id<CHCSVParserDelegate> parserDelegate;
 @property (readonly) NSError * error;
 @property (readonly) NSString * csvFile;
 @property (nonatomic, copy) NSString *delimiter;
+
+- (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError; //designated initializer
+- (id) initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding error:(NSError **)anError;
 
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding error:(NSError **)anError;
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError;

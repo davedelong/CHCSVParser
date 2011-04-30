@@ -55,7 +55,7 @@ enum {
 }
 
 - (void) trimCharactersInSet_csv:(NSCharacterSet *)set {
-	NSString * trimmed = [self stringByTrimmingCharactersInSet:set];
+	NSString *trimmed = [self stringByTrimmingCharactersInSet:set];
 	[self setString:trimmed];
 }
 
@@ -67,10 +67,12 @@ enum {
 
 @interface CHCSVParser ()
 
-@property (retain) NSMutableData * currentChunk;
+@property (retain) NSMutableData *currentChunk;
 
 - (NSStringEncoding) textEncodingForData:(NSData *)chunkToSniff offset:(NSUInteger *)offset;
 
+- (void) determineTextEncoding;
+- (void) readNextChunk;
 - (NSString *) nextCharacter;
 - (void) runParseLoop;
 - (void) processComposedCharacter:(NSString *)currentCharacter previousCharacter:(NSString *)previousCharacter previousPreviousCharacter:(NSString *)previousPreviousCharacter;
@@ -87,19 +89,22 @@ enum {
 @implementation CHCSVParser
 @synthesize parserDelegate, currentChunk, error, csvFile, delimiter;
 
-- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding error:(NSError **)anError {
+- (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
     self = [super init];
-	if (self) {
-		csvFile = [aCSVFile copy];
-		csvFileHandle = [[NSFileHandle fileHandleForReadingAtPath:csvFile] retain];
-		if (csvFileHandle == nil) {
-			if (anError) {
-				*anError = [NSError errorWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unable to open file for reading" forKey:NSLocalizedDescriptionKey]];
-			}
-			[self release];
-			return nil;
-		}
-		fileEncoding = encoding;
+    if (self) {
+        csvReadStream = [readStream retain];
+        [csvReadStream open];
+        
+        if (usedEncoding && *usedEncoding > 0) {
+            //if we're supplied an encoding, just use that
+            fileEncoding = *usedEncoding;
+        } else {
+            //otherwise try to guess
+            [self determineTextEncoding];
+        }
+        if (usedEncoding) {
+            *usedEncoding = fileEncoding;
+        }
 		
 		balancedQuotes = YES;
 		balancedEscapes = YES;
@@ -107,62 +112,55 @@ enum {
 		currentLine = 0;
 		currentField = [[NSMutableString alloc] init];
 		
-		currentChunk = [[NSMutableData alloc] init];
-		doneReadingFile = NO;
+        if (currentChunk == nil) {
+            currentChunk = [[NSMutableData alloc] init];
+        }
+		endOfStreamReached = NO;
         currentChunkString = [[NSMutableString alloc] init];
 		stringIndex = 0;
 		
 		[self setDelimiter:@","];
 		
         SETSTATE(CHCSVParserStateInsideFile)
-	}
-	return self;
+        
+    }
+    return self;
+}
+
+- (id)initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding error:(NSError **)anError {
+    return [self initWithStream:readStream usedEncoding:&encoding error:anError];
+}
+
+- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding error:(NSError **)anError {
+    return [self initWithContentsOfCSVFile:aCSVFile usedEncoding:&encoding error:anError];
 }
 
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
-    self = [self initWithContentsOfCSVFile:aCSVFile encoding:NSUTF8StringEncoding error:anError];
+    NSInputStream *readStream = [NSInputStream inputStreamWithFileAtPath:aCSVFile];
+    if (readStream == nil) {
+        if (anError) {
+            *anError = [NSError errorWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unable to open file for reading" forKey:NSLocalizedDescriptionKey]];
+        }
+        [self release];
+        return nil;
+    }
+    
+    self = [self initWithStream:readStream usedEncoding:usedEncoding error:anError];
 	if (self) {
-		
-		NSData * chunk = [csvFileHandle readDataOfLength:CHUNK_SIZE];
-		NSUInteger seekOffset = 0;
-		fileEncoding = [self textEncodingForData:chunk offset:&seekOffset];
-		[csvFileHandle seekToFileOffset:seekOffset];
-		
-		[self setDelimiter:@","];
-		
-		if (usedEncoding) {
-			*usedEncoding = fileEncoding;
-		}
+		csvFile = [aCSVFile copy];
 	}
 	return self;
 }
 
 - (id) initWithCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)anError {
-    self = [super init];
-	if (self) {
-		csvFile = nil;
-		csvFileHandle = nil;
-		fileEncoding = encoding;
-		
-		balancedQuotes = YES;
-		balancedEscapes = YES;
-		
-		currentLine = 0;
-		currentField = [[NSMutableString alloc] init];
-		
-		currentChunkString = [csvString mutableCopy];
-		doneReadingFile = YES;
-		stringIndex = 0;
-		
-		[self setDelimiter:@","];
-		
-        SETSTATE(CHCSVParserStateInsideFile)
-	}
-	return self;
+    return [self initWithStream:[NSInputStream inputStreamWithData:[csvString dataUsingEncoding:encoding]]
+                       encoding:encoding
+                          error:anError];
 }
 
 - (void) dealloc {
-	[csvFileHandle release];
+    [csvReadStream close];
+	[csvReadStream release];
 	[csvFile release];
 	[currentField release];
 	[currentChunk release];
@@ -171,6 +169,21 @@ enum {
 	[delimiter release];
 	
 	[super dealloc];
+}
+
+- (void) determineTextEncoding {
+    uint8_t bytes[CHUNK_SIZE];
+    NSUInteger bytesRead = [csvReadStream read:bytes maxLength:CHUNK_SIZE];
+    currentChunk = [[NSMutableData alloc] initWithBytes:bytes length:bytesRead];
+    
+    if ([currentChunk length] > 0) {
+        NSUInteger offset = 0;
+        fileEncoding = [self textEncodingForData:currentChunk offset:&offset];
+        if (offset > 0) {
+            // strip off the text encoding bytes
+            [currentChunk replaceBytesInRange:NSMakeRange(0, offset) withBytes:NULL];
+        }
+    }
 }
 
 - (NSStringEncoding) textEncodingForData:(NSData *)chunkToSniff offset:(NSUInteger *)offset {
@@ -256,11 +269,13 @@ enum {
 #pragma mark Parsing methods
 
 - (void) readNextChunk {
-    NSData * nextChunk = nil;
+    NSData *nextChunk = nil;
     @try {
-        nextChunk = [csvFileHandle readDataOfLength:CHUNK_SIZE];
+        uint8_t bytes[CHUNK_SIZE];
+        NSUInteger bytesRead = [csvReadStream read:bytes maxLength:CHUNK_SIZE];
+        nextChunk = [NSData dataWithBytes:bytes length:bytesRead];
     }
-    @catch (NSException * e) {
+    @catch (NSException *e) {
         error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
                                                                                        e, NSUnderlyingErrorKey,
                                                                                        [e reason], NSLocalizedDescriptionKey,
@@ -293,13 +308,13 @@ enum {
         
         [currentChunk replaceBytesInRange:NSMakeRange(0, readLength) withBytes:NULL length:0];
     }
-    if ([nextChunk length] < CHUNK_SIZE) {
-        doneReadingFile = YES;
+    if ([csvReadStream streamStatus] == NSStreamStatusAtEnd) {
+        endOfStreamReached = YES;
     }
 }
 
 - (NSString *) nextCharacter {
-	if (doneReadingFile == NO && stringIndex >= [currentChunkString length]/2) {
+	if (endOfStreamReached == NO && stringIndex >= [currentChunkString length]/2) {
         [self readNextChunk];
 	}
 	
@@ -307,7 +322,7 @@ enum {
 	if ([currentChunkString length] == 0) { return nil; }
 	
 	NSRange charRange = [currentChunkString rangeOfComposedCharacterSequenceAtIndex:stringIndex];
-	NSString * nextChar = [currentChunkString substringWithRange:charRange];
+	NSString *nextChar = [currentChunkString substringWithRange:charRange];
 	stringIndex = charRange.location + charRange.length;
 	return nextChar;
 }
@@ -327,11 +342,11 @@ enum {
 }
 
 - (void) runParseLoop {
-	NSString * currentCharacter = nil;
-	NSString * previousCharacter = nil;
-	NSString * previousPreviousCharacter = nil;
+	NSString *currentCharacter = nil;
+	NSString *previousCharacter = nil;
+	NSString *previousPreviousCharacter = nil;
 	
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	unsigned char counter = 0;
 	
 	while (error == nil && 
@@ -425,7 +440,7 @@ enum {
 		}
 	} else {
 		if (previousUnichar == UNICHAR_QUOTE && previousPreviousUnichar != UNICHAR_BACKSLASH && balancedQuotes == YES && balancedEscapes == YES) {
-			NSString * reason = [NSString stringWithFormat:@"Invalid CSV format on line #%lu immediately after \"%@\"", currentLine, currentField];
+			NSString *reason = [NSString stringWithFormat:@"Invalid CSV format on line #%lu immediately after \"%@\"", currentLine, currentField];
 			error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]];
 			return;
 		}
@@ -482,7 +497,7 @@ enum {
 		nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:nextSearchRange];
 	}
 	
-	NSString * field = [currentField copy];
+	NSString *field = [currentField copy];
 	[[self parserDelegate] parser:self didReadField:field];
 	[field release];
 	

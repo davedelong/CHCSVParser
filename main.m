@@ -30,7 +30,7 @@
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/Test.csv";
-	
+    
 	/**
 	CHCSVWriter *big = [[CHCSVWriter alloc] initWithCSVFile:file atomic:NO];
 	for (int i = 0; i < 1000000; ++i) {
@@ -70,7 +70,9 @@ int main (int argc, const char * argv[]) {
 	
 	NSLog(@"Beginning...");
 	NSStringEncoding encoding = 0;
-	CHCSVParser * p = [[CHCSVParser alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding error:nil];
+    NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:file];
+    NSError *error = nil;
+	CHCSVParser * p = [[CHCSVParser alloc] initWithStream:stream usedEncoding:&encoding error:&error];
 	
 	NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
 	
@@ -87,6 +89,7 @@ int main (int argc, const char * argv[]) {
     
     
     NSArray *a = [NSArray arrayWithContentsOfCSVFile:file encoding:encoding error:nil];
+    NSLog(@"%@", a);
     NSString *s = [a CSVString];
     NSLog(@"%@", s);
     

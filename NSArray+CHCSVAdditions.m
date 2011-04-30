@@ -26,64 +26,84 @@
 #import "NSArray+CHCSVAdditions.h"
 #import "CHCSVParser.h"
 #import "CHCSVWriter.h"
-#import "CHCSVSupport.h"
+
+#pragma mark Support
+
+@interface NSArrayCHCSVAggregator : NSObject <CHCSVParserDelegate> {
+	NSMutableArray * lines;
+	NSMutableArray * currentLine;
+	NSError * error;
+}
+
+@property (readonly) NSArray * lines;
+@property (readonly) NSError * error;
+
+@end
+
+@implementation NSArrayCHCSVAggregator
+@synthesize lines, error;
+
+- (void) dealloc {
+	[lines release];
+	[currentLine release];
+	[error release];
+	[super dealloc];
+}
+
+- (void) parser:(CHCSVParser *)parser didStartDocument:(NSString *)csvFile {
+	lines = [[NSMutableArray alloc] init];
+}
+
+- (void) parser:(CHCSVParser *)parser didStartLine:(NSUInteger)lineNumber {
+	currentLine = [[NSMutableArray alloc] init];
+}
+
+- (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber {
+	if ([currentLine count] > 0) {
+		[lines addObject:currentLine];
+	}
+	[currentLine release], currentLine = nil;
+}
+
+- (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field {
+	[currentLine addObject:field];
+}
+
+- (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile {
+	
+}
+
+- (void) parser:(CHCSVParser *)parser didFailWithError:(NSError *)anError {
+	error = [anError retain];
+}
+
+@end
+
+#pragma mark NSArray Category
 
 @implementation NSArray (CHCSVAdditions)
 
-+ (id) arrayWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error {
-	return [[[self alloc] initWithContentsOfCSVFile:csvFile encoding:encoding error:error] autorelease];
++ (id) arrayWithContentsOfCSVStream:(NSInputStream *)csvStream encoding:(NSStringEncoding)encoding error:(NSError **)error {
+    return [[[self alloc] initWithContentsOfCSVStream:csvStream encoding:encoding error:error] autorelease];
+}
+- (id) initWithContentsOfCSVStream:(NSInputStream *)csvStream encoding:(NSStringEncoding)encoding error:(NSError **)error {
+    return [self initWithContentsOfCSVStream:csvStream encoding:encoding delimiter:@"," error:error];
+}
+- (id) initWithContentsOfCSVStream:(NSInputStream *)csvStream encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
+    return [self initWithContentsOfCSVStream:csvStream usedEncoding:&encoding delimiter:delimiter error:error];
 }
 
-- (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error {
-	return [self initWithContentsOfCSVFile:csvFile encoding:encoding delimiter:@"," error:error];
++ (id) arrayWithContentsOfCSVStream:(NSInputStream *)csvStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
+    return [[[self alloc] initWithContentsOfCSVStream:csvStream usedEncoding:usedEncoding error:error] autorelease];
 }
-
-- (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
-    if (error) { *error = nil; }
-	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:encoding error:error];
-	if ((error && *error) || rawCSV == nil) {
-		[self release];
-		return nil;
-	}
-	return [self initWithContentsOfCSVString:rawCSV encoding:encoding delimiter:delimiter error:error];
+- (id) initWithContentsOfCSVStream:(NSInputStream *)csvStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
+    return [self initWithContentsOfCSVStream:csvStream usedEncoding:usedEncoding delimiter:@"," error:error];
 }
-
-+ (id) arrayWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
-	return [[[self alloc] initWithContentsOfCSVFile:csvFile usedEncoding:usedEncoding error:error] autorelease];
-}
-
-- (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
-	return [self initWithContentsOfCSVFile:csvFile usedEncoding:usedEncoding delimiter:@"," error:error];
-}
-
-- (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding delimiter:(NSString *)delimiter error:(NSError **)error {
-    NSError *localError = nil;
-	NSString * rawCSV = [NSString stringWithContentsOfFile:csvFile usedEncoding:usedEncoding error:&localError];
-	if (rawCSV == nil) {
-		if (error) { *error = [[localError retain] autorelease]; }
-		if (usedEncoding) { *usedEncoding = NSMacOSRomanStringEncoding; }
-        
-		rawCSV = [NSString stringWithContentsOfFile:csvFile encoding:NSMacOSRomanStringEncoding error:&localError];
-	}
-	if (rawCSV == nil) {
-		if (error) { *error = [[localError retain] autorelease]; }
-		[self release];
-		return nil;
-	}
-	
-	return [self initWithContentsOfCSVString:rawCSV encoding:(usedEncoding ? *usedEncoding : NSMacOSRomanStringEncoding) delimiter:delimiter error:error];
-}
-
-+ (id) arrayWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error {
-	return [[[self alloc] initWithContentsOfCSVString:csvString encoding:encoding error:error] autorelease];
-}
-
-- (id) initWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error {
-	return [self initWithContentsOfCSVString:csvString encoding:encoding delimiter:@"," error:error];
-}
-
-- (id) initWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
-	CHCSVParser * parser = [[CHCSVParser alloc] initWithCSVString:csvString encoding:encoding error:error];
+- (id) initWithContentsOfCSVStream:(NSInputStream *)csvStream usedEncoding:(NSStringEncoding *)usedEncoding delimiter:(NSString *)delimiter error:(NSError **)error {
+    //THIS IS THE "DESIGNATED" INITIALIZER
+    //all other CSV initializers run through this one
+    
+    CHCSVParser *parser = [[CHCSVParser alloc] initWithStream:csvStream usedEncoding:usedEncoding error:error];
 	[parser setDelimiter:delimiter];
 	NSArrayCHCSVAggregator * delegate = [[NSArrayCHCSVAggregator alloc] init];
 	[parser setParserDelegate:delegate];
@@ -104,6 +124,45 @@
 		return nil;
 	}
 	return [self initWithArray:lines];
+}
+
++ (id) arrayWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error {
+	return [[[self alloc] initWithContentsOfCSVFile:csvFile encoding:encoding error:error] autorelease];
+}
+
+- (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding error:(NSError **)error {
+	return [self initWithContentsOfCSVFile:csvFile encoding:encoding delimiter:@"," error:error];
+}
+
+- (id) initWithContentsOfCSVFile:(NSString *)csvFile encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
+    NSInputStream *csvStream = [NSInputStream inputStreamWithFileAtPath:csvFile];
+    return [self initWithContentsOfCSVStream:csvStream encoding:encoding delimiter:delimiter error:error];
+}
+
++ (id) arrayWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
+	return [[[self alloc] initWithContentsOfCSVFile:csvFile usedEncoding:usedEncoding error:error] autorelease];
+}
+
+- (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)error {
+	return [self initWithContentsOfCSVFile:csvFile usedEncoding:usedEncoding delimiter:@"," error:error];
+}
+
+- (id) initWithContentsOfCSVFile:(NSString *)csvFile usedEncoding:(NSStringEncoding *)usedEncoding delimiter:(NSString *)delimiter error:(NSError **)error {
+    NSInputStream *csvStream = [NSInputStream inputStreamWithFileAtPath:csvFile];
+    return [self initWithContentsOfCSVStream:csvStream usedEncoding:usedEncoding delimiter:delimiter error:error];
+}
+
++ (id) arrayWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error {
+	return [[[self alloc] initWithContentsOfCSVString:csvString encoding:encoding error:error] autorelease];
+}
+
+- (id) initWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)error {
+	return [self initWithContentsOfCSVString:csvString encoding:encoding delimiter:@"," error:error];
+}
+
+- (id) initWithContentsOfCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding delimiter:(NSString *)delimiter error:(NSError **)error {
+    NSInputStream *csvStream = [NSInputStream inputStreamWithData:[csvString dataUsingEncoding:encoding]];
+    return [self initWithContentsOfCSVStream:csvStream encoding:encoding delimiter:delimiter error:error];
 }
 
 - (BOOL) writeToCSVFile:(NSString *)csvFile atomically:(BOOL)atomically error:(NSError **)error {
