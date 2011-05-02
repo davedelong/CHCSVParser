@@ -26,7 +26,6 @@
 #import "NSString+CHCSVAdditions.h"
 #import "NSArray+CHCSVAdditions.h"
 #import "CHCSVParser.h"
-#import "CHCSVSupport.h"
 
 @implementation NSString (CHCSVAdditions)
 
