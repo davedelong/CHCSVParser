@@ -72,6 +72,7 @@ enum {
 - (NSStringEncoding) textEncodingForData:(NSData *)chunkToSniff offset:(NSUInteger *)offset;
 
 - (void) determineTextEncoding;
+- (void) extractStringFromCurrentChunk;
 - (void) readNextChunk;
 - (NSString *) nextCharacter;
 - (void) runParseLoop;
@@ -183,6 +184,7 @@ enum {
             // strip off the text encoding bytes
             [currentChunk replaceBytesInRange:NSMakeRange(0, offset) withBytes:NULL];
         }
+        [self extractStringFromCurrentChunk];
     }
 }
 
@@ -268,6 +270,30 @@ enum {
 
 #pragma mark Parsing methods
 
+- (void)extractStringFromCurrentChunk {
+    
+    NSUInteger readLength = [currentChunk length];
+    do {
+        NSString *readString = [[NSString alloc] initWithBytes:[currentChunk bytes] length:readLength encoding:fileEncoding];
+        if (readString == nil) {
+            readLength--;
+            if (readLength == 0) {
+                error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                                                               @"unable to interpret current chunk as a string", NSLocalizedDescriptionKey,
+                                                                                               nil]];
+                break;
+            }
+        } else {
+            [currentChunkString appendString:readString];
+            [readString release];
+            break;
+        }
+    } while (1);
+    
+    
+    [currentChunk replaceBytesInRange:NSMakeRange(0, readLength) withBytes:NULL length:0];
+}
+
 - (void) readNextChunk {
     NSData *nextChunk = nil;
     @try {
@@ -287,26 +313,7 @@ enum {
         // we were able to read something!
         [currentChunk appendData:nextChunk];
         
-        NSUInteger readLength = [currentChunk length];
-        do {
-            NSString *readString = [[NSString alloc] initWithBytes:[currentChunk bytes] length:readLength encoding:fileEncoding];
-            if (readString == nil) {
-                readLength--;
-                if (readLength == 0) {
-                    error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                                                                   @"unable to interpret current chunk as a string", NSLocalizedDescriptionKey,
-                                                                                                   nil]];
-                    break;
-                }
-            } else {
-                [currentChunkString appendString:readString];
-                [readString release];
-                break;
-            }
-        } while (1);
-        
-        
-        [currentChunk replaceBytesInRange:NSMakeRange(0, readLength) withBytes:NULL length:0];
+        [self extractStringFromCurrentChunk];
     }
     if ([csvReadStream streamStatus] == NSStreamStatusAtEnd) {
         endOfStreamReached = YES;
