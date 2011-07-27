@@ -24,7 +24,6 @@
  **/
 
 #import "CHCSVParser.h"
-#define CHUNK_SIZE 2048
 #define STRING_QUOTE @"\""
 #define STRING_BACKSLASH @"\\"
 
@@ -88,7 +87,7 @@ enum {
 #define SETSTATE(_s) if (state != CHCSVParserStateCancelled) { state = _s; }
 
 @implementation CHCSVParser
-@synthesize parserDelegate, currentChunk, error, csvFile, delimiter;
+@synthesize parserDelegate, currentChunk, error, csvFile, delimiter, chunkSize;
 
 - (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
     self = [super init];
@@ -107,6 +106,8 @@ enum {
             *usedEncoding = fileEncoding;
         }
 		
+        chunkSize = 2048;
+        
 		balancedQuotes = YES;
 		balancedEscapes = YES;
 		
@@ -173,8 +174,8 @@ enum {
 }
 
 - (void) determineTextEncoding {
-    uint8_t bytes[CHUNK_SIZE];
-    NSUInteger bytesRead = [csvReadStream read:bytes maxLength:CHUNK_SIZE];
+    uint8_t *bytes = calloc([self chunkSize], sizeof(uint8_t));
+    NSUInteger bytesRead = [csvReadStream read:bytes maxLength:[self chunkSize]];
     currentChunk = [[NSMutableData alloc] initWithBytes:bytes length:bytesRead];
     
     if ([currentChunk length] > 0) {
@@ -186,6 +187,7 @@ enum {
         }
         [self extractStringFromCurrentChunk];
     }
+    free(bytes);
 }
 
 - (NSStringEncoding) textEncodingForData:(NSData *)chunkToSniff offset:(NSUInteger *)offset {
@@ -296,9 +298,9 @@ enum {
 
 - (void) readNextChunk {
     NSData *nextChunk = nil;
+    uint8_t *bytes = calloc([self chunkSize], sizeof(uint8_t));
     @try {
-        uint8_t bytes[CHUNK_SIZE];
-        NSUInteger bytesRead = [csvReadStream read:bytes maxLength:CHUNK_SIZE];
+        NSUInteger bytesRead = [csvReadStream read:bytes maxLength:[self chunkSize]];
         nextChunk = [NSData dataWithBytes:bytes length:bytesRead];
     }
     @catch (NSException *e) {
@@ -308,6 +310,7 @@ enum {
                                                                                        nil]];
         nextChunk = nil;
     }
+    free(bytes);
     
     if ([nextChunk length] > 0) {
         // we were able to read something!

@@ -59,6 +59,7 @@
 @property (readonly) NSError * error;
 @property (readonly) NSString * csvFile;
 @property (nonatomic, copy) NSString *delimiter;
+@property (nonatomic) NSUInteger chunkSize;
 
 - (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError; //designated initializer
 - (id) initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding error:(NSError **)anError;
