@@ -183,7 +183,7 @@ enum {
         fileEncoding = [self textEncodingForData:currentChunk offset:&offset];
         if (offset > 0) {
             // strip off the text encoding bytes
-            [currentChunk replaceBytesInRange:NSMakeRange(0, offset) withBytes:NULL];
+            [currentChunk replaceBytesInRange:NSMakeRange(0, offset) withBytes:NULL length:0];
         }
         [self extractStringFromCurrentChunk];
     }
