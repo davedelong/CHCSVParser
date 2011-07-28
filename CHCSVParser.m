@@ -94,17 +94,6 @@ enum {
     if (self) {
         csvReadStream = [readStream retain];
         [csvReadStream open];
-        
-        if (usedEncoding && *usedEncoding > 0) {
-            //if we're supplied an encoding, just use that
-            fileEncoding = *usedEncoding;
-        } else {
-            //otherwise try to guess
-            [self determineTextEncoding];
-        }
-        if (usedEncoding) {
-            *usedEncoding = fileEncoding;
-        }
 		
         chunkSize = 2048;
         
@@ -124,6 +113,17 @@ enum {
 		[self setDelimiter:@","];
 		
         SETSTATE(CHCSVParserStateInsideFile)
+        
+        if (usedEncoding && *usedEncoding > 0) {
+            //if we're supplied an encoding, just use that
+            fileEncoding = *usedEncoding;
+        } else {
+            //otherwise try to guess
+            [self determineTextEncoding];
+        }
+        if (usedEncoding) {
+            *usedEncoding = fileEncoding;
+        }
         
     }
     return self;
@@ -176,7 +176,7 @@ enum {
 - (void) determineTextEncoding {
     uint8_t *bytes = calloc([self chunkSize], sizeof(uint8_t));
     NSUInteger bytesRead = [csvReadStream read:bytes maxLength:[self chunkSize]];
-    currentChunk = [[NSMutableData alloc] initWithBytes:bytes length:bytesRead];
+    [currentChunk appendBytes:bytes length:bytesRead];
     
     if ([currentChunk length] > 0) {
         NSUInteger offset = 0;
