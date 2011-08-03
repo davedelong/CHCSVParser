@@ -17,6 +17,9 @@
 - (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber {
 //	NSLog(@"Ending line: %lu", lineNumber);
 }
+- (void) parser:(CHCSVParser *)parser didCancelDocument:(NSString *)csvFile {
+    //	NSLog(@"parser canceled: %@", csvFile);
+}
 - (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile {
 //	NSLog(@"parser ended: %@", csvFile);
 }

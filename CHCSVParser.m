@@ -345,7 +345,7 @@ enum {
 	
 	if (error != nil) {
 		[[self parserDelegate] parser:self didFailWithError:error];
-	} else {
+	} else if (state != CHCSVParserStateCancelled) {
 		[[self parserDelegate] parser:self didEndDocument:[self csvFile]];
 	}
 	hasStarted = NO;
@@ -493,7 +493,7 @@ enum {
 	}
 	
 	[currentField trimCharactersInSet_csv:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-
+    
 	[currentField replaceOccurrencesOfString:@"\"\"" withString_csv:STRING_QUOTE];
 	
 	//replace all occurrences of regex: \\(.) with $1 (but not by using a regex)
@@ -524,6 +524,7 @@ enum {
 #pragma Cancelling
 
 - (void) cancelParsing {
+    [[self parserDelegate] parser:self didCancelDocument:[self csvFile]];
     SETSTATE(CHCSVParserStateCancelled)
 }
 

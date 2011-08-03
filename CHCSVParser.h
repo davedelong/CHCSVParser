@@ -83,6 +83,7 @@
 
 - (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field;
 
+- (void) parser:(CHCSVParser *)parser didCancelDocument:(NSString *)csvFile;
 - (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile;
 
 - (void) parser:(CHCSVParser *)parser didFailWithError:(NSError *)error;
