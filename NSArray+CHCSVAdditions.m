@@ -23,9 +23,7 @@
  THE SOFTWARE.
  **/
 
-#import "NSArray+CHCSVAdditions.h"
-#import "CHCSVParser.h"
-#import "CHCSVWriter.h"
+#import "CHCSV.h"
 
 #pragma mark Support
 
@@ -174,7 +172,7 @@
 	for (id object in self) {
 		if ([object isKindOfClass:[NSArray class]] == NO) {
             if (error != NULL) {
-                *error = [NSError errorWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Invalid array structure" forKey:NSLocalizedDescriptionKey]];
+                *error = [NSError errorWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidFormat userInfo:[NSDictionary dictionaryWithObject:@"Invalid array structure" forKey:NSLocalizedDescriptionKey]];
             }
             return NO;
         }

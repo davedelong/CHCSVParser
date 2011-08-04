@@ -23,12 +23,14 @@
  THE SOFTWARE.
  **/
 
-#import "CHCSVParser.h"
+#import "CHCSV.h"
 #define STRING_QUOTE @"\""
 #define STRING_BACKSLASH @"\\"
 
 #define UNICHAR_QUOTE '"'
 #define UNICHAR_BACKSLASH '\\'
+
+NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 enum {
 	CHCSVParserStateInsideFile = 0,
@@ -94,6 +96,17 @@ enum {
     if (self) {
         csvReadStream = [readStream retain];
         [csvReadStream open];
+        
+        NSStreamStatus status = [csvReadStream streamStatus];
+        if (status != NSStreamStatusOpening &&
+            status != NSStreamStatusOpen &&
+            status != NSStreamStatusReading) {
+            if (anError) {
+                *anError = [NSError errorWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidStream userInfo:[NSDictionary dictionaryWithObject:@"Unable to open file for reading" forKey:NSLocalizedDescriptionKey]];
+            }
+            [self release];
+            return nil;
+        }
 		
         chunkSize = 2048;
         
@@ -139,13 +152,6 @@ enum {
 
 - (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
     NSInputStream *readStream = [NSInputStream inputStreamWithFileAtPath:aCSVFile];
-    if (readStream == nil) {
-        if (anError) {
-            *anError = [NSError errorWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unable to open file for reading" forKey:NSLocalizedDescriptionKey]];
-        }
-        [self release];
-        return nil;
-    }
     
     self = [self initWithStream:readStream usedEncoding:usedEncoding error:anError];
 	if (self) {
@@ -280,7 +286,7 @@ enum {
         if (readString == nil) {
             readLength--;
             if (readLength == 0) {
-                error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+                error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidStream userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
                                                                                                @"unable to interpret current chunk as a string", NSLocalizedDescriptionKey,
                                                                                                nil]];
                 break;
@@ -304,7 +310,7 @@ enum {
         nextChunk = [NSData dataWithBytes:bytes length:bytesRead];
     }
     @catch (NSException *e) {
-        error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+        error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidStream userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
                                                                                        e, NSUnderlyingErrorKey,
                                                                                        [e reason], NSLocalizedDescriptionKey,
                                                                                        nil]];
@@ -451,7 +457,7 @@ enum {
 	} else {
 		if (previousUnichar == UNICHAR_QUOTE && previousPreviousUnichar != UNICHAR_BACKSLASH && balancedQuotes == YES && balancedEscapes == YES) {
 			NSString *reason = [NSString stringWithFormat:@"Invalid CSV format on line #%lu immediately after \"%@\"", currentLine, currentField];
-			error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:0 userInfo:[NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]];
+			error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidFormat userInfo:[NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]];
 			return;
 		}
 		if (state != CHCSVParserStateInsideComment) {
@@ -525,6 +531,7 @@ enum {
 
 - (void) cancelParsing {
     SETSTATE(CHCSVParserStateCancelled)
+    error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeParsingCancelled userInfo:nil];
 }
 
 @end

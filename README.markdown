@@ -9,9 +9,19 @@
 
 ##Usage
 
+In order to use `CHCSVParser`, you'll need to include the following five files in your project:
+
+- `CHCSV.h`
+- `CHCSVParser.*`
+- `CHCSVWriter.*`
+
+These four files are optional, though they do simplify things:
+
+- `NSArray+CHCSVAdditions.*`
+- `NSString+CHCSVAdditions.*`
 
 ###Parsing
-In order to parse CSV files, you'll need `CHCSVParser.h` and `CHCSVParser.m`.  A `CHCSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
+A `CHCSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
 
 A `CHCSVParser` can be created in one of three ways:
 
@@ -22,7 +32,7 @@ A `CHCSVParser` can be created in one of three ways:
 `CHCSVParser` can be configured to parse other "character-seperated" file formats, such as "TSV" (tab-seperated).  You can change the delimiter of the parser prior to beginning parsing.  The delimiter can only be one character in length, and cannot be any newline character, `#`, `"`, or `\`.
 
 ###Writing
-In order to write data to a CSV file, you'll need `CHCSVWriter.h` and `CHCSVWriter.m`.  A `CHCSVWriter` has several methods for constructing CSV files:
+A `CHCSVWriter` has several methods for constructing CSV files:
 
 `-writeField:` accepts an object and writes its `-description` (after being properly escaped) out to the CSV file.  It will also write field seperator (`,`) if necessary.  You may pass an empty string (`@""`) or `nil` to write an empty field.
 
@@ -41,21 +51,13 @@ In addition to writing to a file, `CHCSVWriter` can be initialized for writing d
 Like `CHCSVParser`, `CHCSVWriter` can be customized with a delimiter other than `,` prior to beginning writing.
 
 ###Convenience Methods
-Included in the code is an `NSArray` category to simplify reading from and writing to CSV files.  In order to use these methods, you must include `CHCSVParser.*`, `CHCSVWriter.*`, and `NSArray+CHCSVAdditions.*` in your project (all six files).  This category adds many methods to `NSArray` to simplify the process of converting a file, string, or input stream into an `NSArray` of `NSArrays` of `NSStrings`.  There are also methods to write the array to a CSV file (or with a custom delimiter), or to convert it into an `NSString` of well-formed CSV.
+Included in the code is an `NSArray` category to simplify reading from and writing to CSV files.  In order to use these methods, you must also include `NSArray+CHCSVAdditions.*` in your project.  This category adds many methods to `NSArray` to simplify the process of converting a file, string, or input stream into an `NSArray` of `NSArrays` of `NSStrings`.  There are also methods to write the array to a CSV file (or with a custom delimiter), or to convert it into an `NSString` of well-formed CSV.
 
 There is also an `NSString` category to parse an `NSString` of CSV data into an `NSArray` of `NSArray` objects.  This method is `-[NSString CSVComponents]`.
 
 ###General Use
 
-The simplest use of `CHCSVParser` is to include all of the files in your project:
-
-- `CHCSV.h`
-- `CHCSVParser.h` and `CHCSVParser.m`
-- `CHCSVWriter.h` and `CHCSVWriter.m`
-- `NSArray+CHCSVAdditions.h` and `NSArray+CHCSVAdditions.m`
-- `NSString+CHCSVAdditions.h` and `NSString+CHCSVAdditions.m`
-
-Then to use any of the CSV parsing or writing functionality, simply `#import "CHCSV.h"` and use any of the classes and categories as you'd like.
+The simplest use of `CHCSVParser` is to include all of the files mentioned above in your project.  To use any of the CSV parsing or writing functionality, simply `#import "CHCSV.h"` and use any of the classes and categories as you'd like.
 
 
 ##Data Encoding

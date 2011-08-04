@@ -27,3 +27,14 @@
 #import "CHCSVWriter.h"
 #import "NSArray+CHCSVAdditions.h"
 #import "NSString+CHCSVAdditions.h"
+
+extern NSString *const CHCSVErrorDomain;
+
+enum {
+    CHCSVErrorCodeGeneric = 0,
+    CHCSVErrorCodeInvalidStream,
+    CHCSVErrorCodeInvalidFormat,
+    CHCSVErrorCodeParsingCancelled
+};
+
+typedef NSInteger CHCSVErrorCode;
