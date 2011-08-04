@@ -67,6 +67,10 @@
 	[currentLine addObject:field];
 }
 
+- (void) parser:(CHCSVParser *)parser didCancelDocument:(NSString *)csvFile {
+	
+}
+
 - (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile {
 	
 }
