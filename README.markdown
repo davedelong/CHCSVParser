@@ -77,7 +77,7 @@ The simplest use of `CHCSVParser` is to include all of the files mentioned above
 ##To Do
 At some point, `CHCSVWriter` will support writing data directly to `NSOutputStream` instances.
  
-##Credits
+##Credits & Contributors
 
 `CHCSVParser` was written by [Dave DeLong][1].
 
@@ -85,6 +85,12 @@ At some point, `CHCSVWriter` will support writing data directly to `NSOutputStre
 
   [1]: http://davedelong.com
   [2]: http://brockerhoff.net/
+  
+Thanks also to these people for suggestions and bug fixes to `CHCSVParser`:
+
+- [Ben Barnett](https://github.com/benrb)
+- [Aaron Wright](https://github.com/acwright)
+- Gonzalo Castro
   
 ##License
 
