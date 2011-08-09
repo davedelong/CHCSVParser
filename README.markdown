@@ -91,6 +91,7 @@ Thanks also to these people for suggestions and bug fixes to `CHCSVParser`:
 - [Ben Barnett](https://github.com/benrb)
 - [Aaron Wright](https://github.com/acwright)
 - Gonzalo Castro
+- Chris Gulley
   
 ##License
 
