@@ -311,7 +311,12 @@ enum {
             nextChunk = [NSData dataWithBytes:bytes length:bytesRead];
         } else {
             //bytesRead < 0
-            error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidStream userInfo:[NSDictionary dictionaryWithObject:@"Unable to read from input stream" forKey:NSLocalizedDescriptionKey]];
+            error = [[NSError alloc] initWithDomain:CHCSVErrorDomain 
+                                               code:CHCSVErrorCodeInvalidStream 
+                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                     @"Unable to read from input stream", NSLocalizedDescriptionKey,
+                                                     [csvReadStream streamError], NSUnderlyingErrorKey,
+                                                     nil]];
         }
     }
     @catch (NSException *e) {
