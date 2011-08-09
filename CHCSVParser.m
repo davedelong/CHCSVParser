@@ -306,8 +306,13 @@ enum {
     NSData *nextChunk = nil;
     uint8_t *bytes = calloc([self chunkSize], sizeof(uint8_t));
     @try {
-        NSUInteger bytesRead = [csvReadStream read:bytes maxLength:[self chunkSize]];
-        nextChunk = [NSData dataWithBytes:bytes length:bytesRead];
+        NSInteger bytesRead = [csvReadStream read:bytes maxLength:[self chunkSize]];
+        if (bytesRead >= 0) {
+            nextChunk = [NSData dataWithBytes:bytes length:bytesRead];
+        } else {
+            //bytesRead < 0
+            error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidStream userInfo:[NSDictionary dictionaryWithObject:@"Unable to read from input stream" forKey:NSLocalizedDescriptionKey]];
+        }
     }
     @catch (NSException *e) {
         error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidStream userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
