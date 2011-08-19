@@ -38,9 +38,13 @@
 	NSString *csvFile;
 	
 	BOOL hasStarted;
+	BOOL shouldParseBackSlashes;
 	NSString *delimiter;
 	unichar delimiterCharacter;
 	
+	NSString *lineDelimiter;
+	NSCharacterSet *lineDelimiterCharacterSet;
+    
 	NSMutableData *currentChunk;
 	NSMutableString *currentChunkString;
 	NSUInteger stringIndex;
@@ -59,7 +63,9 @@
 @property (readonly) NSError * error;
 @property (readonly) NSString * csvFile;
 @property (nonatomic, copy) NSString *delimiter;
+@property (nonatomic, copy) NSString *lineDelimiter;
 @property (nonatomic) NSUInteger chunkSize;
+@property (nonatomic) BOOL shouldParseBackSlashes;
 
 - (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError; //designated initializer
 - (id) initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding error:(NSError **)anError;
