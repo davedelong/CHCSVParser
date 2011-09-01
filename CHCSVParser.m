@@ -89,7 +89,7 @@ enum {
 #define SETSTATE(_s) if (state != CHCSVParserStateCancelled) { state = _s; }
 
 @implementation CHCSVParser
-@synthesize parserDelegate, currentChunk, error, csvFile, delimiter, lineDelimiter, chunkSize, shouldParseBackSlashes;
+@synthesize parserDelegate, currentChunk, error, csvFile, delimiter, chunkSize;
 
 - (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
     self = [super init];
@@ -112,7 +112,6 @@ enum {
         
 		balancedQuotes = YES;
 		balancedEscapes = YES;
-        shouldParseBackSlashes = YES;
 		
 		currentLine = 0;
 		currentField = [[NSMutableString alloc] init];
@@ -258,12 +257,12 @@ enum {
 	
 	// the delimiter cannot be
 	BOOL shouldThrow = ([newDelimiter length] != 1);
-	if ([lineDelimiterCharacterSet characterIsMember:[newDelimiter characterAtIndex:0]]) {
+	if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[newDelimiter characterAtIndex:0]]) {
 		shouldThrow = YES;
 	}
 	if ([newDelimiter hasPrefix:@"#"]) { shouldThrow = YES; }
 	if ([newDelimiter hasPrefix:@"\""]) { shouldThrow = YES; }
-	if ([newDelimiter hasPrefix:@"\\"] && shouldParseBackSlashes) { shouldThrow = YES; }
+	if ([newDelimiter hasPrefix:@"\\"]) { shouldThrow = YES; }
 	
 	if (shouldThrow) {
 		[NSException raise:NSInvalidArgumentException format:@"%@ cannot be used as a delimiter", newDelimiter];
@@ -274,31 +273,6 @@ enum {
 		[delimiter release];
 		delimiter = [newDelimiter copy];
 		delimiterCharacter = [delimiter characterAtIndex:0];
-	}
-}
-
-- (void) setLineDelimiter:(NSString *)newLineDelimiter {
-	if (hasStarted) {
-		[NSException raise:NSInvalidArgumentException format:@"You cannot set a line delimiter after parsing has started"];
-		return;
-	}
-	
-	// the delimiter cannot be
-	BOOL shouldThrow = NO;
-	if ([newLineDelimiter hasPrefix:@"#"]) { shouldThrow = YES; }
-	if ([newLineDelimiter hasPrefix:@"\""]) { shouldThrow = YES; }
-	if ([newLineDelimiter hasPrefix:@"\\"]) { shouldThrow = YES; }
-	
-	if (shouldThrow) {
-		[NSException raise:NSInvalidArgumentException format:@"%@ cannot be used as a line delimiter", newLineDelimiter];
-		return;
-	}
-	
-	if (newLineDelimiter != lineDelimiter) {
-		[lineDelimiter release];
-		lineDelimiter = [newLineDelimiter copy];
-        [lineDelimiterCharacterSet release];
-		lineDelimiterCharacterSet = [[NSCharacterSet characterSetWithCharactersInString: lineDelimiter] retain];
 	}
 }
 
@@ -474,14 +448,14 @@ enum {
 				[self finishCurrentField];
 			}
 		}
-	} else if (currentUnichar == UNICHAR_BACKSLASH && shouldParseBackSlashes) {
+	} else if (currentUnichar == UNICHAR_BACKSLASH) {
 		if (state == CHCSVParserStateInsideField) {
 			balancedEscapes = !balancedEscapes;
 		} else if (state == CHCSVParserStateInsideLine) {
 			[self beginCurrentField];
 			balancedEscapes = NO;
 		}
-	} else if ([lineDelimiterCharacterSet characterIsMember:currentUnichar] && [lineDelimiterCharacterSet characterIsMember:previousUnichar] == NO) {
+	} else if ([[NSCharacterSet newlineCharacterSet] characterIsMember:currentUnichar] && [[NSCharacterSet newlineCharacterSet] characterIsMember:previousUnichar] == NO) {
 		if (balancedQuotes == YES && balancedEscapes == YES) {
 			if (state != CHCSVParserStateInsideComment) {
 				[self finishCurrentField];
@@ -526,7 +500,7 @@ enum {
 }
 
 - (void) finishCurrentField {
-	[currentField trimCharactersInSet_csv:lineDelimiterCharacterSet];
+	[currentField trimCharactersInSet_csv:[NSCharacterSet newlineCharacterSet]];
 	if ([currentField hasPrefix:STRING_QUOTE] && [currentField hasSuffix:STRING_QUOTE]) {
 		[currentField trimString_csv:STRING_QUOTE];
 	}
@@ -538,19 +512,17 @@ enum {
 
 	[currentField replaceOccurrencesOfString:@"\"\"" withString_csv:STRING_QUOTE];
 	
-    if (shouldParseBackSlashes) {
-        //replace all occurrences of regex: \\(.) with $1 (but not by using a regex)
-        NSRange nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:NSMakeRange(0, [currentField length])];
-        while(nextSlash.location != NSNotFound) {
-            [currentField replaceCharactersInRange:nextSlash withString:@""];
-            
-            NSRange nextSearchRange = NSMakeRange(nextSlash.location + nextSlash.length, 0);
-            nextSearchRange.length = [currentField length] - nextSearchRange.location;
-            if (nextSearchRange.location >= [currentField length]) { break; }
-            nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:nextSearchRange];
-        }
+	//replace all occurrences of regex: \\(.) with $1 (but not by using a regex)
+	NSRange nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:NSMakeRange(0, [currentField length])];
+	while(nextSlash.location != NSNotFound) {
+		[currentField replaceCharactersInRange:nextSlash withString:@""];
+		
+		NSRange nextSearchRange = NSMakeRange(nextSlash.location + nextSlash.length, 0);
+		nextSearchRange.length = [currentField length] - nextSearchRange.location;
+        if (nextSearchRange.location >= [currentField length]) { break; }
+		nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:nextSearchRange];
 	}
-    
+	
 	NSString *field = [currentField copy];
 	[[self parserDelegate] parser:self didReadField:field];
 	[field release];
