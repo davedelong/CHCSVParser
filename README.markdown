@@ -9,16 +9,23 @@
 
 ##Usage
 
-In order to use `CHCSVParser`, you'll need to include the following five files in your project:
+###Parsing
+
+In order to use `CHCSVParser`, you'll need to include the following three files in your project:
 
 - `CHCSV.h`
 - `CHCSVParser.*`
-- `CHCSVWriter.*`
 
 These four files are optional, though they do simplify things:
 
 - `NSArray+CHCSVAdditions.*`
 - `NSString+CHCSVAdditions.*`
+
+###Writing
+
+In order to use `CHCSVWriter`, you'll need to include the following two files in your project:
+
+- `CHCSVWriter.*`
 
 ###Parsing
 A `CHCSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
