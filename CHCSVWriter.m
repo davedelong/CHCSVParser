@@ -23,7 +23,7 @@
  THE SOFTWARE.
  **/
 
-#import "CHCSV.h"
+#import "CHCSVWriter.h"
 
 
 @implementation CHCSVWriter
