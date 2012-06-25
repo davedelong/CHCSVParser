@@ -43,6 +43,7 @@
 	
 	NSMutableData *currentChunk;
 	NSMutableString *currentChunkString;
+	NSUInteger chunkSize;
 	NSUInteger stringIndex;
 	
 	BOOL balancedQuotes;
