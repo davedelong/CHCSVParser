@@ -75,7 +75,7 @@
     void (^didFailWithError)(NSError *error);
 }
 
-@property (nonatomic, assign) __weak id<CHCSVParserDelegate> parserDelegate;
+@property (nonatomic, weak) id<CHCSVParserDelegate> parserDelegate;
 @property (nonatomic, readonly) NSError * error;
 @property (nonatomic, readonly) NSString * csvFile;
 @property (nonatomic, copy) NSString *delimiter;
