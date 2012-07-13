@@ -26,6 +26,7 @@
 #import "UnitTests.h"
 #import "NSArray+CHCSVAdditions.h"
 #import "NSString+CHCSVAdditions.h"
+#import "CHCSVParser.h"
 
 @implementation UnitTests
 
@@ -125,6 +126,55 @@
 		
 		STAssertTrue([actualLine isEqualToArray:expectedLine], @"lines differ.  Expected %@, given %@", expectedLine, actualLine);
 	}
+}
+
+- (void) testCSVWithBlocks {
+	NSString *file = [[NSBundle bundleForClass:[self class]] pathForResource:@"Test" ofType:@"csv"];
+	NSStringEncoding encoding = 0;
+	NSError *error = nil;
+    
+    __block CHCSVParser *parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding error:&error];
+    
+    STAssertTrue(encoding == NSUTF8StringEncoding, @"Wrong encoding; given %@ (%lu)", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)), encoding);
+	STAssertNil(error, @"Unexpected error: %@", error);
+    
+    NSArray *expectedFields = [self expectedFields];\
+    __block int expectedLineNumber = 1;
+    __block int expectedFieldCount = 0;
+    
+    parser.didStartDocument = ^(NSString *csvFile) {
+        STAssertTrue([file isEqualToString:csvFile], @"Wrong file path");
+    };
+    parser.didStartLine = ^(NSUInteger lineNumber) {
+        STAssertTrue(expectedLineNumber == lineNumber, @"Incorrect line number. expected %lu, given %lu", expectedLineNumber, lineNumber);
+        
+        expectedFieldCount = 0;
+    };
+    parser.didEndLine = ^(NSUInteger lineNumber, NSArray *fields) {
+        NSArray *expectedLine = [expectedFields objectAtIndex:lineNumber - 1];
+        
+        STAssertTrue(expectedLineNumber == lineNumber, @"Incorrect line number. expected %lu, given %lu", expectedLineNumber, lineNumber);
+        STAssertTrue([fields isEqualToArray:expectedLine], @"lines differ.  Expected %@, given %@", expectedLine, fields);
+        
+        expectedLineNumber++;
+    };
+    parser.didReadField = ^(NSString *field) {
+        NSArray *expectedLine = [expectedFields objectAtIndex:expectedLineNumber - 1];
+        NSString *expectedField = [expectedLine objectAtIndex:expectedFieldCount];
+        
+        STAssertTrue([expectedField isEqualToString:field], @"Incorrect field: expected %@, given %@", expectedField, field);
+        
+        expectedFieldCount++;
+    };
+    parser.didEndDocument = ^(NSString *csvFile) {
+        STAssertTrue([file isEqualToString:csvFile], @"Wrong file path");
+    };
+    parser.didFailWithError = ^(NSError *error) {
+        STAssertNil(error, @"Unexpected error: %@", error);
+    };
+	
+    [parser parse];
+    [parser release];
 }
 
 @end

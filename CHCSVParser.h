@@ -40,6 +40,7 @@
 	BOOL hasStarted;
 	NSString *delimiter;
 	unichar delimiterCharacter;
+    NSUInteger chunkSize;
 	
 	NSMutableData *currentChunk;
 	NSMutableString *currentChunkString;
@@ -54,13 +55,39 @@
 	
 	NSUInteger state;
 	NSError *error;
+    
+    NSMutableArray *fieldArray;
+    
+    struct {
+        unsigned int respondsToDidStartDocument : 1;
+        unsigned int respondsToDidStartLine     : 1;
+        unsigned int respondsToDidEndLine       : 1;
+        unsigned int respondsToDidEndLineFields : 1;
+        unsigned int respondsToDidReadField     : 1;
+        unsigned int respondsToDidEndDocument   : 1;
+        unsigned int respondsToDidFailWithError : 1;
+    } parserDelegateFlags;
+    
+    void (^didStartDocument)(NSString *csvFile);
+    void (^didStartLine)(NSUInteger lineNumber);
+    void (^didEndLine)(NSUInteger lineNumber, NSArray *fields);
+    void (^didReadField)(NSString *field);
+    void (^didEndDocument)(NSString *csvFile);
+    void (^didFailWithError)(NSError *error);
 }
 
-@property (assign) __weak id<CHCSVParserDelegate> parserDelegate;
-@property (readonly) NSError * error;
-@property (readonly) NSString * csvFile;
+@property (nonatomic, weak) id<CHCSVParserDelegate> parserDelegate;
+@property (nonatomic, readonly) NSError * error;
+@property (nonatomic, readonly) NSString * csvFile;
 @property (nonatomic, copy) NSString *delimiter;
 @property (nonatomic) NSUInteger chunkSize;
+
+@property (nonatomic, copy) void (^didStartDocument)(NSString *csvFile);
+@property (nonatomic, copy) void (^didStartLine)(NSUInteger lineNumber);
+@property (nonatomic, copy) void (^didEndLine)(NSUInteger lineNumber, NSArray *fields);
+@property (nonatomic, copy) void (^didReadField)(NSString *field);
+@property (nonatomic, copy) void (^didEndDocument)(NSString *csvFile);
+@property (nonatomic, copy) void (^didFailWithError)(NSError *error);
 
 - (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError; //designated initializer
 - (id) initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding error:(NSError **)anError;
@@ -70,6 +97,7 @@
 
 - (id) initWithCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)anError;
 
+- (void) asyncParse;
 - (void) parse;
 - (void) cancelParsing;
 
@@ -77,15 +105,13 @@
 
 @protocol CHCSVParserDelegate <NSObject>
 
+@optional
 - (void) parser:(CHCSVParser *)parser didStartDocument:(NSString *)csvFile;
 - (void) parser:(CHCSVParser *)parser didStartLine:(NSUInteger)lineNumber;
-
 - (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber;
-
+- (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber fields:(NSArray *)fields;
 - (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field;
-
 - (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile;
-
 - (void) parser:(CHCSVParser *)parser didFailWithError:(NSError *)error;
 
 @end

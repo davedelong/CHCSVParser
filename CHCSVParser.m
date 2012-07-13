@@ -91,6 +91,13 @@ enum {
 @implementation CHCSVParser
 @synthesize parserDelegate, currentChunk, error, csvFile, delimiter, chunkSize;
 
+@synthesize didStartDocument;
+@synthesize didStartLine;
+@synthesize didEndLine;
+@synthesize didReadField;
+@synthesize didEndDocument;
+@synthesize didFailWithError;
+
 - (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
     self = [super init];
     if (self) {
@@ -166,6 +173,20 @@ enum {
                           error:anError];
 }
 
+- (void)setParserDelegate:(id<CHCSVParserDelegate>)theParserDelegate
+{
+    if (parserDelegate != theParserDelegate) {
+        parserDelegate = theParserDelegate;
+        parserDelegateFlags.respondsToDidStartDocument = [theParserDelegate respondsToSelector:@selector(parser:didStartDocument:)];
+        parserDelegateFlags.respondsToDidStartLine     = [theParserDelegate respondsToSelector:@selector(parser:didStartLine:)];
+        parserDelegateFlags.respondsToDidEndLine       = [theParserDelegate respondsToSelector:@selector(parser:didEndLine:)];
+        parserDelegateFlags.respondsToDidEndLineFields = [theParserDelegate respondsToSelector:@selector(parser:didEndLine:fields:)];
+        parserDelegateFlags.respondsToDidReadField     = [theParserDelegate respondsToSelector:@selector(parser:didReadField:)];
+        parserDelegateFlags.respondsToDidEndDocument   = [theParserDelegate respondsToSelector:@selector(parser:didEndDocument:)];
+        parserDelegateFlags.respondsToDidFailWithError = [theParserDelegate respondsToSelector:@selector(parser:didFailWithError:)];
+    }
+}
+
 - (void) dealloc {
     [csvReadStream close];
 	[csvReadStream release];
@@ -174,7 +195,14 @@ enum {
 	[currentChunk release];
 	[currentChunkString release];
 	[error release];
-	[delimiter release];
+	[delimiter release];    
+    [fieldArray release];
+    [didStartDocument release];
+    [didStartLine release];
+    [didEndLine release];
+    [didReadField release];
+    [didEndDocument release];
+    [didFailWithError release];
 	
 	[super dealloc];
 }
@@ -353,16 +381,37 @@ enum {
 	return nextChar;
 }
 
+- (void) asyncParse {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self parse];
+    });
+}
+
 - (void) parse {
 	hasStarted = YES;
-	[[self parserDelegate] parser:self didStartDocument:[self csvFile]];
+    if (parserDelegateFlags.respondsToDidStartDocument) {
+        [[self parserDelegate] parser:self didStartDocument:[self csvFile]];
+    }
+    if (didStartDocument) {
+        didStartDocument([self csvFile]);
+    }
 	
 	[self runParseLoop];
 	
 	if (error != nil) {
-		[[self parserDelegate] parser:self didFailWithError:error];
+        if (parserDelegateFlags.respondsToDidFailWithError) {
+            [[self parserDelegate] parser:self didFailWithError:error];
+        }
+        if (didFailWithError) {
+            didFailWithError(error);
+        }
 	} else {
-		[[self parserDelegate] parser:self didEndDocument:[self csvFile]];
+        if (parserDelegateFlags.respondsToDidEndDocument) {
+            [[self parserDelegate] parser:self didEndDocument:[self csvFile]];
+        }
+        if (didEndDocument) {
+            didEndDocument([self csvFile]);
+        }
 	}
 	hasStarted = NO;
 }
@@ -488,7 +537,15 @@ enum {
 
 - (void) beginCurrentLine {
 	currentLine++;
-	[[self parserDelegate] parser:self didStartLine:currentLine];
+    if (parserDelegateFlags.respondsToDidStartLine) {
+        [[self parserDelegate] parser:self didStartLine:currentLine];
+    }
+    if (didStartLine) {
+        didStartLine(currentLine);
+    }
+    if (parserDelegateFlags.respondsToDidEndLineFields || didEndLine) {
+        fieldArray = [[NSMutableArray alloc] init];
+    }
     SETSTATE(CHCSVParserStateInsideLine)
 }
 
@@ -523,8 +580,14 @@ enum {
 		nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:nextSearchRange];
 	}
 	
-	NSString *field = [currentField copy];
-	[[self parserDelegate] parser:self didReadField:field];
+	NSString *field = currentField.length > 0 ? [currentField copy] : nil;
+    if (parserDelegateFlags.respondsToDidReadField) {
+        [[self parserDelegate] parser:self didReadField:field];
+    }
+    if (didReadField) {
+        didReadField(field);
+    }
+    [fieldArray addObject:(field) ? field : [NSNull null]];
 	[field release];
 	
 	[currentField setString:@""];
@@ -533,7 +596,21 @@ enum {
 }
 
 - (void) finishCurrentLine {
-	[[self parserDelegate] parser:self didEndLine:currentLine];
+    if (parserDelegateFlags.respondsToDidEndLine) {
+        [[self parserDelegate] parser:self didEndLine:currentLine];
+    }
+    if (fieldArray) {
+        NSArray *fields = [[NSMutableArray alloc] initWithArray:fieldArray];
+        if (parserDelegateFlags.respondsToDidEndLineFields) {
+            [[self parserDelegate] parser:self didEndLine:currentLine fields:fields];
+        }
+        if (didEndLine) {
+            didEndLine(currentLine, fields);
+        }
+        [fields release];
+        [fieldArray release];
+        fieldArray = nil;
+    }
     SETSTATE(CHCSVParserStateInsideFile)
 }
 
