@@ -580,14 +580,14 @@ enum {
 		nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:nextSearchRange];
 	}
 	
-	NSString *field = [currentField copy];
+	NSString *field = currentField.length > 0 ? [currentField copy] : nil;
     if (parserDelegateFlags.respondsToDidReadField) {
         [[self parserDelegate] parser:self didReadField:field];
     }
     if (didReadField) {
         didReadField(field);
     }
-    [fieldArray addObject:field];
+    [fieldArray addObject:(field) ? field : [NSNull null]];
 	[field release];
 	
 	[currentField setString:@""];
