@@ -38,6 +38,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		01D904FC15B2BF01004A62C8 /* Pod.spec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Pod.spec; sourceTree = "<group>"; };
 		08FB7796FE84155DC02AAC07 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32A70AAB03705E1F00C91783 /* CHCSVParser_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParser_Prefix.pch; sourceTree = "<group>"; };
@@ -84,6 +85,7 @@
 		08FB7794FE84155DC02AAC07 /* CHCSVParser */ = {
 			isa = PBXGroup;
 			children = (
+				01D904FC15B2BF01004A62C8 /* Pod.spec */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859EA2029092E104C91782 /* Documentation */,
 				08FB779DFE84155DC02AAC07 /* External Frameworks and Libraries */,
