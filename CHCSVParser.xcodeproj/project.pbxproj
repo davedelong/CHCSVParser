@@ -138,7 +138,7 @@
 				5516BCB312578CFC0025F235 /* NSString+CHCSVAdditions.h */,
 				5516BCB412578CFC0025F235 /* NSString+CHCSVAdditions.m */,
 			);
-			name = CHCSVParser;
+			path = CHCSVParser;
 			sourceTree = "<group>";
 		};
 		C6859EA2029092E104C91782 /* Documentation */ = {
