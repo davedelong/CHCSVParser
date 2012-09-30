@@ -122,6 +122,7 @@ enum {
 		endOfStreamReached = NO;
         currentChunkString = [[NSMutableString alloc] init];
 		stringIndex = 0;
+		lastEndLineStringIndex = 0;
 		
 		[self setDelimiter:@","];
 		
@@ -341,6 +342,11 @@ enum {
 
 - (NSString *) nextCharacter {
 	if (endOfStreamReached == NO && stringIndex >= [currentChunkString length]/2) {
+		// trim currentChunkString from beginning to the last end of line
+		stringIndex -= lastEndLineStringIndex;
+		[currentChunkString deleteCharactersInRange:NSMakeRange(0, lastEndLineStringIndex)];
+		lastEndLineStringIndex = 0;
+		
         [self readNextChunk];
 	}
 	
@@ -533,6 +539,7 @@ enum {
 }
 
 - (void) finishCurrentLine {
+	lastEndLineStringIndex = stringIndex;
 	[[self parserDelegate] parser:self didEndLine:currentLine];
     SETSTATE(CHCSVParserStateInsideFile)
 }

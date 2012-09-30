@@ -45,6 +45,7 @@
 	NSMutableString *currentChunkString;
 	NSUInteger chunkSize;
 	NSUInteger stringIndex;
+	NSUInteger lastEndLineStringIndex;
 	
 	BOOL balancedQuotes;
 	BOOL balancedEscapes;
