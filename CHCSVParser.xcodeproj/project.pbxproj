@@ -9,14 +9,13 @@
 /* Begin PBXBuildFile section */
 		5516BCB512578CFC0025F235 /* NSString+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 5516BCB412578CFC0025F235 /* NSString+CHCSVAdditions.m */; };
 		5516BCBB12578EA90025F235 /* NSString+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 5516BCB412578CFC0025F235 /* NSString+CHCSVAdditions.m */; };
-		551981D61203715400FBE033 /* CHCSVParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 551981D51203715400FBE033 /* CHCSVParser.m */; };
 		5538B52D1344F0A1004930DD /* test.tsv in Resources */ = {isa = PBXBuildFile; fileRef = 5538B52C1344F0A1004930DD /* test.tsv */; };
 		557FCEB61203F938009FCDBA /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557FCEB51203F938009FCDBA /* CoreServices.framework */; };
 		557FD0431204A45D009FCDBA /* NSArray+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD0421204A45D009FCDBA /* NSArray+CHCSVAdditions.m */; };
-		557FD0581204A71C009FCDBA /* CHCSVParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 551981D51203715400FBE033 /* CHCSVParser.m */; };
 		557FD0591204A71C009FCDBA /* NSArray+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD0421204A45D009FCDBA /* NSArray+CHCSVAdditions.m */; };
 		557FD05D1204A731009FCDBA /* UnitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD05B1204A72B009FCDBA /* UnitTests.m */; };
 		557FD05E1204A736009FCDBA /* Test.csv in Resources */ = {isa = PBXBuildFile; fileRef = 551981EE1203800300FBE033 /* Test.csv */; };
+		55B99321160E376100D6548A /* CHCSVParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 55B99320160E376100D6548A /* CHCSVParser.m */; };
 		55BB40E612A367A500A1BB33 /* CHCSVWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 55EFC7B81210608C0070B303 /* CHCSVWriter.m */; };
 		55EFC7B91210608C0070B303 /* CHCSVWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 55EFC7B81210608C0070B303 /* CHCSVWriter.m */; };
 		8DD76F9A0486AA7600D96B5E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -44,8 +43,6 @@
 		5516BCB312578CFC0025F235 /* NSString+CHCSVAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+CHCSVAdditions.h"; sourceTree = "<group>"; };
 		5516BCB412578CFC0025F235 /* NSString+CHCSVAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+CHCSVAdditions.m"; sourceTree = "<group>"; };
 		5516BCB612578D480025F235 /* CHCSV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSV.h; sourceTree = "<group>"; };
-		551981D41203715400FBE033 /* CHCSVParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParser.h; sourceTree = "<group>"; };
-		551981D51203715400FBE033 /* CHCSVParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVParser.m; sourceTree = "<group>"; };
 		551981EE1203800300FBE033 /* Test.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Test.csv; sourceTree = "<group>"; };
 		5538B52C1344F0A1004930DD /* test.tsv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.tsv; sourceTree = "<group>"; };
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -55,6 +52,8 @@
 		557FD0541204A70D009FCDBA /* Unit Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Unit Tests-Info.plist"; sourceTree = "<group>"; };
 		557FD05A1204A72B009FCDBA /* UnitTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTests.h; sourceTree = "<group>"; };
 		557FD05B1204A72B009FCDBA /* UnitTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnitTests.m; sourceTree = "<group>"; };
+		55B9931F160E376100D6548A /* CHCSVParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParser.h; sourceTree = "<group>"; };
+		55B99320160E376100D6548A /* CHCSVParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVParser.m; sourceTree = "<group>"; };
 		55EFC7B71210608C0070B303 /* CHCSVWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVWriter.h; sourceTree = "<group>"; };
 		55EFC7B81210608C0070B303 /* CHCSVWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVWriter.m; sourceTree = "<group>"; };
 		8DD76FA10486AA7600D96B5E /* CHCSVParser */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CHCSVParser; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -129,8 +128,8 @@
 			isa = PBXGroup;
 			children = (
 				5516BCB612578D480025F235 /* CHCSV.h */,
-				551981D41203715400FBE033 /* CHCSVParser.h */,
-				551981D51203715400FBE033 /* CHCSVParser.m */,
+				55B9931F160E376100D6548A /* CHCSVParser.h */,
+				55B99320160E376100D6548A /* CHCSVParser.m */,
 				55EFC7B71210608C0070B303 /* CHCSVWriter.h */,
 				55EFC7B81210608C0070B303 /* CHCSVWriter.m */,
 				557FD0411204A45D009FCDBA /* NSArray+CHCSVAdditions.h */,
@@ -194,7 +193,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0450;
 			};
 			buildConfigurationList = 1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "CHCSVParser" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -249,7 +248,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				557FD0581204A71C009FCDBA /* CHCSVParser.m in Sources */,
 				557FD0591204A71C009FCDBA /* NSArray+CHCSVAdditions.m in Sources */,
 				557FD05D1204A731009FCDBA /* UnitTests.m in Sources */,
 				55EFC7B91210608C0070B303 /* CHCSVWriter.m in Sources */,
@@ -262,10 +260,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				8DD76F9A0486AA7600D96B5E /* main.m in Sources */,
-				551981D61203715400FBE033 /* CHCSVParser.m in Sources */,
 				557FD0431204A45D009FCDBA /* NSArray+CHCSVAdditions.m in Sources */,
 				5516BCBB12578EA90025F235 /* NSString+CHCSVAdditions.m in Sources */,
 				55BB40E612A367A500A1BB33 /* CHCSVWriter.m in Sources */,
+				55B99321160E376100D6548A /* CHCSVParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,6 +326,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -353,6 +352,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";

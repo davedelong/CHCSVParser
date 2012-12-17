@@ -1,547 +1,423 @@
 //
 //  CHCSVParser.m
 //  CHCSVParser
-/**
- Copyright (c) 2010 Dave DeLong
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- **/
+//
+//  Created by Dave DeLong on 9/22/12.
+//
+//
 
-#import "CHCSV.h"
-#define STRING_QUOTE @"\""
-#define STRING_BACKSLASH @"\\"
+#import "Parser.h"
 
-#define UNICHAR_QUOTE '"'
-#define UNICHAR_BACKSLASH '\\'
+#define CHUNK_SIZE 512
+#define DOUBLE_QUOTE '"'
+#define COMMA ','
+#define OCTOTHORPE '#'
+#define BACKSLASH '\\'
 
-NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
-
-enum {
-	CHCSVParserStateInsideFile = 0,
-	CHCSVParserStateInsideLine = 1,
-	CHCSVParserStateInsideField = 2,
-	CHCSVParserStateInsideComment = 3,
-    CHCSVParserStateCancelled = 4
-};
-
-@interface NSMutableString (CHCSVAdditions)
-
-- (void) trimString_csv:(NSString *)character;
-- (void) trimCharactersInSet_csv:(NSCharacterSet *)set;
-- (void) replaceOccurrencesOfString:(NSString *)find withString_csv:(NSString *)replace;
-
-@end
-
-@implementation NSMutableString (CHCSVAdditions)
-
-- (void) trimString_csv:(NSString *)character {
-	[self replaceCharactersInRange:NSMakeRange(0, [character length]) withString:@""];
-	[self replaceCharactersInRange:NSMakeRange([self length] - [character length], [character length]) withString:@""];
+@implementation CHCSVParser {
+    NSInputStream *_stream;
+    NSStringEncoding _streamEncoding;
+    NSMutableData *_stringBuffer;
+    NSMutableString *_string;
+    NSCharacterSet *_validFieldCharacters;
+    
+    NSInteger _nextIndex;
+    
+    NSRange _fieldRange;
+    NSMutableString *_sanitizedField;
+    
+    unichar _delimiter;
+    
+    NSError *_error;
+    
+    NSUInteger _currentRecord;
+    BOOL _cancelled;
 }
 
-- (void) trimCharactersInSet_csv:(NSCharacterSet *)set {
-	NSString *trimmed = [self stringByTrimmingCharactersInSet:set];
-	[self setString:trimmed];
+- (id)initWithCSVString:(NSString *)csv {
+    NSStringEncoding encoding = NSUTF8StringEncoding;
+    NSInputStream *stream = [NSInputStream inputStreamWithData:[csv dataUsingEncoding:encoding]];
+    return [self initWithInputStream:stream usedEncoding:&encoding delimiter:COMMA];
 }
 
-- (void) replaceOccurrencesOfString:(NSString *)find withString_csv:(NSString *)replace {
-	[self replaceOccurrencesOfString:find withString:replace options:NSLiteralSearch range:NSMakeRange(0, [self length])];
+- (id)initWithContentsOfCSVFile:(NSString *)csvFilePath {
+    NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:csvFilePath];
+    NSStringEncoding encoding = NSUTF8StringEncoding;
+    return [self initWithInputStream:stream usedEncoding:&encoding delimiter:COMMA];
 }
 
-@end
-
-@interface CHCSVParser ()
-
-@property (retain) NSMutableData *currentChunk;
-
-- (NSStringEncoding) textEncodingForData:(NSData *)chunkToSniff offset:(NSUInteger *)offset;
-
-- (void) determineTextEncoding;
-- (void) extractStringFromCurrentChunk;
-- (void) readNextChunk;
-- (NSString *) nextCharacter;
-- (void) runParseLoop;
-- (void) processComposedCharacter:(NSString *)currentCharacter previousCharacter:(NSString *)previousCharacter previousPreviousCharacter:(NSString *)previousPreviousCharacter;
-
-- (void) beginCurrentLine;
-- (void) beginCurrentField;
-- (void) finishCurrentField;
-- (void) finishCurrentLine;
-
-@end
-
-#define SETSTATE(_s) if (state != CHCSVParserStateCancelled) { state = _s; }
-
-@implementation CHCSVParser
-@synthesize parserDelegate, currentChunk, error, csvFile, delimiter, chunkSize;
-
-- (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
+- (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter {
+    NSParameterAssert(stream);
+    NSParameterAssert(delimiter);
+    NSAssert([[NSCharacterSet newlineCharacterSet] characterIsMember:_delimiter] == NO, @"The field delimiter may not be a newline");
+    NSAssert(_delimiter != DOUBLE_QUOTE, @"The field delimiter may not be a double quote");
+    NSAssert(_delimiter != OCTOTHORPE, @"The field delimiter may not be an octothorpe");
+    
     self = [super init];
     if (self) {
-        csvReadStream = [readStream retain];
-        [csvReadStream open];
+        _stream = [stream retain];
+        [_stream open];
         
-        NSStreamStatus status = [csvReadStream streamStatus];
-        if (status != NSStreamStatusOpening &&
-            status != NSStreamStatusOpen &&
-            status != NSStreamStatusReading) {
-            if (anError) {
-                *anError = [NSError errorWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidStream userInfo:[NSDictionary dictionaryWithObject:@"Unable to open file for reading" forKey:NSLocalizedDescriptionKey]];
+        _stringBuffer = [[NSMutableData alloc] init];
+        _string = [[NSMutableString alloc] init];
+        
+        _delimiter = delimiter;
+        
+        _nextIndex = 0;
+        _recognizesBackslashesAsEscapes = YES;
+        _sanitizesFields = NO;
+        _sanitizedField = [[NSMutableString alloc] init];
+        
+        NSMutableCharacterSet *m = [[NSCharacterSet newlineCharacterSet] mutableCopy];
+        NSString *invalid = [NSString stringWithFormat:@"%c%C", DOUBLE_QUOTE, _delimiter];
+        [m addCharactersInString:invalid];
+        _validFieldCharacters = [[m invertedSet] retain];
+        [m release];
+        
+        if (encoding == NULL || *encoding == 0) {
+            // we need to determine the encoding
+            [self _sniffEncoding];
+            if (encoding) {
+                *encoding = _streamEncoding;
             }
-            [self release];
-            return nil;
-        }
-		
-        chunkSize = 2048;
-        
-		balancedQuotes = YES;
-		balancedEscapes = YES;
-		
-		currentLine = 0;
-		currentField = [[NSMutableString alloc] init];
-		
-        if (currentChunk == nil) {
-            currentChunk = [[NSMutableData alloc] init];
-        }
-		endOfStreamReached = NO;
-        currentChunkString = [[NSMutableString alloc] init];
-		stringIndex = 0;
-		
-		[self setDelimiter:@","];
-		
-        SETSTATE(CHCSVParserStateInsideFile)
-        
-        if (usedEncoding && *usedEncoding > 0) {
-            //if we're supplied an encoding, just use that
-            fileEncoding = *usedEncoding;
         } else {
-            //otherwise try to guess
-            [self determineTextEncoding];
+            _streamEncoding = *encoding;
         }
-        if (usedEncoding) {
-            *usedEncoding = fileEncoding;
-        }
-        
     }
     return self;
 }
 
-- (id)initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding error:(NSError **)anError {
-    return [self initWithStream:readStream usedEncoding:&encoding error:anError];
+- (void)dealloc {
+    [_stream close];
+    [_stream release];
+    [_stringBuffer release];
+    [_string release];
+    [_sanitizedField release];
+    [_validFieldCharacters release];
+    [super dealloc];
 }
 
-- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding error:(NSError **)anError {
-    return [self initWithContentsOfCSVFile:aCSVFile usedEncoding:&encoding error:anError];
-}
+#pragma mark -
 
-- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
-    NSInputStream *readStream = [NSInputStream inputStreamWithFileAtPath:aCSVFile];
+- (void)_sniffEncoding {
+    uint8_t bytes[CHUNK_SIZE];
+    NSUInteger readLength = [_stream read:bytes maxLength:CHUNK_SIZE];
+    [_stringBuffer appendBytes:bytes length:readLength];
     
-    self = [self initWithStream:readStream usedEncoding:usedEncoding error:anError];
-	if (self) {
-		csvFile = [aCSVFile copy];
-	}
-	return self;
-}
-
-- (id) initWithCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)anError {
-    return [self initWithStream:[NSInputStream inputStreamWithData:[csvString dataUsingEncoding:encoding]]
-                       encoding:encoding
-                          error:anError];
-}
-
-- (void) dealloc {
-    [csvReadStream close];
-	[csvReadStream release];
-	[csvFile release];
-	[currentField release];
-	[currentChunk release];
-	[currentChunkString release];
-	[error release];
-	[delimiter release];
-	
-	[super dealloc];
-}
-
-- (void) determineTextEncoding {
-    uint8_t *bytes = calloc([self chunkSize], sizeof(uint8_t));
-    NSUInteger bytesRead = [csvReadStream read:bytes maxLength:[self chunkSize]];
-    [currentChunk appendBytes:bytes length:bytesRead];
-    
-    if ([currentChunk length] > 0) {
-        NSUInteger offset = 0;
-        fileEncoding = [self textEncodingForData:currentChunk offset:&offset];
-        if (offset > 0) {
-            // strip off the text encoding bytes
-            [currentChunk replaceBytesInRange:NSMakeRange(0, offset) withBytes:NULL length:0];
+    NSUInteger bufferLength = [_stringBuffer length];
+    if (bufferLength > 0) {
+        NSStringEncoding encoding = NSUTF8StringEncoding;
+        
+        UInt8* bytes = (UInt8*)[_stringBuffer bytes];
+        if (bufferLength > 3 && bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0xFE && bytes[3] == 0xFF) {
+            encoding = NSUTF32BigEndianStringEncoding;
+        } else if (bufferLength > 3 && bytes[0] == 0xFF && bytes[1] == 0xFE && bytes[2] == 0x00 && bytes[3] == 0x00) {
+            encoding = NSUTF32LittleEndianStringEncoding;
+        } else if (bufferLength > 1 && bytes[0] == 0xFE && bytes[1] == 0xFF) {
+            encoding = NSUTF16BigEndianStringEncoding;
+        } else if (bufferLength > 1 && bytes[0] == 0xFF && bytes[1] == 0xFE) {
+            encoding = NSUTF16LittleEndianStringEncoding;
+        } else if (bufferLength > 2 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) {
+            encoding = NSUTF8StringEncoding;
+        } else {
+            NSString *bufferAsUTF8 = [[NSString alloc] initWithData:_stringBuffer encoding:NSUTF8StringEncoding];
+            if (bufferAsUTF8 != nil) {
+                encoding = NSUTF8StringEncoding;
+                [bufferAsUTF8 release];
+            } else {
+                NSLog(@"unable to determine stream encoding; assuming MacOSRoman");
+                encoding = NSMacOSRomanStringEncoding;
+            }
         }
-        [self extractStringFromCurrentChunk];
+        
+        _streamEncoding = encoding;
     }
-    free(bytes);
 }
 
-- (NSStringEncoding) textEncodingForData:(NSData *)chunkToSniff offset:(NSUInteger *)offset {
-	NSUInteger length = [chunkToSniff length];
-	*offset = 0;
-	NSStringEncoding encoding = NSUTF8StringEncoding;
-	
-	if (length > 0) {
-		UInt8* bytes = (UInt8*)[chunkToSniff bytes];
-		encoding = CFStringConvertEncodingToNSStringEncoding(CFStringGetSystemEncoding());
-		switch (bytes[0]) {
-			case 0x00:
-				if (length>3 && bytes[1]==0x00 && bytes[2]==0xFE && bytes[3]==0xFF) {
-					encoding = NSUTF32BigEndianStringEncoding;
-					*offset = 4;
-				}
-				break;
-			case 0xEF:
-				if (length>2 && bytes[1]==0xBB && bytes[2]==0xBF) {
-					encoding = NSUTF8StringEncoding;
-					*offset = 3;
-				}
-				break;
-			case 0xFE:
-				if (length>1 && bytes[1]==0xFF) {
-					encoding = NSUTF16BigEndianStringEncoding;
-					*offset = 2;
-				}
-				break;
-			case 0xFF:
-				if (length>1 && bytes[1]==0xFE) {
-					if (length>3 && bytes[2]==0x00 && bytes[3]==0x00) {
-						encoding = NSUTF32LittleEndianStringEncoding;
-						*offset = 4;
-					} else {
-						encoding = NSUTF16LittleEndianStringEncoding;
-						*offset = 2;
-					}
-				}
-				break;
-			default:
-				if ([[[NSString alloc] initWithData:chunkToSniff encoding:NSUTF8StringEncoding] autorelease] == nil) {
-					NSLog(@"unable to determine file encoding; assuming MacOSRoman");
-					encoding = NSMacOSRomanStringEncoding;
-				} else {
-					NSLog(@"unable to determine file encoding; assuming UTF8");
-					encoding = NSUTF8StringEncoding; // fall back on UTF8
-				}
-				break;
-		}
-	}
-	
-	return encoding;
-}
-
-- (void) setDelimiter:(NSString *)newDelimiter {
-	if (hasStarted) {
-		[NSException raise:NSInvalidArgumentException format:@"You cannot set a delimiter after parsing has started"];
-		return;
-	}
-	
-	// the delimiter cannot be
-	BOOL shouldThrow = ([newDelimiter length] != 1);
-	if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[newDelimiter characterAtIndex:0]]) {
-		shouldThrow = YES;
-	}
-	if ([newDelimiter hasPrefix:@"#"]) { shouldThrow = YES; }
-	if ([newDelimiter hasPrefix:@"\""]) { shouldThrow = YES; }
-	if ([newDelimiter hasPrefix:@"\\"]) { shouldThrow = YES; }
-	
-	if (shouldThrow) {
-		[NSException raise:NSInvalidArgumentException format:@"%@ cannot be used as a delimiter", newDelimiter];
-		return;
-	}
-	
-	if (newDelimiter != delimiter) {
-		[delimiter release];
-		delimiter = [newDelimiter copy];
-		delimiterCharacter = [delimiter characterAtIndex:0];
-	}
-}
-
-#pragma mark Parsing methods
-
-- (void)extractStringFromCurrentChunk {
+- (void)_loadMoreIfNecessary {
+    NSUInteger stringLength = [_string length];
+    NSUInteger reloadPortion = stringLength / 3;
+    if (reloadPortion < 10) { reloadPortion = 10; }
     
-    NSUInteger readLength = [currentChunk length];
-    do {
-        NSString *readString = [[NSString alloc] initWithBytes:[currentChunk bytes] length:readLength encoding:fileEncoding];
-        if (readString == nil) {
-            readLength--;
-            if (readLength == 0) {
-                error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidStream userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                                                               @"unable to interpret current chunk as a string", NSLocalizedDescriptionKey,
-                                                                                               nil]];
+    if (_nextIndex+reloadPortion >= stringLength && [_stream hasBytesAvailable]) {
+        // read more
+        uint8_t buffer[CHUNK_SIZE];
+        NSInteger readBytes = [_stream read:buffer maxLength:CHUNK_SIZE];
+        if (readBytes > 0) {
+            [_stringBuffer appendBytes:buffer length:readBytes];
+            
+            NSUInteger readLength = [_stringBuffer length];
+            while (readLength > 0) {
+                NSString *readString = [[NSString alloc] initWithBytes:[_stringBuffer bytes] length:readLength encoding:_streamEncoding];
+                if (readString == nil) {
+                    readLength--;
+                } else {
+                    [_string appendString:readString];
+                    [readString release];
+                    break;
+                }
+            };
+            
+            [_stringBuffer replaceBytesInRange:NSMakeRange(0, readLength) withBytes:NULL length:0];
+        }
+    }
+}
+
+- (void)_advance {
+    [self _loadMoreIfNecessary];
+    _nextIndex++;
+}
+
+- (unichar)_peekCharacter {
+    [self _loadMoreIfNecessary];
+    if (_nextIndex >= [_string length]) { return '\0'; }
+    
+    return [_string characterAtIndex:_nextIndex];
+}
+
+- (unichar)_peekPeekCharacter {
+    [self _loadMoreIfNecessary];
+    NSUInteger nextNextIndex = _nextIndex+1;
+    if (nextNextIndex >= [_string length]) { return '\0'; }
+    
+    return [_string characterAtIndex:nextNextIndex];
+}
+
+#pragma mark -
+
+- (void)parse {
+    [self _beginDocument];
+    
+    _currentRecord = 0;
+    while ([self _parseRecord]) {
+        ; // yep;
+    }
+    
+    if (_error != nil) {
+        [self _error];
+    } else {
+        [self _endDocument];
+    }
+}
+
+- (void)cancelParsing {
+    _cancelled = YES;
+}
+
+- (BOOL)_parseRecord {
+    while ([self _peekCharacter] == OCTOTHORPE) {
+        [self _parseComment];
+    }
+    
+    [self _beginRecord];
+    while (1) {
+        if (![self _parseField]) {
+            break;
+        }
+        if (![self _parseDelimiter]) {
+            break;
+        }
+    }    
+    [self _parseNewline];
+    [self _endRecord];
+    
+    return (_error == nil);
+}
+
+- (BOOL)_parseNewline {
+    if (_cancelled) { return NO; }
+    
+    NSUInteger charCount = 0;
+    while ([[NSCharacterSet newlineCharacterSet] characterIsMember:[self _peekCharacter]]) {
+        charCount++;
+        [self _advance];
+    }
+    return (charCount > 0);
+}
+
+- (BOOL)_parseComment {
+    NSCharacterSet *newlines = [NSCharacterSet newlineCharacterSet];
+    
+    BOOL isBackslashEscaped = NO;
+    while (1) {
+        if (isBackslashEscaped == NO) {
+            unichar next = [self _peekCharacter];
+            if (next == BACKSLASH && _recognizesBackslashesAsEscapes) {
+                isBackslashEscaped = YES;
+                [self _advance];
+            } else if ([newlines characterIsMember:next] == NO) {
+                [self _advance];
+            } else {
+                // it's a newline
                 break;
             }
         } else {
-            [currentChunkString appendString:readString];
-            [readString release];
-            break;
+            isBackslashEscaped = YES;
+            [self _advance];
         }
-    } while (1);
-    
-    
-    [currentChunk replaceBytesInRange:NSMakeRange(0, readLength) withBytes:NULL length:0];
+    }
+    return [self _parseNewline];
 }
 
-- (void) readNextChunk {
-    NSData *nextChunk = nil;
-    uint8_t *bytes = calloc([self chunkSize], sizeof(uint8_t));
-    @try {
-        NSInteger bytesRead = [csvReadStream read:bytes maxLength:[self chunkSize]];
-        if (bytesRead >= 0) {
-            nextChunk = [NSData dataWithBytes:bytes length:bytesRead];
+- (BOOL)_parseField {
+    if (_cancelled) { return NO; }
+    
+    [_sanitizedField setString:@""];
+    if ([self _peekCharacter] == DOUBLE_QUOTE) {
+        return [self _parseEscapedField];
+    } else {
+        return [self _parseUnescapedField];
+    }
+}
+
+- (BOOL)_parseEscapedField {
+    [self _beginField];
+    [self _advance]; // consume the opening double quote
+    
+    NSCharacterSet *newlines = [NSCharacterSet newlineCharacterSet];
+    BOOL isBackslashEscaped = NO;
+    while (1) {
+        unichar next = [self _peekCharacter];
+        if (next == '\0') { break; }
+        
+        if (isBackslashEscaped == NO) {
+            if (next == BACKSLASH && _recognizesBackslashesAsEscapes) {
+                isBackslashEscaped = YES;
+                [self _advance]; // consume the backslash
+            } else if ([_validFieldCharacters characterIsMember:next] ||
+                       [newlines characterIsMember:next] ||
+                       next == COMMA) {
+                [_sanitizedField appendFormat:@"%C", next];
+                [self _advance];
+            } else if (next == DOUBLE_QUOTE && [self _peekPeekCharacter] == DOUBLE_QUOTE) {
+                [_sanitizedField appendFormat:@"%C", next];
+                [self _advance];
+                [self _advance];
+            } else {
+                // not valid, or it's not a doubled double quote
+                break;
+            }
         } else {
-            //bytesRead < 0
-            error = [[NSError alloc] initWithDomain:CHCSVErrorDomain 
-                                               code:CHCSVErrorCodeInvalidStream 
-                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                     @"Unable to read from input stream", NSLocalizedDescriptionKey,
-                                                     [csvReadStream streamError], NSUnderlyingErrorKey,
-                                                     nil]];
+            [_sanitizedField appendFormat:@"%C", next];
+            isBackslashEscaped = NO;
+            [self _advance];
         }
     }
-    @catch (NSException *e) {
-        error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidStream userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                                                       e, NSUnderlyingErrorKey,
-                                                                                       [e reason], NSLocalizedDescriptionKey,
-                                                                                       nil]];
-        nextChunk = nil;
-    }
-    free(bytes);
     
-    if ([nextChunk length] > 0) {
-        // we were able to read something!
-        [currentChunk appendData:nextChunk];
-        
-        [self extractStringFromCurrentChunk];
+    if ([self _peekCharacter] == DOUBLE_QUOTE) {
+        [self _advance];
+        [self _endField];
+        return YES;
     }
-    if ([csvReadStream streamStatus] == NSStreamStatusAtEnd) {
-        endOfStreamReached = YES;
+    
+    return NO;
+}
+
+- (BOOL)_parseUnescapedField {
+    [self _beginField];
+    
+    BOOL isBackslashEscaped = NO;
+    while (1) {
+        unichar next = [self _peekCharacter];
+        if (next == '\0') { break; }
+        
+        if (isBackslashEscaped == NO) {
+            if (next == BACKSLASH && _recognizesBackslashesAsEscapes) {
+                isBackslashEscaped = YES;
+                [self _advance];
+            } else if ([_validFieldCharacters characterIsMember:next]) {
+                [_sanitizedField appendFormat:@"%C", next];
+                [self _advance];
+            } else {
+                break;
+            }
+        } else {
+            isBackslashEscaped = NO;
+            [_sanitizedField appendFormat:@"%C", next];
+            [self _advance];
+        }
+    }
+    
+    [self _endField];
+    return YES;
+}
+
+- (BOOL)_parseDelimiter {
+    unichar next = [self _peekCharacter];
+    if (next == _delimiter) {
+        [self _advance];
+        return YES;
+    }
+    if (next != '\0' && [[NSCharacterSet newlineCharacterSet] characterIsMember:next] == NO) {
+        NSString *description = [NSString stringWithFormat:@"Unexpected delimiter. Expected '%C', but got '%C'", _delimiter, [self _peekCharacter]];
+        _error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:1 userInfo:@{NSLocalizedDescriptionKey : description}];
+    }
+    return NO;
+}
+
+- (void)_beginDocument {
+    if ([_delegate respondsToSelector:@selector(parserDidBeginDocument:)]) {
+        [_delegate parserDidBeginDocument:self];
     }
 }
 
-- (NSString *) nextCharacter {
-	if (endOfStreamReached == NO && stringIndex >= [currentChunkString length]/2) {
-        [self readNextChunk];
-	}
-	
-	if (stringIndex >= [currentChunkString length]) { return nil; }
-	if ([currentChunkString length] == 0) { return nil; }
-	
-	NSRange charRange = [currentChunkString rangeOfComposedCharacterSequenceAtIndex:stringIndex];
-	NSString *nextChar = [currentChunkString substringWithRange:charRange];
-	stringIndex = charRange.location + charRange.length;
-	return nextChar;
+- (void)_endDocument {
+    if ([_delegate respondsToSelector:@selector(parserDidEndDocument:)]) {
+        [_delegate parserDidEndDocument:self];
+    }
 }
 
-- (void) parse {
-	hasStarted = YES;
-	[[self parserDelegate] parser:self didStartDocument:[self csvFile]];
-	
-	[self runParseLoop];
-	
-	if (error != nil) {
-		[[self parserDelegate] parser:self didFailWithError:error];
-	} else {
-		[[self parserDelegate] parser:self didEndDocument:[self csvFile]];
-	}
-	hasStarted = NO;
+- (void)_beginRecord {
+    if (_cancelled) { return; }
+    
+    _currentRecord++;
+    if ([_delegate respondsToSelector:@selector(parser:didBeginRecord:)]) {
+        [_delegate parser:self didBeginRecord:_currentRecord];
+    }
 }
 
-- (void) runParseLoop {
-	NSString *currentCharacter = nil;
-	NSString *previousCharacter = nil;
-	NSString *previousPreviousCharacter = nil;
-	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	unsigned char counter = 0;
-	
-	while (error == nil && 
-		   (currentCharacter = [self nextCharacter]) && 
-		   currentCharacter != nil) {
-		[self processComposedCharacter:currentCharacter previousCharacter:previousCharacter previousPreviousCharacter:previousPreviousCharacter];
-        
-        if (state == CHCSVParserStateCancelled) { break; }
-        
-		previousPreviousCharacter = previousCharacter;
-		previousCharacter = currentCharacter;
-		
-		counter++;
-		if (counter == 0) { //this happens every 256 (2**8) iterations when the unsigned short overflows
-			[currentCharacter retain];
-			[previousCharacter retain];
-			[previousPreviousCharacter retain];
-			
-			[pool drain];
-			pool = [[NSAutoreleasePool alloc] init];
-			
-			[currentCharacter autorelease];
-			[previousCharacter autorelease];
-			[previousPreviousCharacter autorelease];
-		}
-	}
-	
-	[pool drain];
-	
-	if ([currentField length] > 0 && state == CHCSVParserStateInsideField) {
-		[self finishCurrentField];
-	}
-	if (state == CHCSVParserStateInsideLine) {
-		[self finishCurrentLine];
-	}
+- (void)_endRecord {
+    if (_cancelled) { return; }
+    
+    if ([_delegate respondsToSelector:@selector(parser:didEndRecord:)]) {
+        [_delegate parser:self didEndRecord:_currentRecord];
+    }
 }
 
-- (void) processComposedCharacter:(NSString *)currentCharacter previousCharacter:(NSString *)previousCharacter previousPreviousCharacter:(NSString *)previousPreviousCharacter {
-	if (state == CHCSVParserStateInsideFile) {
-		//this is the "beginning of the line" state
-		//this is also where we determine if we should ignore this line (it's a comment)
-		if ([currentCharacter isEqual:@"#"] == NO) {
-			[self beginCurrentLine];
-		} else {
-            SETSTATE(CHCSVParserStateInsideComment)
-		}
-	}
-	
-	unichar currentUnichar = [currentCharacter characterAtIndex:0];
-	unichar previousUnichar = [previousCharacter characterAtIndex:0];
-	unichar previousPreviousUnichar = [previousPreviousCharacter characterAtIndex:0];
-	
-	if (currentUnichar == UNICHAR_QUOTE) {
-		if (state == CHCSVParserStateInsideLine) {
-			//beginning a quoted field
-			[self beginCurrentField];
-			balancedQuotes = NO;
-		} else if (state == CHCSVParserStateInsideField) {
-			if (balancedEscapes == NO) {
-				balancedEscapes = YES;
-			} else {
-				balancedQuotes = !balancedQuotes;
-			}
-		}
-	} else if (currentUnichar == delimiterCharacter) {
-		if (state == CHCSVParserStateInsideLine) {
-			[self beginCurrentField];
-			[self finishCurrentField];
-		} else if (state == CHCSVParserStateInsideField) {
-			if (balancedEscapes == NO) {
-				balancedEscapes = YES;
-			} else if (balancedQuotes == YES) {
-				[self finishCurrentField];
-			}
-		}
-	} else if (currentUnichar == UNICHAR_BACKSLASH) {
-		if (state == CHCSVParserStateInsideField) {
-			balancedEscapes = !balancedEscapes;
-		} else if (state == CHCSVParserStateInsideLine) {
-			[self beginCurrentField];
-			balancedEscapes = NO;
-		}
-	} else if ([[NSCharacterSet newlineCharacterSet] characterIsMember:currentUnichar] && [[NSCharacterSet newlineCharacterSet] characterIsMember:previousUnichar] == NO) {
-		if (balancedQuotes == YES && balancedEscapes == YES) {
-			if (state != CHCSVParserStateInsideComment) {
-				[self finishCurrentField];
-				[self finishCurrentLine];
-			} else {
-                SETSTATE(CHCSVParserStateInsideFile)
-			}
-		}
-	} else {
-		if (previousUnichar == UNICHAR_QUOTE && previousPreviousUnichar != UNICHAR_BACKSLASH && balancedQuotes == YES && balancedEscapes == YES) {
-			NSString *reason = [NSString stringWithFormat:@"Invalid CSV format on line #%lu immediately after \"%@\"", currentLine, currentField];
-			error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidFormat userInfo:[NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]];
-			return;
-		}
-		if (state != CHCSVParserStateInsideComment) {
-			if (state != CHCSVParserStateInsideField) {
-				[self beginCurrentField];
-			}
-            SETSTATE(CHCSVParserStateInsideField)
-			if (balancedEscapes == NO) {
-				balancedEscapes = YES;
-			}
-		}
-	}
-	
-	if (state != CHCSVParserStateInsideComment) {
-		[currentField appendString:currentCharacter];
-	}
+- (void)_beginField {
+    if (_cancelled) { return; }
+    
+    _fieldRange.location = _nextIndex;
 }
 
-- (void) beginCurrentLine {
-	currentLine++;
-	[[self parserDelegate] parser:self didStartLine:currentLine];
-    SETSTATE(CHCSVParserStateInsideLine)
+- (void)_endField {
+    if (_cancelled) { return; }
+    
+    _fieldRange.length = (_nextIndex - _fieldRange.location);
+    NSString *field = [_string substringWithRange:_fieldRange];
+    
+    if (_sanitizesFields) {
+        field = [[_sanitizedField copy] autorelease];
+    }
+    
+    if ([_delegate respondsToSelector:@selector(parser:didReadField:)]) {
+        [_delegate parser:self didReadField:field];
+    } else {
+        NSLog(@"%@", field);
+    }
+    
+    [_string replaceCharactersInRange:NSMakeRange(0, NSMaxRange(_fieldRange)) withString:@""];
+    _nextIndex = 0;
 }
 
-- (void) beginCurrentField {
-	[currentField setString:@""];
-	balancedQuotes = YES;
-	balancedEscapes = YES;
-    SETSTATE(CHCSVParserStateInsideField)
-}
-
-- (void) finishCurrentField {
-	[currentField trimCharactersInSet_csv:[NSCharacterSet newlineCharacterSet]];
-	if ([currentField hasPrefix:STRING_QUOTE] && [currentField hasSuffix:STRING_QUOTE]) {
-		[currentField trimString_csv:STRING_QUOTE];
-	}
-	if ([currentField hasPrefix:delimiter]) {
-		[currentField replaceCharactersInRange:NSMakeRange(0, [delimiter length]) withString:@""];
-	}
-	
-	[currentField trimCharactersInSet_csv:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-
-	[currentField replaceOccurrencesOfString:@"\"\"" withString_csv:STRING_QUOTE];
-	
-	//replace all occurrences of regex: \\(.) with $1 (but not by using a regex)
-	NSRange nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:NSMakeRange(0, [currentField length])];
-	while(nextSlash.location != NSNotFound) {
-		[currentField replaceCharactersInRange:nextSlash withString:@""];
-		
-		NSRange nextSearchRange = NSMakeRange(nextSlash.location + nextSlash.length, 0);
-		nextSearchRange.length = [currentField length] - nextSearchRange.location;
-        if (nextSearchRange.location >= [currentField length]) { break; }
-		nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:nextSearchRange];
-	}
-	
-	NSString *field = [currentField copy];
-	[[self parserDelegate] parser:self didReadField:field];
-	[field release];
-	
-	[currentField setString:@""];
-	
-    SETSTATE(CHCSVParserStateInsideLine)
-}
-
-- (void) finishCurrentLine {
-	[[self parserDelegate] parser:self didEndLine:currentLine];
-    SETSTATE(CHCSVParserStateInsideFile)
-}
-
-#pragma Cancelling
-
-- (void) cancelParsing {
-    SETSTATE(CHCSVParserStateCancelled)
-    error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeParsingCancelled userInfo:nil];
+- (void)_error {
+    if (_cancelled) { return; }
+    
+    if ([_delegate respondsToSelector:@selector(parser:didFailWithError:)]) {
+        [_delegate parser:self didFailWithError:_error];
+    } else {
+        NSLog(@"error parsing: %@", _error);
+    }
 }
 
 @end

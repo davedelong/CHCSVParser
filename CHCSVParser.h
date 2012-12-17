@@ -1,90 +1,42 @@
 //
 //  CHCSVParser.h
 //  CHCSVParser
-/**
- Copyright (c) 2010 Dave DeLong
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- **/
+//
+//  Created by Dave DeLong on 9/22/12.
+//
+//
 
 #import <Foundation/Foundation.h>
 
-@protocol CHCSVParserDelegate;
+@class CHCSVParser;
+@protocol CHCSVParserDelegate <NSObject>
 
-@interface CHCSVParser : NSObject {
+@optional
+- (void)parserDidBeginDocument:(CHCSVParser *)parser;
+- (void)parserDidEndDocument:(CHCSVParser *)parser;
 
-	@private
-	__weak id<CHCSVParserDelegate> parserDelegate;
-    NSInputStream *csvReadStream;
-	BOOL endOfStreamReached;
-	NSStringEncoding fileEncoding;
-    
-	NSString *csvFile;
-	
-	BOOL hasStarted;
-	NSString *delimiter;
-	unichar delimiterCharacter;
-	
-	NSMutableData *currentChunk;
-	NSMutableString *currentChunkString;
-	NSUInteger stringIndex;
-	
-	BOOL balancedQuotes;
-	BOOL balancedEscapes;
-	
-	NSMutableString *currentField;
-	NSUInteger currentLine;
-	
-	NSUInteger state;
-	NSError *error;
-}
+- (void)parser:(CHCSVParser *)parser didBeginLine:(NSUInteger)recordNumber;
+- (void)parser:(CHCSVParser *)parser didEndLine:(NSUInteger)recordNumber;
 
-@property (assign) __weak id<CHCSVParserDelegate> parserDelegate;
-@property (readonly) NSError * error;
-@property (readonly) NSString * csvFile;
-@property (nonatomic, copy) NSString *delimiter;
-@property (nonatomic) NSUInteger chunkSize;
+- (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field;
 
-- (id) initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError; //designated initializer
-- (id) initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding error:(NSError **)anError;
-
-- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile encoding:(NSStringEncoding)encoding error:(NSError **)anError;
-- (id) initWithContentsOfCSVFile:(NSString *)aCSVFile usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError;
-
-- (id) initWithCSVString:(NSString *)csvString encoding:(NSStringEncoding)encoding error:(NSError **)anError;
-
-- (void) parse;
-- (void) cancelParsing;
+- (void)parser:(CHCSVParser *)parser didFailWithError:(NSError *)error;
 
 @end
 
-@protocol CHCSVParserDelegate <NSObject>
+@interface CHCSVParser : NSObject
 
-- (void) parser:(CHCSVParser *)parser didStartDocument:(NSString *)csvFile;
-- (void) parser:(CHCSVParser *)parser didStartLine:(NSUInteger)lineNumber;
+@property (assign) id<CHCSVParserDelegate> delegate;
+@property (assign) BOOL recognizesBackslashesAsEscapes; // default is YES
+@property (assign) BOOL sanitizesFields; // default is NO
 
-- (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber;
+// designated initializer
+- (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter;
 
-- (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field;
+- (id)initWithCSVString:(NSString *)csv;
+- (id)initWithContentsOfCSVFile:(NSString *)csvFilePath;
 
-- (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile;
-
-- (void) parser:(CHCSVParser *)parser didFailWithError:(NSError *)error;
+- (void)parse;
+- (void)cancelParsing;
 
 @end
