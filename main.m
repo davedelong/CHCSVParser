@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "CHCSV.h"
-#import "Parser.h"
+#import "CHCSVParser.h"
 
 @interface Delegate : NSObject <CHCSVParserDelegate>
 @end
@@ -32,8 +31,10 @@ int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/Test.csv";
     file = @"/Users/dave/Downloads/test.csv";
-    Parser *newP = [[Parser alloc] initWithContentsOfCSVFile:file];
-    [newP setRecognizesBackslashesAsEscapes:NO];
+    NSArray *a = [NSArray arrayWithContentsOfCSVFile:file];
+    NSLog(@"%@", a);
+    CHCSVParser *newP = [[CHCSVParser alloc] initWithContentsOfCSVFile:file];
+//    [newP setRecognizesBackslashesAsEscapes:NO];
     [newP setSanitizesFields:YES];
     [newP parse];
     [newP release];
@@ -78,13 +79,12 @@ int main (int argc, const char * argv[]) {
 	NSLog(@"Beginning...");
 	NSStringEncoding encoding = 0;
     NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:file];
-    NSError *error = nil;
-	CHCSVParser * p = [[CHCSVParser alloc] initWithStream:stream usedEncoding:&encoding error:&error];
+	CHCSVParser * p = [[CHCSVParser alloc] initWithInputStream:stream usedEncoding:&encoding delimiter:','];
 	
 	NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
 	
 	Delegate * d = [[Delegate alloc] init];
-	[p setParserDelegate:d];
+	[p setDelegate:d];
 	
 	NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
 	[p parse];
@@ -95,7 +95,7 @@ int main (int argc, const char * argv[]) {
 	[d release];
     
     
-    NSArray *a = [NSArray arrayWithContentsOfCSVFile:file encoding:encoding error:nil];
+    a = [NSArray arrayWithContentsOfCSVFile:file];
     NSLog(@"%@", a);
     NSString *s = [a CSVString];
     NSLog(@"%@", s);

@@ -1,12 +1,31 @@
 //
 //  CHCSVParser.m
 //  CHCSVParser
-//
-//  Created by Dave DeLong on 9/22/12.
-//
-//
+/**
+ Copyright (c) 2010 Dave DeLong
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ **/
 
-#import "Parser.h"
+#import "CHCSVParser.h"
+
+NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 #define CHUNK_SIZE 512
 #define DOUBLE_QUOTE '"'
@@ -64,7 +83,8 @@
         _delimiter = delimiter;
         
         _nextIndex = 0;
-        _recognizesBackslashesAsEscapes = YES;
+        _recognizesComments = NO;
+        _recognizesBackslashesAsEscapes = NO;
         _sanitizesFields = NO;
         _sanitizedField = [[NSMutableString alloc] init];
         
@@ -139,7 +159,7 @@
     NSUInteger reloadPortion = stringLength / 3;
     if (reloadPortion < 10) { reloadPortion = 10; }
     
-    if (_nextIndex+reloadPortion >= stringLength && [_stream hasBytesAvailable]) {
+    if ([_stream hasBytesAvailable] && _nextIndex+reloadPortion >= stringLength) {
         // read more
         uint8_t buffer[CHUNK_SIZE];
         NSInteger readBytes = [_stream read:buffer maxLength:CHUNK_SIZE];
@@ -218,10 +238,10 @@
             break;
         }
     }    
-    [self _parseNewline];
+    BOOL followedByNewline = [self _parseNewline];
     [self _endRecord];
     
-    return (_error == nil);
+    return (followedByNewline && _error == nil);
 }
 
 - (BOOL)_parseNewline {
@@ -236,8 +256,11 @@
 }
 
 - (BOOL)_parseComment {
+    [self _advance]; // consume the octothorpe
+    
     NSCharacterSet *newlines = [NSCharacterSet newlineCharacterSet];
     
+    [self _beginComment];
     BOOL isBackslashEscaped = NO;
     while (1) {
         if (isBackslashEscaped == NO) {
@@ -256,6 +279,8 @@
             [self _advance];
         }
     }
+    [self _endComment];
+    
     return [self _parseNewline];
 }
 
@@ -350,7 +375,7 @@
     }
     if (next != '\0' && [[NSCharacterSet newlineCharacterSet] characterIsMember:next] == NO) {
         NSString *description = [NSString stringWithFormat:@"Unexpected delimiter. Expected '%C', but got '%C'", _delimiter, [self _peekCharacter]];
-        _error = [[NSError alloc] initWithDomain:@"com.davedelong.csv" code:1 userInfo:@{NSLocalizedDescriptionKey : description}];
+        _error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidFormat userInfo:@{NSLocalizedDescriptionKey : description}];
     }
     return NO;
 }
@@ -371,16 +396,16 @@
     if (_cancelled) { return; }
     
     _currentRecord++;
-    if ([_delegate respondsToSelector:@selector(parser:didBeginRecord:)]) {
-        [_delegate parser:self didBeginRecord:_currentRecord];
+    if ([_delegate respondsToSelector:@selector(parser:didBeginLine:)]) {
+        [_delegate parser:self didBeginLine:_currentRecord];
     }
 }
 
 - (void)_endRecord {
     if (_cancelled) { return; }
     
-    if ([_delegate respondsToSelector:@selector(parser:didEndRecord:)]) {
-        [_delegate parser:self didEndRecord:_currentRecord];
+    if ([_delegate respondsToSelector:@selector(parser:didEndLine:)]) {
+        [_delegate parser:self didEndLine:_currentRecord];
     }
 }
 
@@ -394,16 +419,35 @@
     if (_cancelled) { return; }
     
     _fieldRange.length = (_nextIndex - _fieldRange.location);
-    NSString *field = [_string substringWithRange:_fieldRange];
+    NSString *field = nil;
     
     if (_sanitizesFields) {
         field = [[_sanitizedField copy] autorelease];
+    } else {
+        field = [_string substringWithRange:_fieldRange];
     }
     
     if ([_delegate respondsToSelector:@selector(parser:didReadField:)]) {
         [_delegate parser:self didReadField:field];
-    } else {
-        NSLog(@"%@", field);
+    }
+    
+    [_string replaceCharactersInRange:NSMakeRange(0, NSMaxRange(_fieldRange)) withString:@""];
+    _nextIndex = 0;
+}
+
+- (void)_beginComment {
+    if (_cancelled) { return; }
+    
+    _fieldRange.location = _nextIndex;
+}
+
+- (void)_endComment {
+    if (_cancelled) { return; }
+    
+    _fieldRange.length = (_nextIndex - _fieldRange.location);
+    if ([_delegate respondsToSelector:@selector(parser:didReadComment:)]) {
+        NSString *comment = [_string substringWithRange:_fieldRange];
+        [_delegate parser:self didReadComment:comment];
     }
     
     [_string replaceCharactersInRange:NSMakeRange(0, NSMaxRange(_fieldRange)) withString:@""];
@@ -415,9 +459,239 @@
     
     if ([_delegate respondsToSelector:@selector(parser:didFailWithError:)]) {
         [_delegate parser:self didFailWithError:_error];
-    } else {
-        NSLog(@"error parsing: %@", _error);
     }
+}
+
+@end
+
+@implementation CHCSVWriter {
+    NSOutputStream *_stream;
+    NSStringEncoding _streamEncoding;
+    
+    NSData *_delimiter;
+    NSData *_bom;
+    NSCharacterSet *_illegalCharacters;
+    
+    NSUInteger _currentField;
+}
+
+- (instancetype)initForWritingToCSVFile:(NSString *)path {
+    NSOutputStream *stream = [NSOutputStream outputStreamToFileAtPath:path append:NO];
+    return [self initWithOutputStream:stream encoding:NSUTF8StringEncoding delimiter:COMMA];
+}
+
+- (instancetype)initWithOutputStream:(NSOutputStream *)stream encoding:(NSStringEncoding)encoding delimiter:(unichar)delimiter {
+    self = [super init];
+    if (self) {
+        _stream = [stream retain];
+        _streamEncoding = encoding;
+        
+        if ([_stream streamStatus] == NSStreamStatusNotOpen) {
+            [_stream open];
+        }
+        
+        NSData *a = [@"a" dataUsingEncoding:_streamEncoding];
+        NSData *aa = [@"aa" dataUsingEncoding:_streamEncoding];
+        if ([a length] * 2 != [aa length]) {
+            NSUInteger characterLength = [aa length] - [a length];
+            _bom = [[a subdataWithRange:NSMakeRange(0, [a length] - characterLength)] retain];
+            [self _writeData:_bom];
+        }
+        
+        NSString *delimiterString = [NSString stringWithFormat:@"%C", delimiter];
+        NSData *delimiterData = [delimiterString dataUsingEncoding:_streamEncoding];
+        if ([_bom length] > 0) {
+            _delimiter = [[delimiterData subdataWithRange:NSMakeRange([_bom length], [delimiterData length] - [_bom length])] retain];
+        } else {
+            _delimiter = [delimiterData retain];
+        }
+        
+        NSMutableCharacterSet *illegalCharacters = [[NSCharacterSet newlineCharacterSet] mutableCopy];
+        [illegalCharacters addCharactersInString:delimiterString];
+        [illegalCharacters addCharactersInString:@"\""];
+        _illegalCharacters = [illegalCharacters copy];
+        [illegalCharacters release];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [self closeStream];
+    
+    [_delimiter release];
+    [_bom release];
+    [_illegalCharacters release];
+    [super dealloc];
+}
+
+- (void)_writeData:(NSData *)data {
+    const void *bytes = [data bytes];
+    [_stream write:bytes maxLength:[data length]];
+}
+
+- (void)_writeString:(NSString *)string {
+    NSData *stringData = [string dataUsingEncoding:_streamEncoding];
+    if ([_bom length] > 0) {
+        stringData = [stringData subdataWithRange:NSMakeRange([_bom length], [stringData length] - [_bom length])];
+    }
+    [self _writeData:stringData];
+}
+
+- (void)_writeDelimiter {
+    [self _writeData:_delimiter];
+}
+
+- (void)writeField:(NSString *)field {
+    if (_currentField > 0) {
+        [self _writeDelimiter];
+    }
+    NSString *string = field;
+    if ([string rangeOfCharacterFromSet:_illegalCharacters].location != NSNotFound) {
+        // replace double quotes with double double quotes
+        string = [string stringByReplacingOccurrencesOfString:@"\"" withString:@"\"\""];
+        // surround in double quotes
+        string = [NSString stringWithFormat:@"\"%@\"", string];
+    }
+    [self _writeString:string];
+    _currentField++;
+}
+
+- (void)finishLine {
+    [self _writeString:@"\n"];
+    _currentField = 0;
+}
+
+- (void)_finishLineIfNecessary {
+    if (_currentField != 0) {
+        [self finishLine];
+    }
+}
+
+- (void)writeLineOfFields:(NSArray *)fields {
+    [self _finishLineIfNecessary];
+    
+    for (NSString *field in fields) {
+        [self writeField:field];
+    }
+    [self finishLine];
+}
+
+- (void)writeComment:(NSString *)comment {
+    [self _finishLineIfNecessary];
+    
+    NSArray *lines = [comment componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    for (NSString *line in lines) {
+        NSString *commented = [NSString stringWithFormat:@"#%@\n", line];
+        [self _writeString:commented];
+    }
+}
+
+- (void)closeStream {
+    [_stream close];
+    [_stream release], _stream = nil;
+}
+
+@end
+
+#pragma mark - Convenience Categories
+
+@interface _CHCSVAggregator : NSObject <CHCSVParserDelegate>
+
+@property (readonly) NSArray *lines;
+@property (readonly) NSError *error;
+
+@end
+
+@implementation _CHCSVAggregator {
+    NSMutableArray *_lines;
+    NSMutableArray *_currentLine;
+}
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [_lines release];
+    [_error release];
+    [super dealloc];
+}
+
+- (void)parserDidBeginDocument:(CHCSVParser *)parser {
+    _lines = [[NSMutableArray alloc] init];
+}
+
+- (void)parser:(CHCSVParser *)parser didBeginLine:(NSUInteger)recordNumber {
+    _currentLine = [[NSMutableArray alloc] init];
+}
+
+- (void)parser:(CHCSVParser *)parser didEndLine:(NSUInteger)recordNumber {
+    [_lines addObject:_currentLine];
+    [_currentLine release], _currentLine = nil;
+}
+
+- (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field {
+    [_currentLine addObject:field];
+}
+
+- (void)parser:(CHCSVParser *)parser didFailWithError:(NSError *)error {
+    _error = [error retain];
+    [_lines release], _lines = nil;
+}
+
+@end
+
+@implementation NSArray (CHCSVAdditions)
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath {
+    NSParameterAssert(csvFilePath);
+    _CHCSVAggregator *aggregator = [[_CHCSVAggregator alloc] init];
+    CHCSVParser *parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFilePath];
+    [parser setDelegate:aggregator];
+    [parser parse];
+    [parser release];
+    
+    NSArray *final = [[[aggregator lines] retain] autorelease];
+    [aggregator release];
+    
+    return final;
+}
+
+- (NSString *)CSVString {
+    NSOutputStream *output = [NSOutputStream outputStreamToMemory];
+    CHCSVWriter *writer = [[CHCSVWriter alloc] initWithOutputStream:output encoding:NSUTF8StringEncoding delimiter:COMMA];
+    for (id object in self) {
+        if ([object conformsToProtocol:@protocol(NSFastEnumeration)]) {
+            [writer writeLineOfFields:object];
+        }
+    }
+    [writer closeStream];
+    [writer release];
+    
+    NSData *buffer = [output propertyForKey:NSStreamDataWrittenToMemoryStreamKey];
+    NSString *string = [[NSString alloc] initWithData:buffer encoding:NSUTF8StringEncoding];
+    return [string autorelease];
+}
+
+@end
+
+@implementation NSString (CHCSVAdditions)
+
+- (NSArray *)CSVComponents {
+    _CHCSVAggregator *aggregator = [[_CHCSVAggregator alloc] init];
+    CHCSVParser *parser = [[CHCSVParser alloc] initWithCSVString:self];
+    [parser setDelegate:aggregator];
+    [parser parse];
+    [parser release];
+    
+    NSArray *final = [[[aggregator lines] retain] autorelease];
+    [aggregator release];
+    
+    return final;
 }
 
 @end
