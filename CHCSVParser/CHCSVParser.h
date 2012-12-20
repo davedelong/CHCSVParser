@@ -2,7 +2,7 @@
 //  CHCSVParser.h
 //  CHCSVParser
 /**
- Copyright (c) 2010 Dave DeLong
+ Copyright (c) 2012 Dave DeLong
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ typedef NSInteger CHCSVErrorCode;
 - (void)writeField:(NSString *)field;
 - (void)finishLine;
 
-- (void)writeLineOfFields:(NSArray *)fields;
+- (void)writeLineOfFields:(id<NSFastEnumeration>)fields;
 
 - (void)writeComment:(NSString *)comment;
 

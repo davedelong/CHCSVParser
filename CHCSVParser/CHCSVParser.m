@@ -2,7 +2,7 @@
 //  CHCSVParser.m
 //  CHCSVParser
 /**
- Copyright (c) 2010 Dave DeLong
+ Copyright (c) 2012 Dave DeLong
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -561,11 +561,11 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     [self _writeData:_delimiter];
 }
 
-- (void)writeField:(NSString *)field {
+- (void)writeField:(id)field {
     if (_currentField > 0) {
         [self _writeDelimiter];
     }
-    NSString *string = field;
+    NSString *string = field ? [field description] : @"";
     if ([string rangeOfCharacterFromSet:_illegalCharacters].location != NSNotFound) {
         // replace double quotes with double double quotes
         string = [string stringByReplacingOccurrencesOfString:@"\"" withString:@"\"\""];
@@ -587,10 +587,10 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     }
 }
 
-- (void)writeLineOfFields:(NSArray *)fields {
+- (void)writeLineOfFields:(id<NSFastEnumeration>)fields {
     [self _finishLineIfNecessary];
     
-    for (NSString *field in fields) {
+    for (id field in fields) {
         [self writeField:field];
     }
     [self finishLine];
