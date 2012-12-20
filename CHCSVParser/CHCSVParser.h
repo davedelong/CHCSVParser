@@ -43,7 +43,7 @@ typedef NSInteger CHCSVErrorCode;
 - (void)parser:(CHCSVParser *)parser didBeginLine:(NSUInteger)recordNumber;
 - (void)parser:(CHCSVParser *)parser didEndLine:(NSUInteger)recordNumber;
 
-- (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field;
+- (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field atIndex:(NSInteger)fieldIndex;
 - (void)parser:(CHCSVParser *)parser didReadComment:(NSString *)comment;
 
 - (void)parser:(CHCSVParser *)parser didFailWithError:(NSError *)error;

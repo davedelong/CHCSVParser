@@ -58,6 +58,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     NSInteger _nextIndex;
     
+    NSInteger _fieldIndex;
     NSRange _fieldRange;
     NSMutableString *_sanitizedField;
     
@@ -413,6 +414,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 - (void)_beginRecord {
     if (_cancelled) { return; }
     
+    _fieldIndex = 0;
     _currentRecord++;
     if ([_delegate respondsToSelector:@selector(parser:didBeginLine:)]) {
         [_delegate parser:self didBeginLine:_currentRecord];
@@ -445,12 +447,13 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         field = [_string substringWithRange:_fieldRange];
     }
     
-    if ([_delegate respondsToSelector:@selector(parser:didReadField:)]) {
-        [_delegate parser:self didReadField:field];
+    if ([_delegate respondsToSelector:@selector(parser:didReadField:atIndex:)]) {
+        [_delegate parser:self didReadField:field atIndex:_fieldIndex];
     }
     
     [_string replaceCharactersInRange:NSMakeRange(0, NSMaxRange(_fieldRange)) withString:@""];
     _nextIndex = 0;
+    _fieldIndex++;
 }
 
 - (void)_beginComment {
@@ -658,7 +661,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     _currentLine = nil;
 }
 
-- (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field {
+- (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field atIndex:(NSInteger)fieldIndex {
     [_currentLine addObject:field];
 }
 
