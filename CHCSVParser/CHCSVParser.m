@@ -402,7 +402,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         return YES;
     }
     if (next != '\0' && [[NSCharacterSet newlineCharacterSet] characterIsMember:next] == NO) {
-        NSString *description = [NSString stringWithFormat:@"Unexpected delimiter. Expected '%C', but got '%C'", _delimiter, [self _peekCharacter]];
+        NSString *description = [NSString stringWithFormat:@"Unexpected delimiter. Expected '%C' (0x%X), but got '%C' (0x%X)", _delimiter, _delimiter, [self _peekCharacter], [self _peekCharacter]];
         _error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidFormat userInfo:@{NSLocalizedDescriptionKey : description}];
     }
     return NO;
