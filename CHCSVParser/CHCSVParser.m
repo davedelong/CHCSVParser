@@ -146,18 +146,24 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     NSUInteger bufferLength = [_stringBuffer length];
     if (bufferLength > 0) {
         NSStringEncoding encoding = NSUTF8StringEncoding;
+        NSInteger bomLength = 0;
         
         UInt8* bytes = (UInt8*)[_stringBuffer bytes];
         if (bufferLength > 3 && bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0xFE && bytes[3] == 0xFF) {
             encoding = NSUTF32BigEndianStringEncoding;
+            bomLength = 4;
         } else if (bufferLength > 3 && bytes[0] == 0xFF && bytes[1] == 0xFE && bytes[2] == 0x00 && bytes[3] == 0x00) {
             encoding = NSUTF32LittleEndianStringEncoding;
+            bomLength = 4;
         } else if (bufferLength > 1 && bytes[0] == 0xFE && bytes[1] == 0xFF) {
             encoding = NSUTF16BigEndianStringEncoding;
+            bomLength = 2;
         } else if (bufferLength > 1 && bytes[0] == 0xFF && bytes[1] == 0xFE) {
             encoding = NSUTF16LittleEndianStringEncoding;
+            bomLength = 2;
         } else if (bufferLength > 2 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) {
             encoding = NSUTF8StringEncoding;
+            bomLength = 3;
         } else {
             NSString *bufferAsUTF8 = [[NSString alloc] initWithData:_stringBuffer encoding:NSUTF8StringEncoding];
             if (bufferAsUTF8 != nil) {
@@ -169,6 +175,9 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
             }
         }
         
+        if (bomLength > 0) {
+            [_stringBuffer replaceBytesInRange:NSMakeRange(0, bomLength) withBytes:NULL length:0];
+        }
         _streamEncoding = encoding;
     }
 }
