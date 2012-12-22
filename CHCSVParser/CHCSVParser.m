@@ -253,7 +253,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 }
 
 - (BOOL)_parseRecord {
-    while ([self _peekCharacter] == OCTOTHORPE) {
+    while ([self _peekCharacter] == OCTOTHORPE && _recognizesComments) {
         [self _parseComment];
     }
     
