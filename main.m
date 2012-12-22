@@ -11,11 +11,16 @@
 - (void) parser:(CHCSVParser *)parser didStartLine:(NSUInteger)lineNumber {
 //	NSLog(@"Starting line: %lu", lineNumber);
 }
-- (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field {
-//	NSLog(@"   field: %@", field);
+- (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field atIndex:(NSInteger)fieldIndex {
+    if (fieldIndex == 0) {
+        printf("\t%s", [field UTF8String]);
+    } else {
+        printf(",%s", [field UTF8String]);
+    }
 }
 - (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber {
 //	NSLog(@"Ending line: %lu", lineNumber);
+    printf("\n");
 }
 - (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile {
 //	NSLog(@"parser ended: %@", csvFile);
@@ -30,12 +35,13 @@
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/Test.csv";
-    file = @"/Users/dave/Downloads/test.csv";
     NSArray *a = [NSArray arrayWithContentsOfCSVFile:file];
     NSLog(@"%@", a);
     CHCSVParser *newP = [[CHCSVParser alloc] initWithContentsOfCSVFile:file];
+//    [newP setDelegate:[[[Delegate alloc] init] autorelease]];
 //    [newP setRecognizesBackslashesAsEscapes:NO];
-    [newP setSanitizesFields:YES];
+//    [newP setSanitizesFields:YES];
+    
     [newP parse];
     [newP release];
     

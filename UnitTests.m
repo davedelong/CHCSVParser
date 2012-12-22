@@ -38,23 +38,24 @@
 
 - (NSArray *) expectedFields {
 	return @[
-            @[@"This",@"is",@"a",@"simple",@"line"],
-            @[@"This",@"is",@"a",@"quoted",@"line"],
-            @[@"This",@"is",@"a",@"mixed",@"line"],
-            @[@"This",@"has",@"a\nmultiline\nfield"],
-            @[@"This",@"has",@"single",@"apostrophes",@"ma'am"],
-            @[@"#This",@"line",@"should",@"not",@"be",@"ignored"],
-            @[@"This",@"has",@"\"escaped\"",@"quotes"],
-            @[@"This",@"has",@"\"escaped\"",@"quotes"],
-            @[@"This",@"has",@"empty",@"fields",@"",@"",@""],
-            @[@"This",@"has",@"escaped",@"escapes\\"],
-            @[@"This",@"has",@"escaped",@"commas,"],
-            @[@"This",@"has",@"quoted",@"commas,"],
-            @[@"This",@"has",@"empty",@"quoted",@"fields",@"",@""],
-            @[@"This",@"has",@"mixed",@"\"escaped quotes\""],
-            @[@"This",@"is",@"the",@"last",@"line"],
-            @[@""]
-			];
+    @[@"This",@"is",@"a",@"simple",@"line"],
+    @[@"This",@"is",@"a",@"quoted",@"line"],
+    @[@"This",@"is",@"a",@"mixed",@"line"],
+    @[@"This",@"has",@"a\nmultiline\nfield"],
+    @[@"This",@"has",@"single",@"apostrophes",@"ma'am"],
+    @[@"#This",@"line",@"should",@"not",@"be",@"ignored"],
+    @[@"This",@"has",@"\"escaped\"",@"quotes"],
+    @[@"This",@"has",@"\"escaped\"",@"quotes"],
+    @[@"This",@"has",@"empty",@"fields",@"",@"",@""],
+    @[@"This",@"has",@"escaped",@"escapes\\"],
+    @[@"This",@"has",@"escaped",@"commas,"],
+    @[@"This",@"has",@"quoted",@"commas,"],
+    @[@"This",@"has",@"empty",@"quoted",@"fields",@"",@""],
+    @[@"This",@"has",@"mixed",@"\"escaped quotes\""],
+    @[@"   This   ",@"   line   ",@"   has   ",@"   significant   ",@"   whitespace   "],
+    @[@"This",@"is",@"the",@"last",@"line"],
+    @[@""]
+    ];
 }
 
 - (void) testCSV {
@@ -78,7 +79,7 @@
 	NSString *tempFileName = [NSString stringWithFormat:@"%d-test.csv", arc4random()];
 	NSString *tempFile = [NSTemporaryDirectory() stringByAppendingPathComponent:tempFileName];
 	NSLog(@"Writing to file: %@", tempFile);
-
+    
     NSOutputStream *output = [NSOutputStream outputStreamToFileAtPath:tempFile append:NO];
     CHCSVWriter *writer = [[CHCSVWriter alloc] initWithOutputStream:output encoding:NSUTF8StringEncoding delimiter:','];
     for (NSArray *line in expectedFields) {

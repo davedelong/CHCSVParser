@@ -101,8 +101,8 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         
         _nextIndex = 0;
         _recognizesComments = NO;
-        _recognizesBackslashesAsEscapes = NO;
-        _sanitizesFields = NO;
+        _recognizesBackslashesAsEscapes = YES;
+        _sanitizesFields = YES;
         _sanitizedField = [[NSMutableString alloc] init];
         
         NSMutableCharacterSet *m = [[NSCharacterSet newlineCharacterSet] mutableCopy];
@@ -312,19 +312,40 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     return [self _parseNewline];
 }
 
-- (BOOL)_parseField {
-    if (_cancelled) { return NO; }
-    
-    [_sanitizedField setString:@""];
-    if ([self _peekCharacter] == DOUBLE_QUOTE) {
-        return [self _parseEscapedField];
-    } else {
-        return [self _parseUnescapedField];
+- (void)_parseFieldWhitespace {
+    NSCharacterSet *whitespace = [NSCharacterSet whitespaceCharacterSet];
+    while ([self _peekCharacter] != '\0' &&
+           [whitespace characterIsMember:[self _peekCharacter]] &&
+           [self _peekCharacter] != _delimiter) {
+        // if we're sanitizing fields, then these characters would be stripped (because they're not appended to _sanitizedField)
+        // if we're not sanitizing fields, then they'll be included in the -substringWithRange:
+        [self _advance];
     }
 }
 
-- (BOOL)_parseEscapedField {
+- (BOOL)_parseField {
+    if (_cancelled) { return NO; }
+    
+    BOOL parsedField = NO;
     [self _beginField];
+    // consume leading whitespace
+    [self _parseFieldWhitespace];
+    
+    if ([self _peekCharacter] == DOUBLE_QUOTE) {
+        parsedField = [self _parseEscapedField];
+    } else {
+        parsedField = [self _parseUnescapedField];
+    }
+    
+    if (parsedField) {
+        // consume trailing whitespace
+        [self _parseFieldWhitespace];
+        [self _endField];
+    }
+    return parsedField;
+}
+
+- (BOOL)_parseEscapedField {
     [self _advance]; // consume the opening double quote
     
     NSCharacterSet *newlines = [NSCharacterSet newlineCharacterSet];
@@ -359,7 +380,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     if ([self _peekCharacter] == DOUBLE_QUOTE) {
         [self _advance];
-        [self _endField];
         return YES;
     }
     
@@ -367,7 +387,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 }
 
 - (BOOL)_parseUnescapedField {
-    [self _beginField];
     
     BOOL isBackslashEscaped = NO;
     while (1) {
@@ -391,7 +410,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         }
     }
     
-    [self _endField];
     return YES;
 }
 
@@ -441,6 +459,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 - (void)_beginField {
     if (_cancelled) { return; }
     
+    [_sanitizedField setString:@""];
     _fieldRange.location = _nextIndex;
 }
 
@@ -452,6 +471,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     if (_sanitizesFields) {
         field = CHCSV_AUTORELEASE([_sanitizedField copy]);
+        field = [field stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     } else {
         field = [_string substringWithRange:_fieldRange];
     }
