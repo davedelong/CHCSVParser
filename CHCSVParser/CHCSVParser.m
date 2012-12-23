@@ -155,6 +155,9 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         } else if (bufferLength > 3 && bytes[0] == 0xFF && bytes[1] == 0xFE && bytes[2] == 0x00 && bytes[3] == 0x00) {
             encoding = NSUTF32LittleEndianStringEncoding;
             bomLength = 4;
+        } else if (bufferLength > 3 && bytes[0] == 0x1B && bytes[1] == 0x24 && bytes[2] == 0x29 && bytes[3] == 0x43) {
+            encoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingISO_2022_KR);
+            bomLength = 4;
         } else if (bufferLength > 1 && bytes[0] == 0xFE && bytes[1] == 0xFF) {
             encoding = NSUTF16BigEndianStringEncoding;
             bomLength = 2;

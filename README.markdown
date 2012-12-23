@@ -54,13 +54,13 @@ There are a couple of category methods on `NSArray` and `NSString` to simplify t
 ##Data Encoding
 `CHCSVParser` relies on knowing the encoding of the CSV file.  It should work with pretty much any kind of file encoding, if you can provide what that encoding is.  If you do not know the encoding of the file, then `CHCSVParser` can make a naïve guess.  `CHCSVParser` will try to guess the encoding of the file from among these options:
 
- - `NSMacOSRomanStringEncoding` (the default/fallback encoding)
- - `NSUTF8StringEncoding`
- - `NSUTF16BigEndianStringEncoding`
- - `NSUTF16LittleEndianStringEncoding`
- - `NSUTF32BigEndianStringEncoding`
- - `NSUTF32LittleEndianStringEncoding`
- 
+ - MacOS Roman (`NSMacOSRomanStringEncoding`; the default/fallback encoding)
+ - UTF-8 (`NSUTF8StringEncoding`)
+ - UTF-16BE (`NSUTF16BigEndianStringEncoding`)
+ - UTF-16LE (`NSUTF16LittleEndianStringEncoding`)
+ - UTF-32BE (`NSUTF32BigEndianStringEncoding`)
+ - UTF-32LE (`NSUTF32LittleEndianStringEncoding`)
+ - ISO 2022-KR (`kCFStringEncodingISO_2022_KR`)
  
 ##Performance
 `CHCSVParser` is conscious of low-memory environments, such as the iPhone or iPad.  It can safely parse very large CSV files, because it only loads portions of the file into memory at a single time.
@@ -72,7 +72,7 @@ There are a couple of category methods on `NSArray` and `NSString` to simplify t
 `CHCSVParser` uses code to discover file encoding that was provided by [Rainer Brockerhoff][2].
 
   [1]: http://davedelong.com
-  [2]: http://brockerhoff.net/
+  [2]: http://brockerhoff.net
   
 ##License
 
