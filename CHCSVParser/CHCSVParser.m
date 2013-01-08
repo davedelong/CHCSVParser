@@ -580,8 +580,10 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 }
 
 - (void)_writeData:(NSData *)data {
-    const void *bytes = [data bytes];
-    [_stream write:bytes maxLength:[data length]];
+    if ([data length] > 0) {
+        const void *bytes = [data bytes];
+        [_stream write:bytes maxLength:[data length]];
+    }
 }
 
 - (void)_writeString:(NSString *)string {
