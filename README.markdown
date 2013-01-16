@@ -9,7 +9,7 @@
 
 ##Usage
 
-In order to use `CHCSVParser`, you'll need to include the following three files in your project:
+In order to use `CHCSVParser`, you'll need to include the following two files in your project:
 
 - `CHCSVParser.h`
 - `CHCSVParser.m`
