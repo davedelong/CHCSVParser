@@ -85,9 +85,9 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 - (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter {
     NSParameterAssert(stream);
     NSParameterAssert(delimiter);
-    NSAssert([[NSCharacterSet newlineCharacterSet] characterIsMember:_delimiter] == NO, @"The field delimiter may not be a newline");
-    NSAssert(_delimiter != DOUBLE_QUOTE, @"The field delimiter may not be a double quote");
-    NSAssert(_delimiter != OCTOTHORPE, @"The field delimiter may not be an octothorpe");
+    NSAssert([[NSCharacterSet newlineCharacterSet] characterIsMember:delimiter] == NO, @"The field delimiter may not be a newline");
+    NSAssert(delimiter != DOUBLE_QUOTE, @"The field delimiter may not be a double quote");
+    NSAssert(delimiter != OCTOTHORPE, @"The field delimiter may not be an octothorpe");
     
     self = [super init];
     if (self) {
