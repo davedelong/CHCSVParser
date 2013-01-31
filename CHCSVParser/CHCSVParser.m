@@ -669,16 +669,9 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     NSMutableArray *_currentLine;
 }
 
-- (id)init {
-    self = [super init];
-    if (self) {
-        
-    }
-    return self;
-}
-
 #if !CHCSV_HAS_ARC
 - (void)dealloc {
+    [_currentLine release];
     [_lines release];
     [_error release];
     [super dealloc];
