@@ -38,7 +38,7 @@ A `CHCSVWriter` has several methods for constructing CSV files:
 
 `-finishLine` is used to terminate the current CSV line.  If you do not invoke `-finishLine`, then all of your CSV fields will be on a single line.
 
-`-writeLineOfFields:` accepts an array of objects, sends each one to `-writeField:`, and then invokes `-writeLine`.
+`-writeLineOfFields:` accepts an array of objects, sends each one to `-writeField:`, and then invokes `-finishLine`.
 
 `-writeComment:` accepts a string and writes it out to the file as a CSV-style comment.
 
