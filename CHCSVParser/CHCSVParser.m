@@ -191,26 +191,30 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     if (reloadPortion < 10) { reloadPortion = 10; }
     
     if ([_stream hasBytesAvailable] && _nextIndex+reloadPortion >= stringLength) {
-        // read more
+        // read more from the stream
         uint8_t buffer[CHUNK_SIZE];
         NSInteger readBytes = [_stream read:buffer maxLength:CHUNK_SIZE];
         if (readBytes > 0) {
+            // append it to the buffer
             [_stringBuffer appendBytes:buffer length:readBytes];
-            
-            NSUInteger readLength = [_stringBuffer length];
-            while (readLength > 0) {
-                NSString *readString = [[NSString alloc] initWithBytes:[_stringBuffer bytes] length:readLength encoding:_streamEncoding];
-                if (readString == nil) {
-                    readLength--;
-                } else {
-                    [_string appendString:readString];
-                    CHCSV_RELEASE(readString);
-                    break;
-                }
-            };
-            
-            [_stringBuffer replaceBytesInRange:NSMakeRange(0, readLength) withBytes:NULL length:0];
         }
+    }
+    
+    if ([_stringBuffer length] > 0) {
+        // try to turn the next portion of the buffer into a string
+        NSUInteger readLength = [_stringBuffer length];
+        while (readLength > 0) {
+            NSString *readString = [[NSString alloc] initWithBytes:[_stringBuffer bytes] length:readLength encoding:_streamEncoding];
+            if (readString == nil) {
+                readLength--;
+            } else {
+                [_string appendString:readString];
+                CHCSV_RELEASE(readString);
+                break;
+            }
+        };
+        
+        [_stringBuffer replaceBytesInRange:NSMakeRange(0, readLength) withBytes:NULL length:0];
     }
 }
 
