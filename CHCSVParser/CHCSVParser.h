@@ -86,9 +86,16 @@ typedef NSInteger CHCSVErrorCode;
 
 #pragma mark - Convenience Categories
 
+typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
+    CHCSVParserOptionsRecognizesBackslashesAsEscapes = 1 << 0,
+    CHCSVParserOptionsSanitizesFields = 1 << 1,
+    CHCSVParserOptionsRecognizesComments = 1 << 2
+};
+
 @interface NSArray (CHCSVAdditions)
 
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath;
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options;
 - (NSString *)CSVString;
 
 @end
@@ -96,5 +103,6 @@ typedef NSInteger CHCSVErrorCode;
 @interface NSString (CHCSVAdditions)
 
 - (NSArray *)CSVComponents;
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options;
 
 @end

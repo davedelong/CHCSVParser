@@ -34,8 +34,9 @@
 
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/Test.csv";
-    NSArray *a = [NSArray arrayWithContentsOfCSVFile:file];
+    NSString *file = @(__FILE__);
+    file = [[file stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"Test.csv"];
+    NSArray *a = [NSArray arrayWithContentsOfCSVFile:file options:CHCSVParserOptionsRecognizesBackslashesAsEscapes | CHCSVParserOptionsSanitizesFields | CHCSVParserOptionsRecognizesComments];
     NSLog(@"%@", a);
     CHCSVParser *newP = [[CHCSVParser alloc] initWithContentsOfCSVFile:file];
 //    [newP setDelegate:[[[Delegate alloc] init] autorelease]];

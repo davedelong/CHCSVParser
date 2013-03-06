@@ -101,8 +101,8 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         
         _nextIndex = 0;
         _recognizesComments = NO;
-        _recognizesBackslashesAsEscapes = YES;
-        _sanitizesFields = YES;
+        _recognizesBackslashesAsEscapes = NO;
+        _sanitizesFields = NO;
         _sanitizedField = [[NSMutableString alloc] init];
         
         NSMutableCharacterSet *m = [[NSCharacterSet newlineCharacterSet] mutableCopy];
@@ -705,10 +705,19 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 @implementation NSArray (CHCSVAdditions)
 
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath {
+    return [self arrayWithContentsOfCSVFile:csvFilePath options:0];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options{
     NSParameterAssert(csvFilePath);
     _CHCSVAggregator *aggregator = [[_CHCSVAggregator alloc] init];
     CHCSVParser *parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFilePath];
     [parser setDelegate:aggregator];
+    
+    [parser setRecognizesBackslashesAsEscapes:!!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes)];
+    [parser setSanitizesFields:!!(options & CHCSVParserOptionsSanitizesFields)];
+    [parser setRecognizesComments:!!(options & CHCSVParserOptionsRecognizesComments)];
+    
     [parser parse];
     CHCSV_RELEASE(parser);
     
@@ -739,9 +748,18 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 @implementation NSString (CHCSVAdditions)
 
 - (NSArray *)CSVComponents {
+    return [self CSVComponentsWithOptions:0];
+}
+
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options {
     _CHCSVAggregator *aggregator = [[_CHCSVAggregator alloc] init];
     CHCSVParser *parser = [[CHCSVParser alloc] initWithCSVString:self];
     [parser setDelegate:aggregator];
+    
+    [parser setRecognizesBackslashesAsEscapes:!!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes)];
+    [parser setSanitizesFields:!!(options & CHCSVParserOptionsSanitizesFields)];
+    [parser setRecognizesComments:!!(options & CHCSVParserOptionsRecognizesComments)];
+    
     [parser parse];
     CHCSV_RELEASE(parser);
     
