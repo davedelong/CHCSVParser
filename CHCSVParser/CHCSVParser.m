@@ -49,6 +49,10 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 #endif
 
+@interface CHCSVParser ()
+@property (assign) NSUInteger totalBytesRead;
+@end
+
 @implementation CHCSVParser {
     NSInputStream *_stream;
     NSStringEncoding _streamEncoding;
@@ -142,6 +146,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     uint8_t bytes[CHUNK_SIZE];
     NSUInteger readLength = [_stream read:bytes maxLength:CHUNK_SIZE];
     [_stringBuffer appendBytes:bytes length:readLength];
+    [self setTotalBytesRead:[self totalBytesRead] + readLength];
     
     if (readLength > 0) {
         NSStringEncoding encoding = NSUTF8StringEncoding;
@@ -195,6 +200,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         if (readBytes > 0) {
             // append it to the buffer
             [_stringBuffer appendBytes:buffer length:readBytes];
+            [self setTotalBytesRead:[self totalBytesRead] + readBytes];
         }
     }
     
