@@ -57,6 +57,8 @@ typedef NSInteger CHCSVErrorCode;
 @property (assign) BOOL sanitizesFields; // default is NO
 @property (assign) BOOL recognizesComments; // default is NO
 
+@property (assign) long long totalBytesRead;
+
 // designated initializer
 - (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter;
 
