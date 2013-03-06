@@ -141,6 +141,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 - (void)_sniffEncoding {
     uint8_t bytes[CHUNK_SIZE];
     NSUInteger readLength = [_stream read:bytes maxLength:CHUNK_SIZE];
+    self.totalBytesRead += readLength;
     [_stringBuffer appendBytes:bytes length:readLength];
     
     NSUInteger bufferLength = [_stringBuffer length];
@@ -197,6 +198,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         if (readBytes > 0) {
             // append it to the buffer
             [_stringBuffer appendBytes:buffer length:readBytes];
+            self.totalBytesRead += readBytes;
         }
     }
     
