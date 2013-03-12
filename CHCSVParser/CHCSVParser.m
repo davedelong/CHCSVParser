@@ -97,24 +97,24 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     if (self) {
         _stream = CHCSV_RETAIN(stream);
         [_stream open];
-        
+
         _stringBuffer = [[NSMutableData alloc] init];
         _string = [[NSMutableString alloc] init];
-        
+
         _delimiter = delimiter;
-        
+
         _nextIndex = 0;
         _recognizesComments = NO;
         _recognizesBackslashesAsEscapes = NO;
         _sanitizesFields = NO;
         _sanitizedField = [[NSMutableString alloc] init];
-        
+
         NSMutableCharacterSet *m = [[NSCharacterSet newlineCharacterSet] mutableCopy];
         NSString *invalid = [NSString stringWithFormat:@"%c%C", DOUBLE_QUOTE, _delimiter];
         [m addCharactersInString:invalid];
         _validFieldCharacters = CHCSV_RETAIN([m invertedSet]);
         CHCSV_RELEASE(m);
-        
+
         if (encoding == NULL || *encoding == 0) {
             // we need to determine the encoding
             [self _sniffEncoding];
@@ -371,7 +371,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
                 [self _advance]; // consume the backslash
             } else if ([_validFieldCharacters characterIsMember:next] ||
                        [newlines characterIsMember:next] ||
-                       next == COMMA) {
+                       next == _delimiter) {
                 [_sanitizedField appendFormat:@"%C", next];
                 [self _advance];
             } else if (next == DOUBLE_QUOTE && [self _peekPeekCharacter] == DOUBLE_QUOTE) {
