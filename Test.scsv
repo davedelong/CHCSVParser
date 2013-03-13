@@ -1,0 +1,21 @@
+This;is;a;simple;line
+"This";"is";"a";"quoted";"line"
+"This";is;"a";mixed;"line"
+"This";has;"a
+multiline
+field"
+"This";has;single;semicolon;ma'am
+#this;line;should;be;ignored
+\#This;line;should;not;be;ignored
+This;has;"""escaped""";quotes
+This;has;\"escaped\";quotes
+This;has;empty;fields;;;
+This;has;escaped;escapes\\
+This;has;escaped;commas\;
+This;has;quoted;"commas;"
+This;has;empty;quoted;fields;"";""
+This;has;mixed;"""escaped quotes\""
+#empty line
+   This   ;   line   ;   has   ;   significant   ;   whitespace   
+This;is;the;last;line
+;
