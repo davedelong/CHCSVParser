@@ -4,7 +4,7 @@ Pod::Spec.new do |spec|
     spec.homepage     = 'https://github.com/davedelong/CHCSVParser'
     spec.summary      = 'A proper CSV parser for Objective-C.'
     spec.license      = 'MIT (LICENSE)'
-    spec.version      = '2.0.4'
-    spec.source       = { :git => 'https://github.com/davedelong/CHCSVParser', :tag => '2.0.4' }
+    spec.version      = '2.0.5'
+    spec.source       = { :git => 'https://github.com/davedelong/CHCSVParser.git', :tag => '2.0.5' }
     spec.source_files = 'CHCSVParser/CHCSVParser.{h,m}'
 end
