@@ -61,7 +61,7 @@
 - (void) testCSV {
 	NSString *file = [[NSBundle bundleForClass:[self class]] pathForResource:@"Test" ofType:@"csv"];
 	
-	NSArray *fields = [NSArray arrayWithContentsOfCSVFile:file];
+	NSArray *fields = [NSArray arrayWithContentsOfCSVFile:file options:CHCSVParserOptionsRecognizesBackslashesAsEscapes];
 	NSLog(@"read: %@", fields);
 	
 	NSArray *expectedFields = [self expectedFields];
