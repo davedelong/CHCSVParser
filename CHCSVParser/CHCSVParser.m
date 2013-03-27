@@ -339,8 +339,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     BOOL parsedField = NO;
     [self _beginField];
-    // consume leading whitespace
-    [self _parseFieldWhitespace];
     
     if ([self _peekCharacter] == DOUBLE_QUOTE) {
         parsedField = [self _parseEscapedField];
@@ -349,8 +347,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     }
     
     if (parsedField) {
-        // consume trailing whitespace
-        [self _parseFieldWhitespace];
         [self _endField];
     }
     return parsedField;
@@ -482,7 +478,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     if (_sanitizesFields) {
         field = CHCSV_AUTORELEASE([_sanitizedField copy]);
-        field = [field stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     } else {
         field = [_string substringWithRange:_fieldRange];
     }
