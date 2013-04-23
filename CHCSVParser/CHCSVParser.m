@@ -143,13 +143,14 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 #pragma mark -
 
 - (void)_sniffEncoding {
-    uint8_t bytes[CHUNK_SIZE];
-    NSUInteger readLength = [_stream read:bytes maxLength:CHUNK_SIZE];
-    [_stringBuffer appendBytes:bytes length:readLength];
-    [self setTotalBytesRead:[self totalBytesRead] + readLength];
+    NSStringEncoding encoding = NSUTF8StringEncoding;
     
-    if (readLength > 0) {
-        NSStringEncoding encoding = NSUTF8StringEncoding;
+    uint8_t bytes[CHUNK_SIZE];
+    NSInteger readLength = [_stream read:bytes maxLength:CHUNK_SIZE];
+    if (readLength > 0 && readLength <= CHUNK_SIZE) {
+        [_stringBuffer appendBytes:bytes length:readLength];
+        [self setTotalBytesRead:[self totalBytesRead] + readLength];
+        
         NSInteger bomLength = 0;
         
         if (readLength > 3 && bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0xFE && bytes[3] == 0xFF) {
@@ -184,8 +185,8 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         if (bomLength > 0) {
             [_stringBuffer replaceBytesInRange:NSMakeRange(0, bomLength) withBytes:NULL length:0];
         }
-        _streamEncoding = encoding;
     }
+    _streamEncoding = encoding;
 }
 
 - (void)_loadMoreIfNecessary {
