@@ -172,10 +172,17 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
             encoding = NSUTF8StringEncoding;
             bomLength = 3;
         } else {
-            NSString *bufferAsUTF8 = [[NSString alloc] initWithData:_stringBuffer encoding:NSUTF8StringEncoding];
+            NSString *bufferAsUTF8 = nil;
+            
+            for (NSInteger triedLength = 0; triedLength < 4; ++triedLength) {
+                bufferAsUTF8 = CHCSV_AUTORELEASE([[NSString alloc] initWithBytes:bytes length:readLength-triedLength encoding:NSUTF8StringEncoding]);
+                if (bufferAsUTF8 != nil) {
+                    break;
+                }
+            }
+            
             if (bufferAsUTF8 != nil) {
                 encoding = NSUTF8StringEncoding;
-                CHCSV_RELEASE(bufferAsUTF8);
             } else {
                 NSLog(@"unable to determine stream encoding; assuming MacOSRoman");
                 encoding = NSMacOSRomanStringEncoding;
