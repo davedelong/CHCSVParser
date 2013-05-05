@@ -32,6 +32,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 #define COMMA ','
 #define OCTOTHORPE '#'
 #define BACKSLASH '\\'
+#define NULLCHAR '\0'
 
 #if __has_feature(objc_arc)
 
@@ -238,7 +239,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 - (unichar)_peekCharacter {
     [self _loadMoreIfNecessary];
-    if (_nextIndex >= [_string length]) { return '\0'; }
+    if (_nextIndex >= [_string length]) { return NULLCHAR; }
     
     return [_string characterAtIndex:_nextIndex];
 }
@@ -246,7 +247,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 - (unichar)_peekPeekCharacter {
     [self _loadMoreIfNecessary];
     NSUInteger nextNextIndex = _nextIndex+1;
-    if (nextNextIndex >= [_string length]) { return '\0'; }
+    if (nextNextIndex >= [_string length]) { return NULLCHAR; }
     
     return [_string characterAtIndex:nextNextIndex];
 }
@@ -289,7 +290,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     BOOL followedByNewline = [self _parseNewline];
     [self _endRecord];
     
-    return (followedByNewline && _error == nil);
+    return (followedByNewline && _error == nil && [self _peekCharacter] != NULLCHAR);
 }
 
 - (BOOL)_parseNewline {
@@ -334,7 +335,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 - (void)_parseFieldWhitespace {
     NSCharacterSet *whitespace = [NSCharacterSet whitespaceCharacterSet];
-    while ([self _peekCharacter] != '\0' &&
+    while ([self _peekCharacter] != NULLCHAR &&
            [whitespace characterIsMember:[self _peekCharacter]] &&
            [self _peekCharacter] != _delimiter) {
         // if we're sanitizing fields, then these characters would be stripped (because they're not appended to _sanitizedField)
@@ -380,7 +381,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     BOOL isBackslashEscaped = NO;
     while (1) {
         unichar next = [self _peekCharacter];
-        if (next == '\0') { break; }
+        if (next == NULLCHAR) { break; }
         
         if (isBackslashEscaped == NO) {
             if (next == BACKSLASH && _recognizesBackslashesAsEscapes) {
@@ -419,7 +420,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     BOOL isBackslashEscaped = NO;
     while (1) {
         unichar next = [self _peekCharacter];
-        if (next == '\0') { break; }
+        if (next == NULLCHAR) { break; }
         
         if (isBackslashEscaped == NO) {
             if (next == BACKSLASH && _recognizesBackslashesAsEscapes) {
@@ -447,7 +448,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         [self _advance];
         return YES;
     }
-    if (next != '\0' && [[NSCharacterSet newlineCharacterSet] characterIsMember:next] == NO) {
+    if (next != NULLCHAR && [[NSCharacterSet newlineCharacterSet] characterIsMember:next] == NO) {
         NSString *description = [NSString stringWithFormat:@"Unexpected delimiter. Expected '%C' (0x%X), but got '%C' (0x%X)", _delimiter, _delimiter, [self _peekCharacter], [self _peekCharacter]];
         _error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidFormat userInfo:@{NSLocalizedDescriptionKey : description}];
     }
