@@ -3,3 +3,5 @@ build
 **/*.pbxuser
 **/*.mode*
 *.xcodeproj/xcworkspace/xcuserdata/**
+.DS_Store
+xcuserdata
