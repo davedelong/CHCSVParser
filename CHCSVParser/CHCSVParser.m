@@ -417,6 +417,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 - (BOOL)_parseUnescapedField {
     
+    NSCharacterSet *newlines = [NSCharacterSet newlineCharacterSet];
     BOOL isBackslashEscaped = NO;
     while (1) {
         unichar next = [self _peekCharacter];
@@ -426,11 +427,11 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
             if (next == BACKSLASH && _recognizesBackslashesAsEscapes) {
                 isBackslashEscaped = YES;
                 [self _advance];
-            } else if ([_validFieldCharacters characterIsMember:next]) {
+            } else if ([newlines characterIsMember:next] == YES || next == _delimiter) {
+                break;
+            } else {
                 [_sanitizedField appendFormat:@"%C", next];
                 [self _advance];
-            } else {
-                break;
             }
         } else {
             isBackslashEscaped = NO;
