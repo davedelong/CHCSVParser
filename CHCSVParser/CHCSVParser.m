@@ -278,18 +278,20 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         [self _parseComment];
     }
     
-    [self _beginRecord];
-    while (1) {
-        if (![self _parseField]) {
-            break;
-        }
-        if (![self _parseDelimiter]) {
-            break;
-        }
-    }    
-    BOOL followedByNewline = [self _parseNewline];
-    [self _endRecord];
+    if ([self _peekCharacter] != NULLCHAR) {
+        [self _beginRecord];
+        while (1) {
+            if (![self _parseField]) {
+                break;
+            }
+            if (![self _parseDelimiter]) {
+                break;
+            }
+        }    
+        [self _endRecord];
+    }
     
+    BOOL followedByNewline = [self _parseNewline];
     return (followedByNewline && _error == nil && [self _peekCharacter] != NULLCHAR);
 }
 
@@ -317,7 +319,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
             if (next == BACKSLASH && _recognizesBackslashesAsEscapes) {
                 isBackslashEscaped = YES;
                 [self _advance];
-            } else if ([newlines characterIsMember:next] == NO) {
+            } else if ([newlines characterIsMember:next] == NO && next != NULLCHAR) {
                 [self _advance];
             } else {
                 // it's a newline

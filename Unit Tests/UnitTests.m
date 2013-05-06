@@ -36,6 +36,13 @@
     STAssertEqualObjects(parsed, expected, @"failed");
 }
 
+- (void)testEmptyFields {
+    NSString *csv = COMMA COMMA;
+    NSArray *parsed = [csv CSVComponents];
+    NSArray *expected = @[@[@"", @"", @""]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
 - (void)testSimpleWithInnerQuote {
     NSString *csv = FIELD1 COMMA FIELD2 DOUBLEQUOTE FIELD3;
     NSArray *parsed = [csv CSVComponents];
@@ -50,10 +57,10 @@
     STAssertEqualObjects(parsed, expected, @"failed");
 }
 
-- (void)testSimpleMultiline {
-    NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE FIELD1 COMMA FIELD2 COMMA FIELD3;
+- (void)testInterspersedDoubleQuotes {
+    NSString *csv = FIELD1 COMMA FIELD2 DOUBLEQUOTE FIELD3 DOUBLEQUOTE;
     NSArray *parsed = [csv CSVComponents];
-    NSArray *expected = @[@[FIELD1, FIELD2, FIELD3], @[FIELD1, FIELD2, FIELD3]];
+    NSArray *expected = @[@[FIELD1, FIELD2 DOUBLEQUOTE FIELD3 DOUBLEQUOTE]];
     STAssertEqualObjects(parsed, expected, @"failed");
 }
 
@@ -68,6 +75,83 @@
     NSString *csv = QUOTED_FIELD1 COMMA QUOTED_FIELD2 COMMA QUOTED_FIELD3;
     NSArray *parsed = [csv CSVComponentsWithOptions:CHCSVParserOptionsSanitizesFields];
     NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testSimpleMultiline {
+    NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE FIELD1 COMMA FIELD2 COMMA FIELD3;
+    NSArray *parsed = [csv CSVComponents];
+    NSArray *expected = @[@[FIELD1, FIELD2, FIELD3], @[FIELD1, FIELD2, FIELD3]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testQuotedDelimiter {
+    NSString *csv = FIELD1 COMMA DOUBLEQUOTE FIELD2 COMMA FIELD3 DOUBLEQUOTE;
+    NSArray *parsed = [csv CSVComponents];
+    NSArray *expected = @[@[FIELD1, DOUBLEQUOTE FIELD2 COMMA FIELD3 DOUBLEQUOTE]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testSanitizedQuotedDelimiter {
+    NSString *csv = FIELD1 COMMA DOUBLEQUOTE FIELD2 COMMA FIELD3 DOUBLEQUOTE;
+    NSArray *parsed = [csv CSVComponentsWithOptions:CHCSVParserOptionsSanitizesFields];
+    NSArray *expected = @[@[FIELD1, FIELD2 COMMA FIELD3]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testQuotedMultiline {
+    NSString *csv = FIELD1 COMMA DOUBLEQUOTE MULTILINE_FIELD DOUBLEQUOTE NEWLINE FIELD2;
+    NSArray *parsed = [csv CSVComponents];
+    NSArray *expected = @[@[FIELD1, DOUBLEQUOTE MULTILINE_FIELD DOUBLEQUOTE], @[FIELD2]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testSanitizedMultiline {
+    NSString *csv = FIELD1 COMMA DOUBLEQUOTE MULTILINE_FIELD DOUBLEQUOTE NEWLINE FIELD2;
+    NSArray *parsed = [csv CSVComponentsWithOptions:CHCSVParserOptionsSanitizesFields];
+    NSArray *expected = @[@[FIELD1, MULTILINE_FIELD], @[FIELD2]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testWhitespace {
+    NSString *csv = FIELD1 COMMA SPACE SPACE SPACE FIELD2 COMMA FIELD3 SPACE SPACE SPACE;
+    NSArray *parsed = [csv CSVComponents];
+    NSArray *expected = @[@[FIELD1, SPACE SPACE SPACE FIELD2, FIELD3 SPACE SPACE SPACE]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testTrimmedWhitespace {
+    NSString *csv = FIELD1 COMMA SPACE SPACE SPACE FIELD2 COMMA FIELD3 SPACE SPACE SPACE;
+    NSArray *parsed = [csv CSVComponentsWithOptions:CHCSVParserOptionsStripsLeadingAndTrailingWhitespace];
+    NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testSanitizedQuotedWhitespace {
+    NSString *csv = FIELD1 COMMA DOUBLEQUOTE SPACE SPACE SPACE FIELD2 DOUBLEQUOTE COMMA DOUBLEQUOTE FIELD3 SPACE SPACE SPACE DOUBLEQUOTE;
+    NSArray *parsed = [csv CSVComponentsWithOptions:CHCSVParserOptionsSanitizesFields];
+    NSArray *expected = @[@[FIELD1, SPACE SPACE SPACE FIELD2, FIELD3 SPACE SPACE SPACE]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testUnrecognizedComment {
+    NSString *csv = FIELD1 NEWLINE OCTOTHORPE FIELD2;
+    NSArray *parsed = [csv CSVComponents];
+    NSArray *expected = @[@[FIELD1], @[OCTOTHORPE FIELD2]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testRecognizedComment {
+    NSString *csv = FIELD1 NEWLINE OCTOTHORPE FIELD2;
+    NSArray *parsed = [csv CSVComponentsWithOptions:CHCSVParserOptionsRecognizesComments];
+    NSArray *expected = @[@[FIELD1]];
+    STAssertEqualObjects(parsed, expected, @"failed");
+}
+
+- (void)testTrailingNewline {
+    NSString *csv = FIELD1 COMMA FIELD2 NEWLINE;
+    NSArray *parsed = [csv CSVComponents];
+    NSArray *expected = @[@[FIELD1, FIELD2]];
     STAssertEqualObjects(parsed, expected, @"failed");
 }
 
