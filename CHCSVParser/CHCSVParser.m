@@ -289,7 +289,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     BOOL followedByNewline = [self _parseNewline];
     [self _endRecord];
     
-    return (followedByNewline && _error == nil);
+    return (followedByNewline && [self _peekCharacter]!='\0' && _error == nil);
 }
 
 - (BOOL)_parseNewline {
