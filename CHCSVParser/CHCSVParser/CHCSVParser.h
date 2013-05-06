@@ -93,7 +93,7 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
     CHCSVParserOptionsRecognizesBackslashesAsEscapes = 1 << 0,
     CHCSVParserOptionsSanitizesFields = 1 << 1,
     CHCSVParserOptionsRecognizesComments = 1 << 2,
-    CHCSVParserOptionsStripsLeadingAndTrailingWhitespace = 1 << 3
+    CHCSVParserOptionsTrimsWhitespace = 1 << 3
 };
 
 @interface NSArray (CHCSVAdditions)

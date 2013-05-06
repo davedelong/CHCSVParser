@@ -746,7 +746,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     [parser setRecognizesBackslashesAsEscapes:!!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes)];
     [parser setSanitizesFields:!!(options & CHCSVParserOptionsSanitizesFields)];
     [parser setRecognizesComments:!!(options & CHCSVParserOptionsRecognizesComments)];
-    [parser setStripsLeadingAndTrailingWhitespace:!!(options & CHCSVParserOptionsStripsLeadingAndTrailingWhitespace)];
+    [parser setStripsLeadingAndTrailingWhitespace:!!(options & CHCSVParserOptionsTrimsWhitespace)];
     
     [parser parse];
     CHCSV_RELEASE(parser);
@@ -789,7 +789,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     [parser setRecognizesBackslashesAsEscapes:!!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes)];
     [parser setSanitizesFields:!!(options & CHCSVParserOptionsSanitizesFields)];
     [parser setRecognizesComments:!!(options & CHCSVParserOptionsRecognizesComments)];
-    [parser setStripsLeadingAndTrailingWhitespace:!!(options & CHCSVParserOptionsStripsLeadingAndTrailingWhitespace)];
+    [parser setStripsLeadingAndTrailingWhitespace:!!(options & CHCSVParserOptionsTrimsWhitespace)];
     
     [parser parse];
     CHCSV_RELEASE(parser);

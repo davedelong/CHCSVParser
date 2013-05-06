@@ -122,7 +122,7 @@
 
 - (void)testTrimmedWhitespace {
     NSString *csv = FIELD1 COMMA SPACE SPACE SPACE FIELD2 COMMA FIELD3 SPACE SPACE SPACE;
-    NSArray *parsed = [csv CSVComponentsWithOptions:CHCSVParserOptionsStripsLeadingAndTrailingWhitespace];
+    NSArray *parsed = [csv CSVComponentsWithOptions:CHCSVParserOptionsTrimsWhitespace];
     NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
     STAssertEqualObjects(parsed, expected, @"failed");
 }
