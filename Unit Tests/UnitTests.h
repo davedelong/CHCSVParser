@@ -26,8 +26,6 @@
 #import <SenTestingKit/SenTestingKit.h>
 
 
-@interface UnitTests : SenTestCase {
-	NSAutoreleasePool * testPool;
-}
+@interface UnitTests : SenTestCase
 
 @end

@@ -37,6 +37,7 @@
 		32A70AAB03705E1F00C91783 /* CHCSVParser_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParser_Prefix.pch; sourceTree = "<group>"; };
 		551981EE1203800300FBE033 /* Test.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Test.csv; sourceTree = "<group>"; };
 		5538B52C1344F0A1004930DD /* test.tsv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.tsv; sourceTree = "<group>"; };
+		5560A19E173743A300DDD1D3 /* UnitTestContent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UnitTestContent.h; sourceTree = "<group>"; };
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		557FD0531204A70D009FCDBA /* Unit Tests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Unit Tests.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		557FD0541204A70D009FCDBA /* Unit Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Unit Tests-Info.plist"; sourceTree = "<group>"; };
@@ -91,8 +92,7 @@
 				551981EE1203800300FBE033 /* Test.csv */,
 				55A2E0FC16F01D5700885DD3 /* Test.scsv */,
 				5538B52C1344F0A1004930DD /* test.tsv */,
-				557FD05A1204A72B009FCDBA /* UnitTests.h */,
-				557FD05B1204A72B009FCDBA /* UnitTests.m */,
+				5560A19D1737433900DDD1D3 /* Unit Tests */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -121,6 +121,16 @@
 				55B99320160E376100D6548A /* CHCSVParser.m */,
 			);
 			name = CHCSVParser;
+			sourceTree = "<group>";
+		};
+		5560A19D1737433900DDD1D3 /* Unit Tests */ = {
+			isa = PBXGroup;
+			children = (
+				5560A19E173743A300DDD1D3 /* UnitTestContent.h */,
+				557FD05A1204A72B009FCDBA /* UnitTests.h */,
+				557FD05B1204A72B009FCDBA /* UnitTests.m */,
+			);
+			path = "Unit Tests";
 			sourceTree = "<group>";
 		};
 		C6859EA2029092E104C91782 /* Documentation */ = {
