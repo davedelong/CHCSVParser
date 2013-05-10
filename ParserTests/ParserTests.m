@@ -39,18 +39,24 @@
 + (instancetype)fieldEventWithIndex:(NSUInteger)anIndex field:(NSString *)aField;
 @end
 
+@interface ParserTests ()
+@property(strong) ParserDelegate *logger;
+@end
+
 @implementation ParserTests
+@synthesize logger;
 
 - (void)setUp {
     [super setUp];
+	self.logger = [[ParserDelegate alloc] init];
 }
 
 - (void)tearDown {
+	self.logger = nil;
     [super tearDown];
 }
 
 - (void)testEmpty {
-	ParserDelegate *logger = [[ParserDelegate alloc] init];
 	CHCSVParser *parser = [[CHCSVParser alloc] initWithCSVString:@""];
 	parser.delegate = logger;
 	[parser parse];
@@ -63,7 +69,6 @@
 }
 
 - (void)testOneField {
-	ParserDelegate *logger = [[ParserDelegate alloc] init];
 	CHCSVParser *parser = [[CHCSVParser alloc] initWithCSVString:@"field"];
 	parser.delegate = logger;
 	[parser parse];
