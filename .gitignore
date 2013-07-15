@@ -5,3 +5,4 @@ build
 *.xcodeproj/xcworkspace/xcuserdata/**
 .DS_Store
 xcuserdata
+DerivedData
