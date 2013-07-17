@@ -57,6 +57,7 @@ typedef NSInteger CHCSVErrorCode;
 @property (assign) BOOL sanitizesFields; // default is NO
 @property (assign) BOOL recognizesComments; // default is NO
 @property (assign) BOOL stripsLeadingAndTrailingWhitespace; // default is NO
+@property (assign) BOOL firstLineAsKeys; // default is NO
 
 @property (readonly) NSUInteger totalBytesRead;
 
@@ -93,7 +94,8 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
     CHCSVParserOptionsRecognizesBackslashesAsEscapes = 1 << 0,
     CHCSVParserOptionsSanitizesFields = 1 << 1,
     CHCSVParserOptionsRecognizesComments = 1 << 2,
-    CHCSVParserOptionsStripsLeadingAndTrailingWhitespace = 1 << 3
+    CHCSVParserOptionsStripsLeadingAndTrailingWhitespace = 1 << 3,
+    CHCSVParserOptionsFirstLineAsKeys = 1 << 4
 };
 
 @interface NSArray (CHCSVAdditions)

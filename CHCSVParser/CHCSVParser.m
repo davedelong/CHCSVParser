@@ -109,6 +109,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         _sanitizesFields = NO;
         _sanitizedField = [[NSMutableString alloc] init];
         _stripsLeadingAndTrailingWhitespace = NO;
+        _firstLineAsKeys = NO;
         
         NSMutableCharacterSet *m = [[NSCharacterSet newlineCharacterSet] mutableCopy];
         NSString *invalid = [NSString stringWithFormat:@"%c%C", DOUBLE_QUOTE, _delimiter];
@@ -683,18 +684,23 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 @interface _CHCSVAggregator : NSObject <CHCSVParserDelegate>
 
 @property (readonly) NSArray *lines;
+@property (readonly) NSArray *keys;
 @property (readonly) NSError *error;
 
 @end
 
 @implementation _CHCSVAggregator {
     NSMutableArray *_lines;
-    NSMutableArray *_currentLine;
+    NSMutableArray *_currentLineArray;
+    NSMutableArray *_keys;
+    NSMutableDictionary *_currentLineDict;
 }
 
 #if !CHCSV_HAS_ARC
 - (void)dealloc {
-    [_currentLine release];
+    [_currentLineArray release];
+    [_keys release];
+    [_currentLineDict release];
     [_lines release];
     [_error release];
     [super dealloc];
@@ -706,17 +712,40 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 }
 
 - (void)parser:(CHCSVParser *)parser didBeginLine:(NSUInteger)recordNumber {
-    _currentLine = [[NSMutableArray alloc] init];
+    if (parser.firstLineAsKeys) {
+        if (!_keys) {
+            _keys = [[NSMutableArray alloc] init];
+        }
+        else {
+            _currentLineDict = [[NSMutableDictionary alloc] init];
+        }
+    }
+    else {
+        _currentLineArray = [[NSMutableArray alloc] init];
+    }
 }
 
 - (void)parser:(CHCSVParser *)parser didEndLine:(NSUInteger)recordNumber {
-    [_lines addObject:_currentLine];
-    CHCSV_RELEASE(_currentLine);
-    _currentLine = nil;
+    if (_currentLineArray) {
+        [_lines addObject:_currentLineArray];
+        CHCSV_RELEASE(_currentLineArray);
+        _currentLineArray = nil;
+    }
+    else if (_currentLineDict){
+        [_lines addObject:_currentLineDict];
+        CHCSV_RELEASE(_currentLineDict);
+        _currentLineDict = nil;
+    }
 }
 
 - (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field atIndex:(NSInteger)fieldIndex {
-    [_currentLine addObject:field];
+    if (_currentLineArray) [_currentLineArray addObject:field];
+    else if (_currentLineDict) {
+        id key = (_keys.count > fieldIndex)? [_keys objectAtIndex:fieldIndex] : [NSString stringWithFormat:@"unknown %ld", fieldIndex];
+        [_currentLineDict setObject:field forKey:key];
+        
+    }
+    else [_keys addObject:field];
 }
 
 - (void)parser:(CHCSVParser *)parser didFailWithError:(NSError *)error {
@@ -743,6 +772,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     [parser setSanitizesFields:!!(options & CHCSVParserOptionsSanitizesFields)];
     [parser setRecognizesComments:!!(options & CHCSVParserOptionsRecognizesComments)];
     [parser setStripsLeadingAndTrailingWhitespace:!!(options & CHCSVParserOptionsStripsLeadingAndTrailingWhitespace)];
+    [parser setFirstLineAsKeys:!!(options & CHCSVParserOptionsFirstLineAsKeys)];
     
     [parser parse];
     CHCSV_RELEASE(parser);
@@ -786,6 +816,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     [parser setSanitizesFields:!!(options & CHCSVParserOptionsSanitizesFields)];
     [parser setRecognizesComments:!!(options & CHCSVParserOptionsRecognizesComments)];
     [parser setStripsLeadingAndTrailingWhitespace:!!(options & CHCSVParserOptionsStripsLeadingAndTrailingWhitespace)];
+    [parser setFirstLineAsKeys:!!(options & CHCSVParserOptionsFirstLineAsKeys)];
     
     [parser parse];
     CHCSV_RELEASE(parser);
