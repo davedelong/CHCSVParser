@@ -42,6 +42,30 @@ STAssertEqualObjects(_parsed, _expected, @"failed"); \
     TEST(csv, expected);
 }
 
+- (void)testSimpleUTF8 {
+    NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 COMMA UTF8FIELD4 NEWLINE FIELD1 COMMA FIELD2 COMMA FIELD3 COMMA UTF8FIELD4;
+    NSArray *expected = @[@[FIELD1, FIELD2, FIELD3, UTF8FIELD4], @[FIELD1, FIELD2, FIELD3, UTF8FIELD4]];
+    TEST(csv, expected);
+}
+
+- (void)testGithubIssue50 {
+    NSString *csv = @"TRẦN,species_code,Scientific name,Author name,Common name,Family,Description,Habitat,\"Leaf size min (cm, 0 decimal digit)\",\"Leaf size max (cm, 0 decimal digit)\",Distribution,Current National Conservation Status,Growth requirements,Horticultural features,Uses,Associated fauna,Reference,species_id";
+    NSArray *expected = @[@[@"TRẦN",@"species_code",@"Scientific name",@"Author name",@"Common name",@"Family",@"Description",@"Habitat",@"\"Leaf size min (cm, 0 decimal digit)\"",@"\"Leaf size max (cm, 0 decimal digit)\"",@"Distribution",@"Current National Conservation Status",@"Growth requirements",@"Horticultural features",@"Uses",@"Associated fauna",@"Reference",@"species_id"]];
+    TEST(csv, expected);
+}
+
+- (void)testGithubIssue50Workaround {
+    NSString *csv = @"TRẦN,species_code,Scientific name,Author name,Common name,Family,Description,Habitat,\"Leaf size min (cm, 0 decimal digit)\",\"Leaf size max (cm, 0 decimal digit)\",Distribution,Current National Conservation Status,Growth requirements,Horticultural features,Uses,Associated fauna,Reference,species_id";
+    
+    NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:NSStringFromSelector(_cmd)];
+    [csv writeToFile:file atomically:NO encoding:NSUTF8StringEncoding error:nil];
+    
+    NSArray *actual = [NSArray arrayWithContentsOfCSVFile:file];
+    
+    NSArray *expected = @[@[@"TRẦN",@"species_code",@"Scientific name",@"Author name",@"Common name",@"Family",@"Description",@"Habitat",@"\"Leaf size min (cm, 0 decimal digit)\"",@"\"Leaf size max (cm, 0 decimal digit)\"",@"Distribution",@"Current National Conservation Status",@"Growth requirements",@"Horticultural features",@"Uses",@"Associated fauna",@"Reference",@"species_id"]];
+    STAssertEqualObjects(actual, expected, @"failed");
+}
+
 - (void)testEmptyFields {
     NSString *csv = COMMA COMMA;
     NSArray *expected = @[@[@"", @"", @""]];

@@ -17,6 +17,7 @@
 #define FIELD1 @"field1"
 #define FIELD2 @"field2"
 #define FIELD3 @"field3"
+#define UTF8FIELD4 @"ḟīễłđ➃"
 
 #define QUOTED_FIELD1 DOUBLEQUOTE FIELD1 DOUBLEQUOTE
 #define QUOTED_FIELD2 DOUBLEQUOTE FIELD2 DOUBLEQUOTE

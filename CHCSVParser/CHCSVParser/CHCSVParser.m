@@ -76,7 +76,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 }
 
 - (id)initWithCSVString:(NSString *)csv {
-    NSStringEncoding encoding = [csv fastestEncoding];
+    NSStringEncoding encoding = NSUTF8StringEncoding;
     NSInputStream *stream = [NSInputStream inputStreamWithData:[csv dataUsingEncoding:encoding]];
     return [self initWithInputStream:stream usedEncoding:&encoding delimiter:COMMA];
 }
