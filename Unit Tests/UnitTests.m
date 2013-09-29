@@ -68,7 +68,7 @@ STAssertEqualObjects(_parsed, _expected, @"failed"); \
 
 - (void)testEmptyFields {
     NSString *csv = COMMA COMMA;
-    NSArray *expected = @[@[@"", @"", @""]];
+    NSArray *expected = @[@[EMPTY, EMPTY, EMPTY]];
     TEST(csv, expected);
 }
 
@@ -170,13 +170,13 @@ STAssertEqualObjects(_parsed, _expected, @"failed"); \
 
 - (void)testTrailingSpace {
     NSString *csv = FIELD1 COMMA FIELD2 NEWLINE SPACE;
-    NSArray *expected = @[@[FIELD1, FIELD2], @[@" "]];
+    NSArray *expected = @[@[FIELD1, FIELD2], @[SPACE]];
     TEST(csv, expected);
 }
 
 - (void)testTrailingTrimmedSpace {
     NSString *csv = FIELD1 COMMA FIELD2 NEWLINE SPACE;
-    NSArray *expected = @[@[FIELD1, FIELD2], @[@""]];
+    NSArray *expected = @[@[FIELD1, FIELD2], @[EMPTY]];
     TEST(csv, expected, CHCSVParserOptionsTrimsWhitespace);
 }
 

@@ -6,6 +6,7 @@
 //
 //
 
+#define EMPTY @""
 #define COMMA @","
 #define SEMICOLON @";"
 #define DOUBLEQUOTE @"\""
