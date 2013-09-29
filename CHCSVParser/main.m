@@ -11,12 +11,7 @@
     NSMutableArray *_lines;
     NSMutableArray *_currentLine;
 }
-- (void)dealloc {
-    [_lines release];
-    [super dealloc];
-}
 - (void)parserDidBeginDocument:(CHCSVParser *)parser {
-    [_lines release];
     _lines = [[NSMutableArray alloc] init];
 }
 - (void)parser:(CHCSVParser *)parser didBeginLine:(NSUInteger)recordNumber {
@@ -28,11 +23,10 @@
 }
 - (void)parser:(CHCSVParser *)parser didEndLine:(NSUInteger)recordNumber {
     [_lines addObject:_currentLine];
-    [_currentLine release];
     _currentLine = nil;
 }
 - (void)parserDidEndDocument:(CHCSVParser *)parser {
-//	NSLog(@"parser ended: %@", csvFile);
+    //	NSLog(@"parser ended: %@", csvFile);
 }
 - (void)parser:(CHCSVParser *)parser didFailWithError:(NSError *)error {
 	NSLog(@"ERROR: %@", error);
@@ -43,34 +37,29 @@
 
 
 int main (int argc, const char * argv[]) {
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-    NSString *file = @(__FILE__);
-    file = [[file stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"Test.scsv"];
-	
-	NSLog(@"Beginning...");
-	NSStringEncoding encoding = 0;
-    NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:file];
-	CHCSVParser * p = [[CHCSVParser alloc] initWithInputStream:stream usedEncoding:&encoding delimiter:';'];
-    [p setRecognizesBackslashesAsEscapes:YES];
-    [p setSanitizesFields:YES];
-	
-	NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
-	
-	Delegate * d = [[Delegate alloc] init];
-	[p setDelegate:d];
-	
-	NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
-	[p parse];
-	NSTimeInterval end = [NSDate timeIntervalSinceReferenceDate];
-	
-	NSLog(@"raw difference: %f", (end-start));
-    
-    NSLog(@"%@", [d lines]);
-	
-	[d release];
-    
-	[p release];
-	
-	[pool drain];
+    @autoreleasepool {
+        NSString *file = @(__FILE__);
+        file = [[file stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"Test.scsv"];
+        
+        NSLog(@"Beginning...");
+        NSStringEncoding encoding = 0;
+        NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:file];
+        CHCSVParser * p = [[CHCSVParser alloc] initWithInputStream:stream usedEncoding:&encoding delimiter:';'];
+        [p setRecognizesBackslashesAsEscapes:YES];
+        [p setSanitizesFields:YES];
+        
+        NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
+        
+        Delegate * d = [[Delegate alloc] init];
+        [p setDelegate:d];
+        
+        NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
+        [p parse];
+        NSTimeInterval end = [NSDate timeIntervalSinceReferenceDate];
+        
+        NSLog(@"raw difference: %f", (end-start));
+        
+        NSLog(@"%@", [d lines]);
+    }
     return 0;
 }

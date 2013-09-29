@@ -14,7 +14,7 @@ In order to use `CHCSVParser`, you'll need to include the following two files in
 - `CHCSVParser.h`
 - `CHCSVParser.m`
 
-`CHCSVParser` can be safely compiled with or without ARC enabled.
+`CHCSVParser` requires ARC.
 
 ###Parsing
 A `CHCSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
