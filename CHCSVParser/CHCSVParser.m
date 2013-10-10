@@ -277,17 +277,20 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         [self _parseComment];
     }
     
-    [self _beginRecord];
-    while (1) {
-        if (![self _parseField]) {
-            break;
+    BOOL followedByNewline;
+    @autoreleasepool {
+        [self _beginRecord];
+        while (1) {
+            if (![self _parseField]) {
+                break;
+            }
+            if (![self _parseDelimiter]) {
+                break;
+            }
         }
-        if (![self _parseDelimiter]) {
-            break;
-        }
-    }    
-    BOOL followedByNewline = [self _parseNewline];
-    [self _endRecord];
+        followedByNewline = [self _parseNewline];
+        [self _endRecord];
+    }
     
     return (followedByNewline && _error == nil);
 }
