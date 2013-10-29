@@ -54,26 +54,26 @@
     @[@"This",@"has",@"mixed",@"\"escaped quotes\""],
     @[@"   This   ",@"   line   ",@"   has   ",@"   significant   ",@"   whitespace   "],
     @[@"This",@"is",@"the",@"last",@"line"],
-    @[@""]
+    @[@"",@""]
     ];
 }
 
 - (void) testCSV {
 	NSString *file = [[NSBundle bundleForClass:[self class]] pathForResource:@"Test" ofType:@"csv"];
 	
-	NSArray *fields = [NSArray arrayWithContentsOfCSVFile:file options:CHCSVParserOptionsRecognizesBackslashesAsEscapes];
-	NSLog(@"read: %@", fields);
+	NSArray *fields = [NSArray arrayWithContentsOfCSVFile:file options:CHCSVParserOptionsRecognizesBackslashesAsEscapes|CHCSVParserOptionsRecognizesComments|CHCSVParserOptionsSanitizesFields];
+	//NSLog(@"read: %@", fields);
 	
 	NSArray *expectedFields = [self expectedFields];
 	
 	NSUInteger expectedCount = [expectedFields count];
 	NSUInteger actualCount = [fields count];
-	STAssertTrue(expectedCount == actualCount, @"incorrect number of lines parsed.  expected %lu, given %lu", expectedCount, actualCount);
+	STAssertEquals(actualCount, expectedCount, @"incorrect number of lines parsed");
 	for (int i = 0; i < MIN(expectedCount, actualCount); ++i) {
 		NSArray *actualLine = [fields objectAtIndex:i];
 		NSArray *expectedLine = [expectedFields objectAtIndex:i];
 		
-		STAssertTrue([actualLine isEqualToArray:expectedLine], @"lines differ.  Expected %@, given %@", expectedLine, actualLine);
+		STAssertEqualObjects(actualLine, expectedLine, @"lines differ");
 	}
 	
 	NSString *tempFileName = [NSString stringWithFormat:@"%d-test.csv", arc4random()];
@@ -90,13 +90,13 @@
 	NSArray *readFromFile = [NSArray arrayWithContentsOfCSVFile:tempFile];
 	
 	NSUInteger readCount = [readFromFile count];
-	STAssertTrue(readCount == expectedCount, @"Incorrect number of lines read.  Expected %lu, read %lu", expectedCount, readCount);
+	STAssertEquals(readCount, expectedCount, @"Incorrect number of lines read");
 	
 	for (int i = 0; i < MIN(expectedCount, readCount); ++i) {
 		NSArray *readLine = [readFromFile objectAtIndex:i];
 		NSArray *expectedLine = [expectedFields objectAtIndex:i];
 		
-		STAssertTrue([expectedLine isEqualToArray:readLine], @"lines differ.  Expected %@, read %@", expectedLine, readLine);
+		STAssertEqualObjects(readLine, expectedLine, @"lines differ");
 	}
 }
 
@@ -105,14 +105,14 @@
 	
 	NSStringEncoding encoding = 0;
 	NSString *csv = [NSString stringWithContentsOfFile:file usedEncoding:&encoding error:nil];
-	NSArray *fields = [csv CSVComponents];
-	NSLog(@"fields: %@", fields);
+	NSArray *fields = [csv CSVComponentsWithOptions:CHCSVParserOptionsRecognizesBackslashesAsEscapes|CHCSVParserOptionsRecognizesComments|CHCSVParserOptionsSanitizesFields];
+	//NSLog(@"fields: %@", fields);
 	
 	NSArray *expectedFields = [self expectedFields];
 	
 	NSUInteger expectedCount = [expectedFields count];
 	NSUInteger actualCount = [fields count];
-	STAssertTrue(expectedCount == actualCount, @"incorrect number of lines parsed.  expected %lu, given %lu", expectedCount, actualCount);
+	STAssertEquals(actualCount, expectedCount, @"incorrect number of lines parsed.  expected %lu, given %lu", expectedCount, actualCount);
 	for (int i = 0; i < MIN(expectedCount, actualCount); ++i) {
 		NSArray *actualLine = [fields objectAtIndex:i];
 		NSArray *expectedLine = [expectedFields objectAtIndex:i];
