@@ -64,7 +64,10 @@ typedef NSInteger CHCSVErrorCode;
 - (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter;
 
 - (id)initWithCSVString:(NSString *)csv;
+- (id)initWithCSVString:(NSString *)csv delimiter:(unichar)delimiter;
+
 - (id)initWithContentsOfCSVFile:(NSString *)csvFilePath;
+- (id)initWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter;
 
 - (void)parse;
 - (void)cancelParsing;
@@ -99,7 +102,9 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
 @interface NSArray (CHCSVAdditions)
 
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath;
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter;
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options;
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter;
 - (NSString *)CSVString;
 
 @end
@@ -107,6 +112,8 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
 @interface NSString (CHCSVAdditions)
 
 - (NSArray *)CSVComponents;
+- (NSArray *)CSVComponentsWithDelimiter:(unichar)delimiter;
 - (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options;
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter;
 
 @end
