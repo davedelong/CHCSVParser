@@ -16,6 +16,20 @@ In order to use `CHCSVParser`, you'll need to include the following two files in
 
 `CHCSVParser` can be safely compiled with or without ARC enabled.
 
+There is no universally agreed standard for the CSV file format. The closest thing to such a standard is the grammar defined by [[RFC 4180][http://tools.ietf.org/html/rfc4180], and `CHCSVParser` strives to conform to that.
+
+###Usage with Microsoft Excel
+
+Another comman usage scenario for CSV data is when you want to import tabular data that was exported from Microsoft Excel. If you are on a Mac, you may well be exporting the data from Microsoft Excel 2011 for Mac, which lets you choose the export file format from the File / Save As option. However, if you have any extended characters then  "Comma Separated Values" or even "Windows Comma Separated" can be a hazardous choice, because neither will use a unicode-aware text encoding. You're safest choice is to save as a "UTF-16 Unicode Text", which is in fact a tab-separated values file, with escaped quotation marks, and certain fields surrounded in double quotes. With `CHCSVParser`, you can read such a file into an array of arrays as follows:
+
+```objective-c
+NSURL * const inputFileURL = [NSURL fileURLWithPath:@"/path/to/exported/file.txt"];
+unichar tabCharacter = '\t';
+NSArray *rows = [NSArray arrayWithContentsOfCSVFile:inputFilePath
+                                            options:CHCSVParserOptionsSanitizesFields
+                                          delimiter:tabCharacter];
+```
+
 ###Parsing
 A `CHCSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
 
