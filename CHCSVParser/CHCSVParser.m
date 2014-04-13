@@ -777,6 +777,40 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     return final;
 }
 
++ (instancetype)arrayWithCSVString:(NSString *)csvString {
+    return [self arrayWithCSVString:csvString options:0 delimiter:COMMA];
+}
+
++ (instancetype)arrayWithCSVString:(NSString *)csvString delimiter:(unichar)delimiter
+{
+    return [self arrayWithCSVString:csvString options:0 delimiter:delimiter];
+}
+
++ (instancetype)arrayWithCSVString:(NSString *)csvString options:(CHCSVParserOptions)options
+{
+    return [self arrayWithCSVString:csvString options:options delimiter:COMMA];
+}
+
++ (instancetype)arrayWithCSVString:(NSString *)csvString options:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
+    NSParameterAssert(csvString);
+    _CHCSVAggregator *aggregator = [[_CHCSVAggregator alloc] init];
+    CHCSVParser *parser = [[CHCSVParser alloc] initWithCSVString:csvString delimiter:delimiter];
+    [parser setDelegate:aggregator];
+    
+    [parser setRecognizesBackslashesAsEscapes:!!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes)];
+    [parser setSanitizesFields:!!(options & CHCSVParserOptionsSanitizesFields)];
+    [parser setRecognizesComments:!!(options & CHCSVParserOptionsRecognizesComments)];
+    [parser setStripsLeadingAndTrailingWhitespace:!!(options & CHCSVParserOptionsStripsLeadingAndTrailingWhitespace)];
+    
+    [parser parse];
+    CHCSV_RELEASE(parser);
+    
+    NSArray *final = CHCSV_AUTORELEASE(CHCSV_RETAIN([aggregator lines]));
+    CHCSV_RELEASE(aggregator);
+    
+    return final;
+}
+
 - (NSString *)CSVString {
     NSOutputStream *output = [NSOutputStream outputStreamToMemory];
     CHCSVWriter *writer = [[CHCSVWriter alloc] initWithOutputStream:output encoding:NSUTF8StringEncoding delimiter:COMMA];
