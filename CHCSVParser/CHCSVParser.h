@@ -105,6 +105,10 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter;
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options;
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter;
++ (instancetype)arrayWithCSVString:(NSString *)csvString;
++ (instancetype)arrayWithCSVString:(NSString *)csvString delimiter:(unichar)delimiter;
++ (instancetype)arrayWithCSVString:(NSString *)csvString options:(CHCSVParserOptions)options;
++ (instancetype)arrayWithCSVString:(NSString *)csvString options:(CHCSVParserOptions)options delimiter:(unichar)delimiter;
 - (NSString *)CSVString;
 
 @end
