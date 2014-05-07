@@ -121,4 +121,31 @@
 	}
 }
 
+/**
+ * Tests the CS Parser with the option CHCSVParserOptionsFirstLineAsKeys
+ * Instead of an array of arrays it will generate an array of dicrionaries starting from index 1.
+ */
+
+- (void) testFirstLineAsKeys {
+	NSString *file = [[NSBundle bundleForClass:[self class]] pathForResource:@"Test" ofType:@"csv"];
+    
+    NSData *data = [NSData dataWithContentsOfFile:file];
+    
+    NSArray *parsedArray = [NSArray arrayWithContentsOfCSVFile:file options:CHCSVParserOptionsRecognizesBackslashesAsEscapes|CHCSVParserOptionsFirstLineAsKeys];
+    STAssertNotNil(parsedArray, @"Failed Parsing");
+    STAssertTrue((parsedArray.count > 0), @"Failed Parsing");
+    
+    NSDictionary *firstRealLine = [parsedArray objectAtIndex:0];
+    STAssertTrue(([firstRealLine isKindOfClass:[NSDictionary class]]), @"Lines are not Dictionaries");
+    
+    NSArray *expectedKeys = [[self expectedFields] objectAtIndex:0];
+    
+    STAssertTrue((firstRealLine.allKeys.count == expectedKeys.count), @"Keys count differ.  Expected %@, given %@", firstRealLine.allKeys.count, expectedKeys.count);
+    
+    [expectedKeys enumerateObjectsUsingBlock:^(id key, NSUInteger idx, BOOL *stop) {
+        id resultObj = [firstRealLine objectForKey:key];
+        STAssertNotNil(resultObj, @"OBject for Key %@ not found", key);
+    }];
+}
+
 @end
