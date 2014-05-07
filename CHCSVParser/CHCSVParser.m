@@ -216,14 +216,28 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     NSUInteger reloadPortion = stringLength / 3;
     if (reloadPortion < 10) { reloadPortion = 10; }
     
-    if ([_stream hasBytesAvailable] && _nextIndex+reloadPortion >= stringLength) {
-        // read more from the stream
-        uint8_t buffer[CHUNK_SIZE];
-        NSInteger readBytes = [_stream read:buffer maxLength:CHUNK_SIZE];
-        if (readBytes > 0) {
-            // append it to the buffer
-            [_stringBuffer appendBytes:buffer length:readBytes];
-            [self setTotalBytesRead:[self totalBytesRead] + readBytes];
+    NSStreamStatus streamStatus = _stream.streamStatus;
+    if (_nextIndex+reloadPortion >= stringLength) {
+        
+        // wait for the stream to either have available data, end in some way or for parsing to get canceled
+        while (![_stream hasBytesAvailable] &&
+               streamStatus != NSStreamStatusAtEnd &&
+               streamStatus != NSStreamStatusClosed &&
+               streamStatus != NSStreamStatusError &&
+               _cancelled == NO) {
+            [NSThread sleepForTimeInterval:0.1];
+        }
+        
+        // need to check again if data is available since the wait loop could have finished if the stream ended
+        if([_stream hasBytesAvailable] && _cancelled == NO) {
+            // read more from the stream
+            uint8_t buffer[CHUNK_SIZE];
+            NSInteger readBytes = [_stream read:buffer maxLength:CHUNK_SIZE];
+            if (readBytes > 0) {
+                // append it to the buffer
+                [_stringBuffer appendBytes:buffer length:readBytes];
+                [self setTotalBytesRead:[self totalBytesRead] + readBytes];
+            }
         }
     }
     
