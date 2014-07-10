@@ -27,11 +27,15 @@
 #import "UnitTestContent.h"
 #import "CHCSVParser.h"
 
+#define TEST_ARRAYS(_csv, _expected) do {\
+XCTAssertEqualObjects(_csv, _expected, @"failed"); \
+} while(0)
+
 #define TEST(_csv, _expected, ...) do {\
 NSUInteger _optionList[] = {0, ##__VA_ARGS__}; \
 NSUInteger _option = _optionList[(sizeof(_optionList)/sizeof(NSUInteger)) == 2 ? 1 : 0]; \
 NSArray *_parsed = [(_csv) CSVComponentsWithOptions:(_option)]; \
-STAssertEqualObjects(_parsed, _expected, @"failed"); \
+TEST_ARRAYS(_parsed, _expected); \
 } while(0)
 
 @implementation UnitTests
@@ -63,7 +67,22 @@ STAssertEqualObjects(_parsed, _expected, @"failed"); \
     NSArray *actual = [NSArray arrayWithContentsOfCSVFile:file];
     
     NSArray *expected = @[@[@"TRẦN",@"species_code",@"Scientific name",@"Author name",@"Common name",@"Family",@"Description",@"Habitat",@"\"Leaf size min (cm, 0 decimal digit)\"",@"\"Leaf size max (cm, 0 decimal digit)\"",@"Distribution",@"Current National Conservation Status",@"Growth requirements",@"Horticultural features",@"Uses",@"Associated fauna",@"Reference",@"species_id"]];
-    STAssertEqualObjects(actual, expected, @"failed");
+    XCTAssertEqualObjects(actual, expected, @"failed");
+}
+
+- (void)testGithubIssue53 {
+    NSString *csv = @"F1,F2,F3" NEWLINE @"a, \"b, B\",c" NEWLINE @"A,B,C" NEWLINE @"1,2,3" NEWLINE @"I,II,III";
+    NSArray *expected = @[@[@"F1",@"F2",@"F3"], @[@"a", @" \"b, B\"", @"c"], @[@"A", @"B", @"C"], @[@"1", @"2", @"3"], @[@"I", @"II", @"III"]];
+    TEST(csv, expected);
+}
+
+- (void)testGithubIssue65 {
+    NSString *csv = FIELD1 @"æ" COMMA FIELD2 @"ø" COMMA FIELD3 @"å";
+    NSArray *expected = @[@[FIELD1 @"æ", FIELD2 @"ø", FIELD3 @"å"]];
+    TEST(csv, expected);
+    
+    NSArray *csvComponents = [csv CSVComponents];
+    TEST_ARRAYS(csvComponents, expected);
 }
 
 - (void)testEmptyFields {
@@ -178,6 +197,12 @@ STAssertEqualObjects(_parsed, _expected, @"failed"); \
     NSString *csv = FIELD1 COMMA FIELD2 NEWLINE SPACE;
     NSArray *expected = @[@[FIELD1, FIELD2], @[EMPTY]];
     TEST(csv, expected, CHCSVParserOptionsTrimsWhitespace);
+}
+
+- (void)testEmoji {
+    NSString *csv = @"1️⃣,2️⃣,3️⃣,4️⃣,5️⃣" NEWLINE @"6️⃣,7️⃣,8️⃣,9️⃣,0️⃣";
+    NSArray *expected = @[@[@"1️⃣",@"2️⃣",@"3️⃣",@"4️⃣",@"5️⃣"],@[@"6️⃣",@"7️⃣",@"8️⃣",@"9️⃣",@"0️⃣"]];
+    TEST(csv, expected);
 }
 
 #pragma mark - Testing Backslashes

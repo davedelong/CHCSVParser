@@ -23,9 +23,9 @@
  THE SOFTWARE.
  **/
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 
 
-@interface UnitTests : SenTestCase
+@interface UnitTests : XCTestCase
 
 @end

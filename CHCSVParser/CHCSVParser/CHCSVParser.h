@@ -27,11 +27,9 @@
 
 extern NSString * const CHCSVErrorDomain;
 
-enum {
+typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
     CHCSVErrorCodeInvalidFormat = 1,
 };
-
-typedef NSInteger CHCSVErrorCode;
 
 @class CHCSVParser;
 @protocol CHCSVParserDelegate <NSObject>

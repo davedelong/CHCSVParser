@@ -233,17 +233,19 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 #pragma mark -
 
 - (void)parse {
-    [self _beginDocument];
-    
-    _currentRecord = 0;
-    while ([self _parseRecord]) {
-        ; // yep;
-    }
-    
-    if (_error != nil) {
-        [self _error];
-    } else {
-        [self _endDocument];
+    @autoreleasepool {
+        [self _beginDocument];
+        
+        _currentRecord = 0;
+        while ([self _parseRecord]) {
+            ; // yep;
+        }
+        
+        if (_error != nil) {
+            [self _error];
+        } else {
+            [self _endDocument];
+        }
     }
 }
 
@@ -252,12 +254,12 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 }
 
 - (BOOL)_parseRecord {
-    @autoreleasepool {
-        while ([self _peekCharacter] == OCTOTHORPE && _recognizesComments) {
-            [self _parseComment];
-        }
-        
-        if ([self _peekCharacter] != NULLCHAR) {
+    while ([self _peekCharacter] == OCTOTHORPE && _recognizesComments) {
+        [self _parseComment];
+    }
+    
+    if ([self _peekCharacter] != NULLCHAR) {
+        @autoreleasepool {
             [self _beginRecord];
             while (1) {
                 if (![self _parseField]) {
@@ -269,10 +271,10 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
             }
             [self _endRecord];
         }
-        
-        BOOL followedByNewline = [self _parseNewline];
-        return (followedByNewline && _error == nil && [self _peekCharacter] != NULLCHAR);
     }
+    
+    BOOL followedByNewline = [self _parseNewline];
+    return (followedByNewline && _error == nil && [self _peekCharacter] != NULLCHAR);
 }
 
 - (BOOL)_parseNewline {
@@ -320,8 +322,11 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     while ([self _peekCharacter] != NULLCHAR &&
            [whitespace characterIsMember:[self _peekCharacter]] &&
            [self _peekCharacter] != _delimiter) {
-        // if we're sanitizing fields, then these characters would be stripped (because they're not appended to _sanitizedField)
-        // if we're not sanitizing fields, then they'll be included in the -substringWithRange:
+        
+        if (_stripsLeadingAndTrailingWhitespace == NO) {
+            [_sanitizedField appendFormat:@"%C", [self _peekCharacter]];
+            // if we're sanitizing fields, then these characters would be stripped (because they're not appended to _sanitizedField)
+        }
         [self _advance];
     }
 }
@@ -331,10 +336,9 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     BOOL parsedField = NO;
     [self _beginField];
-    if (_stripsLeadingAndTrailingWhitespace) {
-        // consume leading whitespace
-        [self _parseFieldWhitespace];
-    }
+    
+    // consume leading whitespace
+    [self _parseFieldWhitespace];
     
     if ([self _peekCharacter] == DOUBLE_QUOTE) {
         parsedField = [self _parseEscapedField];
@@ -347,10 +351,8 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     }
     
     if (parsedField) {
-        if (_stripsLeadingAndTrailingWhitespace) {
-            // consume trailing whitespace
-            [self _parseFieldWhitespace];
-        }
+        // consume trailing whitespace
+        [self _parseFieldWhitespace];
         [self _endField];
     }
     return parsedField;
