@@ -659,36 +659,59 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 @interface _CHCSVAggregator : NSObject <CHCSVParserDelegate>
 
-@property (readonly) NSArray *lines;
-@property (readonly) NSError *error;
+@property (strong) NSMutableArray *lines;
+@property (strong) NSError *error;
+
+@property (strong) NSMutableArray *currentLine;
 
 @end
 
-@implementation _CHCSVAggregator {
-    NSMutableArray *_lines;
-    NSMutableArray *_currentLine;
-}
+@implementation _CHCSVAggregator
 
 - (void)parserDidBeginDocument:(CHCSVParser *)parser {
-    _lines = [[NSMutableArray alloc] init];
+    self.lines = [[NSMutableArray alloc] init];
 }
 
 - (void)parser:(CHCSVParser *)parser didBeginLine:(NSUInteger)recordNumber {
-    _currentLine = [[NSMutableArray alloc] init];
+    self.currentLine = [[NSMutableArray alloc] init];
 }
 
 - (void)parser:(CHCSVParser *)parser didEndLine:(NSUInteger)recordNumber {
-    [_lines addObject:_currentLine];
-    _currentLine = nil;
+    [self.lines addObject:self.currentLine];
+    self.currentLine = nil;
 }
 
 - (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field atIndex:(NSInteger)fieldIndex {
-    [_currentLine addObject:field];
+    [self.currentLine addObject:field];
 }
 
 - (void)parser:(CHCSVParser *)parser didFailWithError:(NSError *)error {
-    _error = error;
-    _lines = nil;
+    self.error = error;
+    self.lines = nil;
+}
+
+@end
+
+@interface _CHCSVKeyedAggregator : _CHCSVAggregator
+
+@property (strong) NSArray *firstLine;
+
+@end
+
+@implementation _CHCSVKeyedAggregator
+
+- (void)parser:(CHCSVParser *)parser didEndLine:(NSUInteger)recordNumber {
+    if (self.firstLine == nil) {
+        self.firstLine = self.currentLine;
+    } else if (self.currentLine.count == self.firstLine.count) {
+        CHCSVOrderedDictionary *line = [[CHCSVOrderedDictionary alloc] initWithObjects:self.currentLine
+                                                                               forKeys:self.firstLine];
+        [self.lines addObject:line];
+    } else {
+        [parser cancelParsing];
+        self.error = [NSError errorWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeIncorrectNumberOfFields userInfo:nil];
+    }
+    self.currentLine = nil;
 }
 
 @end
@@ -699,9 +722,15 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     return [self arrayWithContentsOfCSVFile:csvFilePath options:0];
 }
 
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options{
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options {
+    return [self arrayWithContentsOfCSVFile:csvFilePath options:options error:nil];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options error:(NSError *__autoreleasing *)error {
     NSParameterAssert(csvFilePath);
-    _CHCSVAggregator *aggregator = [[_CHCSVAggregator alloc] init];
+    BOOL usesFirstLineAsKeys = !!(options & CHCSVParserOptionsUsesFirstLineAsKeys);
+    _CHCSVAggregator *aggregator = usesFirstLineAsKeys ? [[_CHCSVKeyedAggregator alloc] init] : [[_CHCSVAggregator alloc] init];
+    
     CHCSVParser *parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFilePath];
     [parser setDelegate:aggregator];
     
@@ -712,7 +741,14 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     [parser parse];
     
-    return [aggregator lines];
+    if (aggregator.error != nil) {
+        if (error) {
+            *error = aggregator.error;
+        }
+        return nil;
+    } else {
+        return aggregator.lines;
+    }
 }
 
 - (NSString *)CSVString {
@@ -738,7 +774,13 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 }
 
 - (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options {
-    _CHCSVAggregator *aggregator = [[_CHCSVAggregator alloc] init];
+    return [self CSVComponentsWithOptions:options error:nil];
+}
+
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options error:(NSError *__autoreleasing *)error {
+    BOOL usesFirstLineAsKeys = !!(options & CHCSVParserOptionsUsesFirstLineAsKeys);
+    _CHCSVAggregator *aggregator = usesFirstLineAsKeys ? [[_CHCSVKeyedAggregator alloc] init] : [[_CHCSVAggregator alloc] init];
+    
     CHCSVParser *parser = [[CHCSVParser alloc] initWithCSVString:self];
     [parser setDelegate:aggregator];
     
@@ -749,7 +791,84 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     [parser parse];
     
-    return [aggregator lines];
+    if (aggregator.error != nil) {
+        if (error) {
+            *error = aggregator.error;
+        }
+        return nil;
+    } else {
+        return aggregator.lines;
+    }
+}
+
+@end
+
+@implementation CHCSVOrderedDictionary {
+    NSArray *_keys;
+    NSArray *_values;
+    NSDictionary *_dictionary;
+}
+
+- (instancetype)initWithObjects:(NSArray *)objects forKeys:(NSArray *)keys {
+    self = [super init];
+    if (self) {
+        _keys = keys.copy;
+        _values = objects.copy;
+        _dictionary = [NSDictionary dictionaryWithObjects:_values forKeys:_keys];
+    }
+    return self;
+}
+
+- (instancetype)initWithObjects:(const id [])objects forKeys:(const id<NSCopying> [])keys count:(NSUInteger)cnt {
+    return [self initWithObjects:[NSArray arrayWithObjects:objects count:cnt]
+                         forKeys:[NSArray arrayWithObjects:keys count:cnt]];
+}
+
+- (NSArray *)allKeys {
+    return _keys;
+}
+
+- (NSArray *)allValues {
+    return _values;
+}
+
+- (NSUInteger)count {
+    return _dictionary.count;
+}
+
+- (id)objectForKey:(id)aKey {
+    return [_dictionary objectForKey:aKey];
+}
+
+- (NSEnumerator *)keyEnumerator {
+    return _keys.objectEnumerator;
+}
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(__unsafe_unretained id [])buffer count:(NSUInteger)len {
+    return [_keys countByEnumeratingWithState:state objects:buffer count:len];
+}
+
+- (id)objectAtIndex:(NSUInteger)idx {
+    id key = [_keys objectAtIndex:idx];
+    return [self objectForKey:key];
+}
+
+- (id)objectAtIndexedSubscript:(NSUInteger)idx {
+    return [self objectAtIndex:idx];
+}
+
+- (NSUInteger)hash {
+    return _dictionary.hash;
+}
+
+- (BOOL)isEqual:(CHCSVOrderedDictionary *)object {
+    if ([super isEqual:object] && [object isKindOfClass:[CHCSVOrderedDictionary class]]) {
+        // we've determined that from a dictionary POV, they're equal
+        // now we need to test for key ordering
+        return [object->_keys isEqual:_keys];
+    }
+    
+    return NO;
 }
 
 @end

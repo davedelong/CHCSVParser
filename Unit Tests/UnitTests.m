@@ -237,4 +237,50 @@ TEST_ARRAYS(_parsed, _expected); \
     TEST(csv, expected, CHCSVParserOptionsRecognizesBackslashesAsEscapes | CHCSVParserOptionsSanitizesFields);
 }
 
+#pragma mark - Testing First Line as Keys
+
+- (void)testOrderedDictionary {
+    CHCSVOrderedDictionary *dictionary = [CHCSVOrderedDictionary dictionaryWithObjects:@[FIELD1, FIELD2, FIELD3] forKeys:@[FIELD1, FIELD2, FIELD3]];
+    NSArray *expected = @[FIELD1, FIELD2, FIELD3];
+    XCTAssertEqualObjects(dictionary.allKeys, expected, @"Unexpected field order");
+    
+    XCTAssertEqualObjects(dictionary[0], FIELD1, @"Unexpected field");
+    XCTAssertEqualObjects(dictionary[1], FIELD2, @"Unexpected field");
+    XCTAssertEqualObjects(dictionary[2], FIELD3, @"Unexpected field");
+    
+    XCTAssertEqualObjects(dictionary[FIELD1], FIELD1, @"Unexpected field");
+    XCTAssertEqualObjects(dictionary[FIELD2], FIELD2, @"Unexpected field");
+    XCTAssertEqualObjects(dictionary[FIELD3], FIELD3, @"Unexpected field");
+    
+    NSDictionary *regularDictionary = @{FIELD1 : FIELD1, FIELD2 : FIELD2, FIELD3 : FIELD3 };
+    XCTAssertNotEqualObjects(regularDictionary, expected, @"Somehow equal??");
+}
+
+- (void)testFirstLineAsKeys {
+    NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE FIELD1 COMMA FIELD2 COMMA FIELD3;
+    NSArray *expected = @[
+                          [CHCSVOrderedDictionary dictionaryWithObjects:@[FIELD1, FIELD2, FIELD3] forKeys:@[FIELD1, FIELD2, FIELD3]]
+                          ];
+    TEST(csv, expected, CHCSVParserOptionsUsesFirstLineAsKeys);
+}
+
+- (void)testFirstLineAsKeys_SingleLine {
+    NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE;
+    NSArray *expected = @[];
+    TEST(csv, expected, CHCSVParserOptionsUsesFirstLineAsKeys);
+    
+    csv = FIELD1 COMMA FIELD2 COMMA FIELD3;
+    TEST(csv, expected, CHCSVParserOptionsUsesFirstLineAsKeys);
+}
+
+- (void)testFirstLineAsKeys_MismatchedFieldCount {
+    NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE FIELD1 COMMA FIELD2 COMMA FIELD3 COMMA FIELD1;
+    
+    NSError *error = nil;
+    (void)[csv CSVComponentsWithOptions:CHCSVParserOptionsUsesFirstLineAsKeys error:&error];
+    XCTAssertNotNil(error, @"Expected error");
+    XCTAssertEqualObjects(error.domain, CHCSVErrorDomain, @"Unexpected error");
+    XCTAssertEqual(error.code, CHCSVErrorCodeIncorrectNumberOfFields, @"Unexpected error");
+}
+
 @end

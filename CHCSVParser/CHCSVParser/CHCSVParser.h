@@ -29,6 +29,7 @@ extern NSString * const CHCSVErrorDomain;
 
 typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
     CHCSVErrorCodeInvalidFormat = 1,
+    CHCSVErrorCodeIncorrectNumberOfFields,
 };
 
 @class CHCSVParser;
@@ -91,13 +92,25 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
     CHCSVParserOptionsRecognizesBackslashesAsEscapes = 1 << 0,
     CHCSVParserOptionsSanitizesFields = 1 << 1,
     CHCSVParserOptionsRecognizesComments = 1 << 2,
-    CHCSVParserOptionsTrimsWhitespace = 1 << 3
+    CHCSVParserOptionsTrimsWhitespace = 1 << 3,
+    
+    // When you specify this option, instead of getting an Array of Arrays of Strings,
+    // you get an Array of CHCSVOrderedDictionaries
+    CHCSVParserOptionsUsesFirstLineAsKeys = 1 << 4
 };
+
+@interface CHCSVOrderedDictionary : NSDictionary
+
+- (id)objectAtIndexedSubscript:(NSUInteger)idx;
+- (id)objectAtIndex:(NSUInteger)idx;
+
+@end
 
 @interface NSArray (CHCSVAdditions)
 
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath;
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options;
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options error:(NSError *__autoreleasing *)error;
 - (NSString *)CSVString;
 
 @end
@@ -106,5 +119,6 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
 
 - (NSArray *)CSVComponents;
 - (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options;
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options error:(NSError *__autoreleasing *)error;
 
 @end
