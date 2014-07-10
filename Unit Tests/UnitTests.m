@@ -52,6 +52,12 @@ TEST_ARRAYS(_parsed, _expected); \
     TEST(csv, expected);
 }
 
+- (void)testGithubIssue38 {
+    NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE @"#";
+    NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
+    TEST(csv, expected, CHCSVParserOptionsRecognizesComments);
+}
+
 - (void)testGithubIssue50 {
     NSString *csv = @"TRẦN,species_code,Scientific name,Author name,Common name,Family,Description,Habitat,\"Leaf size min (cm, 0 decimal digit)\",\"Leaf size max (cm, 0 decimal digit)\",Distribution,Current National Conservation Status,Growth requirements,Horticultural features,Uses,Associated fauna,Reference,species_id";
     NSArray *expected = @[@[@"TRẦN",@"species_code",@"Scientific name",@"Author name",@"Common name",@"Family",@"Description",@"Habitat",@"\"Leaf size min (cm, 0 decimal digit)\"",@"\"Leaf size max (cm, 0 decimal digit)\"",@"Distribution",@"Current National Conservation Status",@"Growth requirements",@"Horticultural features",@"Uses",@"Associated fauna",@"Reference",@"species_id"]];
