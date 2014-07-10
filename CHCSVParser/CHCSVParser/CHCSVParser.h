@@ -59,8 +59,7 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
 
 @property (readonly) NSUInteger totalBytesRead;
 
-// designated initializer
-- (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter;
+- (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter NS_DESIGNATED_INITIALIZER;
 
 - (id)initWithCSVString:(NSString *)csv;
 - (id)initWithContentsOfCSVFile:(NSString *)csvFilePath;
@@ -73,7 +72,7 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
 @interface CHCSVWriter : NSObject
 
 - (instancetype)initForWritingToCSVFile:(NSString *)path;
-- (instancetype)initWithOutputStream:(NSOutputStream *)stream encoding:(NSStringEncoding)encoding delimiter:(unichar)delimiter;
+- (instancetype)initWithOutputStream:(NSOutputStream *)stream encoding:(NSStringEncoding)encoding delimiter:(unichar)delimiter NS_DESIGNATED_INITIALIZER;
 
 - (void)writeField:(NSString *)field;
 - (void)finishLine;
