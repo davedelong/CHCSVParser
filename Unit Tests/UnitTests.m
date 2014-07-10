@@ -283,7 +283,7 @@ TEST_ARRAYS(_parsed, _expected); \
     NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE FIELD1 COMMA FIELD2 COMMA FIELD3 COMMA FIELD1;
     
     NSError *error = nil;
-    (void)[csv CSVComponentsWithOptions:CHCSVParserOptionsUsesFirstLineAsKeys error:&error];
+    (void)[csv CSVComponentsWithOptions:CHCSVParserOptionsUsesFirstLineAsKeys delimiter:[COMMA characterAtIndex:0] error:&error];
     XCTAssertNotNil(error, @"Expected error");
     XCTAssertEqualObjects(error.domain, CHCSVErrorDomain, @"Unexpected error");
     XCTAssertEqual(error.code, CHCSVErrorCodeIncorrectNumberOfFields, @"Unexpected error");

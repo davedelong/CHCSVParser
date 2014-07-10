@@ -25,6 +25,10 @@
 
 #import <Foundation/Foundation.h>
 
+#ifndef NS_DESIGNATED_INITIALIZER
+#define NS_DESIGNATED_INITIALIZER
+#endif
+
 extern NSString * const CHCSVErrorDomain;
 
 typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
