@@ -716,6 +716,30 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 @end
 
+NSArray *_CHCSVParserParse(CHCSVParser *parser, CHCSVParserOptions options, NSError *__autoreleasing *error);
+NSArray *_CHCSVParserParse(CHCSVParser *parser, CHCSVParserOptions options, NSError *__autoreleasing *error) {
+    
+    BOOL usesFirstLineAsKeys = !!(options & CHCSVParserOptionsUsesFirstLineAsKeys);
+    _CHCSVAggregator *aggregator = usesFirstLineAsKeys ? [[_CHCSVKeyedAggregator alloc] init] : [[_CHCSVAggregator alloc] init];
+    parser.delegate = aggregator;
+    
+    parser.recognizesBackslashesAsEscapes = !!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes);
+    parser.sanitizesFields = !!(options & CHCSVParserOptionsSanitizesFields);
+    parser.recognizesComments = !!(options & CHCSVParserOptionsRecognizesComments);
+    parser.stripsLeadingAndTrailingWhitespace = !!(options & CHCSVParserOptionsTrimsWhitespace);
+    
+    [parser parse];
+    
+    if (aggregator.error != nil) {
+        if (error) {
+            *error = aggregator.error;
+        }
+        return nil;
+    } else {
+        return aggregator.lines;
+    }
+}
+
 @implementation NSArray (CHCSVAdditions)
 
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath {
@@ -728,27 +752,8 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 + (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options error:(NSError *__autoreleasing *)error {
     NSParameterAssert(csvFilePath);
-    BOOL usesFirstLineAsKeys = !!(options & CHCSVParserOptionsUsesFirstLineAsKeys);
-    _CHCSVAggregator *aggregator = usesFirstLineAsKeys ? [[_CHCSVKeyedAggregator alloc] init] : [[_CHCSVAggregator alloc] init];
-    
     CHCSVParser *parser = [[CHCSVParser alloc] initWithContentsOfCSVFile:csvFilePath];
-    [parser setDelegate:aggregator];
-    
-    [parser setRecognizesBackslashesAsEscapes:!!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes)];
-    [parser setSanitizesFields:!!(options & CHCSVParserOptionsSanitizesFields)];
-    [parser setRecognizesComments:!!(options & CHCSVParserOptionsRecognizesComments)];
-    [parser setStripsLeadingAndTrailingWhitespace:!!(options & CHCSVParserOptionsTrimsWhitespace)];
-    
-    [parser parse];
-    
-    if (aggregator.error != nil) {
-        if (error) {
-            *error = aggregator.error;
-        }
-        return nil;
-    } else {
-        return aggregator.lines;
-    }
+    return _CHCSVParserParse(parser, options, error);
 }
 
 - (NSString *)CSVString {
@@ -778,27 +783,8 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 }
 
 - (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options error:(NSError *__autoreleasing *)error {
-    BOOL usesFirstLineAsKeys = !!(options & CHCSVParserOptionsUsesFirstLineAsKeys);
-    _CHCSVAggregator *aggregator = usesFirstLineAsKeys ? [[_CHCSVKeyedAggregator alloc] init] : [[_CHCSVAggregator alloc] init];
-    
     CHCSVParser *parser = [[CHCSVParser alloc] initWithCSVString:self];
-    [parser setDelegate:aggregator];
-    
-    [parser setRecognizesBackslashesAsEscapes:!!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes)];
-    [parser setSanitizesFields:!!(options & CHCSVParserOptionsSanitizesFields)];
-    [parser setRecognizesComments:!!(options & CHCSVParserOptionsRecognizesComments)];
-    [parser setStripsLeadingAndTrailingWhitespace:!!(options & CHCSVParserOptionsTrimsWhitespace)];
-    
-    [parser parse];
-    
-    if (aggregator.error != nil) {
-        if (error) {
-            *error = aggregator.error;
-        }
-        return nil;
-    } else {
-        return aggregator.lines;
-    }
+    return _CHCSVParserParse(parser, options, error);
 }
 
 @end
