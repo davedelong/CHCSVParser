@@ -70,7 +70,7 @@ TEST_ARRAYS(_parsed, _expected); \
     NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:NSStringFromSelector(_cmd)];
     [csv writeToFile:file atomically:NO encoding:NSUTF8StringEncoding error:nil];
     
-    NSArray *actual = [NSArray arrayWithContentsOfCSVFile:file];
+    NSArray *actual = [NSArray arrayWithContentsOfCSVURL:[NSURL fileURLWithPath:file]];
     
     NSArray *expected = @[@[@"TRẦN",@"species_code",@"Scientific name",@"Author name",@"Common name",@"Family",@"Description",@"Habitat",@"\"Leaf size min (cm, 0 decimal digit)\"",@"\"Leaf size max (cm, 0 decimal digit)\"",@"Distribution",@"Current National Conservation Status",@"Growth requirements",@"Horticultural features",@"Uses",@"Associated fauna",@"Reference",@"species_id"]];
     XCTAssertEqualObjects(actual, expected, @"failed");
@@ -283,7 +283,7 @@ TEST_ARRAYS(_parsed, _expected); \
     NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE FIELD1 COMMA FIELD2 COMMA FIELD3 COMMA FIELD1;
     
     NSError *error = nil;
-    (void)[csv CSVComponentsWithOptions:CHCSVParserOptionsUsesFirstLineAsKeys delimiter:[COMMA characterAtIndex:0] error:&error];
+    (void)[csv componentsSeparatedByDelimiter:[COMMA characterAtIndex:0] options:CHCSVParserOptionsUsesFirstLineAsKeys error:&error];
     XCTAssertNotNil(error, @"Expected error");
     XCTAssertEqualObjects(error.domain, CHCSVErrorDomain, @"Unexpected error");
     XCTAssertEqual(error.code, CHCSVErrorCodeIncorrectNumberOfFields, @"Unexpected error");

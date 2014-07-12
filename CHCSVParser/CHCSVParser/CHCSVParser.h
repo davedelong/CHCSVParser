@@ -29,6 +29,10 @@
 #define NS_DESIGNATED_INITIALIZER
 #endif
 
+#ifndef CHCSV_DEPRECATED
+#define CHCSV_DEPRECATED(...) __attribute__((deprecated("" #__VA_ARGS__)))
+#endif
+
 extern NSString * const CHCSVErrorDomain;
 
 typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
@@ -63,13 +67,13 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
 
 @property (readonly) NSUInteger totalBytesRead;
 
-- (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter NS_DESIGNATED_INITIALIZER;
 
-- (id)initWithCSVString:(NSString *)csv;
-- (id)initWithCSVString:(NSString *)csv delimiter:(unichar)delimiter;
+- (instancetype)initWithCSVString:(NSString *)csv;
+- (instancetype)initWithCSVString:(NSString *)csv delimiter:(unichar)delimiter;
 
-- (id)initWithContentsOfCSVFile:(NSString *)csvFilePath;
-- (id)initWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter;
+- (instancetype)initWithContentsOfCSVFile:(NSString *)csvFilePath;
+- (instancetype)initWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter;
 
 - (void)parse;
 - (void)cancelParsing;
@@ -114,21 +118,36 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
 
 @interface NSArray (CHCSVAdditions)
 
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath;
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter;
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options;
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter;
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error;
++ (instancetype)arrayWithContentsOfCSVURL:(NSURL *)fileURL;
++ (instancetype)arrayWithContentsOfCSVURL:(NSURL *)fileURL options:(CHCSVParserOptions)options;
++ (instancetype)arrayWithContentsOfDelimitedURL:(NSURL *)fileURL delimiter:(unichar)delimiter;
++ (instancetype)arrayWithContentsOfDelimitedURL:(NSURL *)fileURL options:(CHCSVParserOptions)options delimiter:(unichar)delimiter;
++ (instancetype)arrayWithContentsOfDelimitedURL:(NSURL *)fileURL options:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error;
+
 - (NSString *)CSVString;
+
+// Deprecated methods
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath CHCSV_DEPRECATED("Use +arrayWithContentsOfCSVURL: instead");
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter CHCSV_DEPRECATED("Use +arrayWithContentsOfDelimitedURL:delimiter: instead");
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options CHCSV_DEPRECATED("Use +arrayWithContentsOfCSVURL:options: instead");
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter CHCSV_DEPRECATED("Use +arrayWithContentsOfDelimitedURL:options:delimiter: instead");
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error CHCSV_DEPRECATED("Use +arrayWithContentsOfDelimitedURL:options:delimiter:error: instead");
 
 @end
 
 @interface NSString (CHCSVAdditions)
 
 - (NSArray *)CSVComponents;
-- (NSArray *)CSVComponentsWithDelimiter:(unichar)delimiter;
 - (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options;
-- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter;
-- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error;
+- (NSArray *)componentsSeparatedByDelimiter:(unichar)delimiter;
+- (NSArray *)componentsSeparatedByDelimiter:(unichar)delimiter options:(CHCSVParserOptions)options;
+- (NSArray *)componentsSeparatedByDelimiter:(unichar)delimiter options:(CHCSVParserOptions)options error:(NSError *__autoreleasing *)error;
+
+// Deprecated methods
+
+- (NSArray *)CSVComponentsWithDelimiter:(unichar)delimiter CHCSV_DEPRECATED("Use -componentsSeparatedByDelimiter: instead");
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter CHCSV_DEPRECATED("Use -componentsSeparatedByDelimiter:options: instead");
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error CHCSV_DEPRECATED("Use -componentsSeparatedByDelimiter:options:error: instead");
 
 @end

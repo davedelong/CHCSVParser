@@ -754,25 +754,25 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
 
 @implementation NSArray (CHCSVAdditions)
 
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath {
-    return [self arrayWithContentsOfCSVFile:csvFilePath options:0 delimiter:COMMA error:nil];
++ (instancetype)arrayWithContentsOfCSVURL:(NSURL *)fileURL {
+    return [self arrayWithContentsOfDelimitedURL:fileURL options:0 delimiter:COMMA error:nil];
 }
 
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter {
-    return [self arrayWithContentsOfCSVFile:csvFilePath options:0 delimiter:delimiter error:nil];
++ (instancetype)arrayWithContentsOfDelimitedURL:(NSURL *)fileURL delimiter:(unichar)delimiter {
+    return [self arrayWithContentsOfDelimitedURL:fileURL options:0 delimiter:delimiter error:nil];
 }
 
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options {
-    return [self arrayWithContentsOfCSVFile:csvFilePath options:options delimiter:COMMA error:nil];
++ (instancetype)arrayWithContentsOfCSVURL:(NSURL *)fileURL options:(CHCSVParserOptions)options {
+    return [self arrayWithContentsOfDelimitedURL:fileURL options:options delimiter:COMMA error:nil];
 }
 
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
-    return [self arrayWithContentsOfCSVFile:csvFilePath options:options delimiter:delimiter error:nil];
++ (instancetype)arrayWithContentsOfDelimitedURL:(NSURL *)fileURL options:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
+    return [self arrayWithContentsOfDelimitedURL:fileURL options:options delimiter:delimiter error:nil];
 }
 
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
-    NSParameterAssert(csvFilePath);
-    NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:csvFilePath];
++ (instancetype)arrayWithContentsOfDelimitedURL:(NSURL *)fileURL options:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
+    NSParameterAssert(fileURL);
+    NSInputStream *stream = [NSInputStream inputStreamWithURL:fileURL];
     
     return _CHCSVParserParse(stream, options, delimiter, error);
 }
@@ -791,32 +791,68 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
     return [[NSString alloc] initWithData:buffer encoding:NSUTF8StringEncoding];
 }
 
+// Deprecated methods
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:0 delimiter:COMMA error:nil];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:0 delimiter:delimiter error:nil];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:options delimiter:COMMA error:nil];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:options delimiter:delimiter error:nil];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:options delimiter:delimiter error:error];
+}
+
 @end
 
 @implementation NSString (CHCSVAdditions)
 
 
 - (NSArray *)CSVComponents {
-    return [self CSVComponentsWithOptions:0 delimiter:COMMA];
-}
-
-- (NSArray *)CSVComponentsWithDelimiter:(unichar)delimiter {
-    return [self CSVComponentsWithOptions:0 delimiter:delimiter];
+    return [self componentsSeparatedByDelimiter:COMMA options:0 error:nil];
 }
 
 - (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options {
-    return [self CSVComponentsWithOptions:options delimiter:COMMA];
+    return [self componentsSeparatedByDelimiter:COMMA options:options error:nil];
 }
 
-- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
-    return [self CSVComponentsWithOptions:options delimiter:delimiter error:nil];
+- (NSArray *)componentsSeparatedByDelimiter:(unichar)delimiter {
+    return [self componentsSeparatedByDelimiter:delimiter options:0 error:nil];
 }
 
-- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
+- (NSArray *)componentsSeparatedByDelimiter:(unichar)delimiter options:(CHCSVParserOptions)options {
+    return [self componentsSeparatedByDelimiter:delimiter options:options error:nil];
+}
+
+- (NSArray *)componentsSeparatedByDelimiter:(unichar)delimiter options:(CHCSVParserOptions)options error:(NSError *__autoreleasing *)error {
     NSData *csvData = [self dataUsingEncoding:NSUTF8StringEncoding];
     NSInputStream *stream = [NSInputStream inputStreamWithData:csvData];
     
     return _CHCSVParserParse(stream, options, delimiter, error);
+}
+
+// Deprecated methods
+
+- (NSArray *)CSVComponentsWithDelimiter:(unichar)delimiter {
+    return [self componentsSeparatedByDelimiter:delimiter options:0 error:nil];
+}
+
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
+    return [self componentsSeparatedByDelimiter:delimiter options:options error:nil];
+}
+
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
+    return [self componentsSeparatedByDelimiter:delimiter options:options error:error];
 }
 
 @end
