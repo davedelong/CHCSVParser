@@ -70,21 +70,34 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     return [self initWithInputStream:stream usedEncoding:&encoding delimiter:COMMA];
 }
 
+- (instancetype)initWithDelimitedString:(NSString *)string delimiter:(unichar)delimiter {
+    NSInputStream *stream = [NSInputStream inputStreamWithData:[string dataUsingEncoding:NSUTF8StringEncoding]];
+    return [self initWithInputStream:stream usedEncoding:NULL delimiter:delimiter];
+}
+
+- (instancetype)initWithContentsOfCSVURL:(NSURL *)csvURL {
+    NSInputStream *stream = [NSInputStream inputStreamWithURL:csvURL];
+    return [self initWithInputStream:stream usedEncoding:NULL delimiter:COMMA];
+}
+
+- (instancetype)initWithContentsOfDelimitedURL:(NSURL *)URL delimiter:(unichar)delimiter {
+    NSInputStream *stream = [NSInputStream inputStreamWithURL:URL];
+    return [self initWithInputStream:stream usedEncoding:NULL delimiter:delimiter];
+}
+
+// deprecated
 - (id)initWithCSVString:(NSString *)csv delimiter:(unichar)delimiter {
-    NSInputStream *stream = [NSInputStream inputStreamWithData:[csv dataUsingEncoding:NSUTF8StringEncoding]];
-    return [self initWithInputStream:stream usedEncoding:nil delimiter:delimiter];
+    return [self initWithDelimitedString:csv delimiter:delimiter];
 }
 
+// deprecated
 - (id)initWithContentsOfCSVFile:(NSString *)csvFilePath {
-    NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:csvFilePath];
-    NSStringEncoding encoding = 0;
-    return [self initWithInputStream:stream usedEncoding:&encoding delimiter:COMMA];
+    return [self initWithContentsOfCSVURL:[NSURL fileURLWithPath:csvFilePath]];
 }
 
+// deprecated
 - (id)initWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter {
-    NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:csvFilePath];
-    NSStringEncoding encoding = 0;
-    return [self initWithInputStream:stream usedEncoding:&encoding delimiter:delimiter];
+    return [self initWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] delimiter:delimiter];
 }
 
 - (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter {
@@ -108,7 +121,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         _recognizesBackslashesAsEscapes = NO;
         _sanitizesFields = NO;
         _sanitizedField = [[NSMutableString alloc] init];
-        _stripsLeadingAndTrailingWhitespace = NO;
+        _trimsWhitespace = NO;
         _recognizesLeadingEqualSign = NO;
         
         NSMutableCharacterSet *m = [[NSCharacterSet newlineCharacterSet] mutableCopy];
@@ -154,6 +167,16 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     if (_delimiter == EQUAL && _recognizesLeadingEqualSign) {
         [NSException raise:NSInternalInconsistencyException format:@"Cannot recognize leading equal sign when using '=' as the delimiter"];
     }
+}
+
+// deprecated
+- (void)setStripsLeadingAndTrailingWhitespace:(BOOL)stripsLeadingAndTrailingWhitespace {
+    self.trimsWhitespace = stripsLeadingAndTrailingWhitespace;
+}
+
+// deprecated
+- (BOOL)stripsLeadingAndTrailingWhitespace {
+    return self.trimsWhitespace;
 }
 
 #pragma mark -
@@ -358,7 +381,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
            [whitespace characterIsMember:[self _peekCharacter]] &&
            [self _peekCharacter] != _delimiter) {
         
-        if (_stripsLeadingAndTrailingWhitespace == NO) {
+        if (_trimsWhitespace == NO) {
             [_sanitizedField appendFormat:@"%C", [self _peekCharacter]];
             // if we're sanitizing fields, then these characters would be stripped (because they're not appended to _sanitizedField)
         }
@@ -382,7 +405,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         parsedField = [self _parseEscapedField];
     } else {
         parsedField = [self _parseUnescapedField];
-        if (_stripsLeadingAndTrailingWhitespace) {
+        if (_trimsWhitespace) {
             NSString *trimmedString = [_sanitizedField stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             [_sanitizedField setString:trimmedString];
         }
@@ -525,7 +548,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         field = [_sanitizedField copy];
     } else {
         field = [_string substringWithRange:_fieldRange];
-        if (_stripsLeadingAndTrailingWhitespace) {
+        if (_trimsWhitespace) {
             field = [field stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         }
     }
@@ -765,7 +788,7 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
     parser.recognizesBackslashesAsEscapes = !!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes);
     parser.sanitizesFields = !!(options & CHCSVParserOptionsSanitizesFields);
     parser.recognizesComments = !!(options & CHCSVParserOptionsRecognizesComments);
-    parser.stripsLeadingAndTrailingWhitespace = !!(options & CHCSVParserOptionsTrimsWhitespace);
+    parser.trimsWhitespace = !!(options & CHCSVParserOptionsTrimsWhitespace);
     parser.recognizesLeadingEqualSign = !!(options & CHCSVParserOptionsRecognizesLeadingEqualSign);
     
     [parser parse];

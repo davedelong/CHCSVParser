@@ -62,21 +62,28 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
 @property (assign) id<CHCSVParserDelegate> delegate;
 
 // For a description of these properties, see the CHCSVParserOptions below
-@property (nonatomic, assign) BOOL recognizesBackslashesAsEscapes; // default is NO
 @property (nonatomic, assign) BOOL sanitizesFields; // default is NO
+@property (nonatomic, assign) BOOL trimsWhitespace; // default is NO
+
+@property (nonatomic, assign) BOOL recognizesBackslashesAsEscapes; // default is NO
 @property (nonatomic, assign) BOOL recognizesComments; // default is NO
-@property (nonatomic, assign) BOOL stripsLeadingAndTrailingWhitespace; // default is NO
 @property (nonatomic, assign) BOOL recognizesLeadingEqualSign; // default is NO
+
+@property (nonatomic, assign) BOOL stripsLeadingAndTrailingWhitespace CHCSV_DEPRECATED(@"use .trimsWhitespace instead"); // default is NO
 
 @property (readonly) NSUInteger totalBytesRead;
 
 - (instancetype)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)initWithCSVString:(NSString *)csv;
-- (instancetype)initWithCSVString:(NSString *)csv delimiter:(unichar)delimiter;
+- (instancetype)initWithDelimitedString:(NSString *)string delimiter:(unichar)delimiter;
 
-- (instancetype)initWithContentsOfCSVFile:(NSString *)csvFilePath;
-- (instancetype)initWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter;
+- (instancetype)initWithContentsOfCSVURL:(NSURL *)csvURL;
+- (instancetype)initWithContentsOfDelimitedURL:(NSURL *)URL delimiter:(unichar)delimiter;
+
+- (instancetype)initWithCSVString:(NSString *)csv delimiter:(unichar)delimiter CHCSV_DEPRECATED("use -initWithDelimitedString:delimiter: instead");
+- (instancetype)initWithContentsOfCSVFile:(NSString *)csvFilePath CHCSV_DEPRECATED("use -initWithContentsOfCSVURL: instead");
+- (instancetype)initWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter CHCSV_DEPRECATED("use -initWithContentsOfDelimitedURL:delimiter: instead");
 
 - (void)parse;
 - (void)cancelParsing;
