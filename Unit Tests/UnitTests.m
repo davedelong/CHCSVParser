@@ -27,8 +27,8 @@
 #import "UnitTestContent.h"
 #import "CHCSVParser.h"
 
-#define TEST_ARRAYS(_csv, _expected) do {\
-XCTAssertEqualObjects(_csv, _expected, @"failed"); \
+#define TEST_ARRAYS(_actual, _expected) do {\
+XCTAssertEqualObjects(_actual, _expected, @"failed"); \
 } while(0)
 
 #define TEST(_csv, _expected, ...) do {\
@@ -53,7 +53,7 @@ TEST_ARRAYS(_parsed, _expected); \
 }
 
 - (void)testGithubIssue38 {
-    NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE @"#";
+    NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE OCTOTHORPE;
     NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
     TEST(csv, expected, CHCSVParserOptionsRecognizesComments);
 }
@@ -287,6 +287,68 @@ TEST_ARRAYS(_parsed, _expected); \
     XCTAssertNotNil(error, @"Expected error");
     XCTAssertEqualObjects(error.domain, CHCSVErrorDomain, @"Unexpected error");
     XCTAssertEqual(error.code, CHCSVErrorCodeIncorrectNumberOfFields, @"Unexpected error");
+}
+
+#pragma mark - Testing Valid Delimiters
+
+- (void)testAllowedDelimiter_Octothorpe {
+    NSString *csv = FIELD1 OCTOTHORPE FIELD2 OCTOTHORPE FIELD3;
+    NSArray *actual = [csv componentsSeparatedByDelimiter:'#'];
+    NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
+    
+    TEST_ARRAYS(actual, expected);
+}
+
+- (void)testDisallowedDelimiter_Octothorpe {
+    NSString *csv = FIELD1 OCTOTHORPE FIELD2 OCTOTHORPE FIELD3;
+    
+    XCTAssertThrows([csv componentsSeparatedByDelimiter:'#' options:CHCSVParserOptionsRecognizesComments], @"failed");
+    
+}
+
+- (void)testAllowedDelimiter_Backslash {
+    NSString *csv = FIELD1 BACKSLASH FIELD2 BACKSLASH FIELD3;
+    NSArray *actual = [csv componentsSeparatedByDelimiter:'\\'];
+    NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
+    
+    TEST_ARRAYS(actual, expected);
+}
+
+- (void)testDisallowedDelimiter_Backslash {
+    NSString *csv = FIELD1 BACKSLASH FIELD2 BACKSLASH FIELD3;
+    
+    XCTAssertThrows([csv componentsSeparatedByDelimiter:'\\' options:CHCSVParserOptionsRecognizesBackslashesAsEscapes], @"failed");
+    
+}
+
+- (void)testAllowedDelimiter_Equal {
+    NSString *csv = FIELD1 EQUAL FIELD2 EQUAL FIELD3;
+    NSArray *actual = [csv componentsSeparatedByDelimiter:'='];
+    NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
+    
+    TEST_ARRAYS(actual, expected);
+}
+
+- (void)testDisallowedDelimiter_Equal {
+    NSString *csv = FIELD1 EQUAL FIELD2 EQUAL FIELD3;
+    
+    XCTAssertThrows([csv componentsSeparatedByDelimiter:'=' options:CHCSVParserOptionsRecognizesLeadingEqualSign], @"failed");
+}
+
+#pragma mark - Testing Leading Equal
+
+- (void)testLeadingEqual {
+    NSString *csv = FIELD1 COMMA EQUAL QUOTED_FIELD2 COMMA EQUAL QUOTED_FIELD3;
+    NSArray *expected = @[@[FIELD1, EQUAL QUOTED_FIELD2, EQUAL QUOTED_FIELD3]];
+    
+    TEST(csv, expected, CHCSVParserOptionsRecognizesLeadingEqualSign);
+}
+
+- (void)testSanitizedLeadingEqual {
+    NSString *csv = FIELD1 COMMA EQUAL QUOTED_FIELD2 COMMA EQUAL QUOTED_FIELD3;
+    NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
+    
+    TEST(csv, expected, CHCSVParserOptionsRecognizesLeadingEqualSign | CHCSVParserOptionsSanitizesFields);
 }
 
 @end

@@ -60,10 +60,13 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
 @interface CHCSVParser : NSObject
 
 @property (assign) id<CHCSVParserDelegate> delegate;
-@property (assign) BOOL recognizesBackslashesAsEscapes; // default is NO
-@property (assign) BOOL sanitizesFields; // default is NO
-@property (assign) BOOL recognizesComments; // default is NO
-@property (assign) BOOL stripsLeadingAndTrailingWhitespace; // default is NO
+
+// For a description of these properties, see the CHCSVParserOptions below
+@property (nonatomic, assign) BOOL recognizesBackslashesAsEscapes; // default is NO
+@property (nonatomic, assign) BOOL sanitizesFields; // default is NO
+@property (nonatomic, assign) BOOL recognizesComments; // default is NO
+@property (nonatomic, assign) BOOL stripsLeadingAndTrailingWhitespace; // default is NO
+@property (nonatomic, assign) BOOL recognizesLeadingEqualSign; // default is NO
 
 @property (readonly) NSUInteger totalBytesRead;
 
@@ -99,14 +102,31 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
 #pragma mark - Convenience Categories
 
 typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
+    // Allows you to have delimiters and other control characters in a field without quoting the field
+    // a,b\,c,d
+    // If you use this option, you may not use "\" as the delimiter
     CHCSVParserOptionsRecognizesBackslashesAsEscapes = 1 << 0,
+    
+    // Cleans the field before reporting it (unescaping characters, stripping leading/trailing whitespace, etc)
     CHCSVParserOptionsSanitizesFields = 1 << 1,
+    
+    // Fields that begin with a "#" will be reported as comments. Comments are ended by unescaped newlines
+    // If you use this option, you may not use "#" as the delimiter
     CHCSVParserOptionsRecognizesComments = 1 << 2,
+    
+    // Trims whitespace around a field
     CHCSVParserOptionsTrimsWhitespace = 1 << 3,
     
     // When you specify this option, instead of getting an Array of Arrays of Strings,
     // you get an Array of CHCSVOrderedDictionaries
-    CHCSVParserOptionsUsesFirstLineAsKeys = 1 << 4
+    // If the CSV only contains a single line, then an empty array is returned
+    CHCSVParserOptionsUsesFirstLineAsKeys = 1 << 4,
+    
+    // Some CSV files contain fields that look like:
+    // a,="001234",b
+    // http://edoceo.com/utilitas/csv-file-format
+    // If you specify this option, you may not use "=" as the delimiter
+    CHCSVParserOptionsRecognizesLeadingEqualSign = 1 << 5
 };
 
 @interface CHCSVOrderedDictionary : NSDictionary

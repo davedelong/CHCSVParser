@@ -35,6 +35,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 #define DOUBLE_QUOTE '"'
 #define COMMA ','
 #define OCTOTHORPE '#'
+#define EQUAL '='
 #define BACKSLASH '\\'
 #define NULLCHAR '\0'
 
@@ -91,7 +92,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     NSParameterAssert(delimiter);
     NSAssert([[NSCharacterSet newlineCharacterSet] characterIsMember:delimiter] == NO, @"The field delimiter may not be a newline");
     NSAssert(delimiter != DOUBLE_QUOTE, @"The field delimiter may not be a double quote");
-    NSAssert(delimiter != OCTOTHORPE, @"The field delimiter may not be an octothorpe");
     
     self = [super init];
     if (self) {
@@ -109,6 +109,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         _sanitizesFields = NO;
         _sanitizedField = [[NSMutableString alloc] init];
         _stripsLeadingAndTrailingWhitespace = NO;
+        _recognizesLeadingEqualSign = NO;
         
         NSMutableCharacterSet *m = [[NSCharacterSet newlineCharacterSet] mutableCopy];
         NSString *invalid = [NSString stringWithFormat:@"%c%C", DOUBLE_QUOTE, _delimiter];
@@ -130,6 +131,29 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 - (void)dealloc {
     [_stream close];
+}
+
+#pragma mark -
+
+- (void)setRecognizesBackslashesAsEscapes:(BOOL)recognizesBackslashesAsEscapes {
+    _recognizesBackslashesAsEscapes = recognizesBackslashesAsEscapes;
+    if (_delimiter == BACKSLASH && _recognizesBackslashesAsEscapes) {
+        [NSException raise:NSInternalInconsistencyException format:@"Cannot recognize backslashes as escapes when using '\\' as the delimiter"];
+    }
+}
+
+- (void)setRecognizesComments:(BOOL)recognizesComments {
+    _recognizesComments = recognizesComments;
+    if (_delimiter == OCTOTHORPE && _recognizesComments) {
+        [NSException raise:NSInternalInconsistencyException format:@"Cannot recognize comments when using '#' as the delimiter"];
+    }
+}
+
+- (void)setRecognizesLeadingEqualSign:(BOOL)recognizesLeadingEqualSign {
+    _recognizesLeadingEqualSign = recognizesLeadingEqualSign;
+    if (_delimiter == EQUAL && _recognizesLeadingEqualSign) {
+        [NSException raise:NSInternalInconsistencyException format:@"Cannot recognize leading equal sign when using '=' as the delimiter"];
+    }
 }
 
 #pragma mark -
@@ -352,6 +376,9 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     [self _parseFieldWhitespace];
     
     if ([self _peekCharacter] == DOUBLE_QUOTE) {
+        parsedField = [self _parseEscapedField];
+    } else if (_recognizesLeadingEqualSign && [self _peekCharacter] == EQUAL && [self _peekPeekCharacter] == DOUBLE_QUOTE) {
+        [self _advance]; // consume the equal sign
         parsedField = [self _parseEscapedField];
     } else {
         parsedField = [self _parseUnescapedField];
@@ -739,6 +766,7 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
     parser.sanitizesFields = !!(options & CHCSVParserOptionsSanitizesFields);
     parser.recognizesComments = !!(options & CHCSVParserOptionsRecognizesComments);
     parser.stripsLeadingAndTrailingWhitespace = !!(options & CHCSVParserOptionsTrimsWhitespace);
+    parser.recognizesLeadingEqualSign = !!(options & CHCSVParserOptionsRecognizesLeadingEqualSign);
     
     [parser parse];
     

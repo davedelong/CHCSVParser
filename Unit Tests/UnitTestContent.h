@@ -14,6 +14,7 @@
 #define SPACE @" "
 #define BACKSLASH @"\\"
 #define OCTOTHORPE @"#"
+#define EQUAL @"="
 
 #define FIELD1 @"field1"
 #define FIELD2 @"field2"
