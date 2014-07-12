@@ -303,7 +303,6 @@ TEST_ARRAYS(_parsed, _expected); \
     NSString *csv = FIELD1 OCTOTHORPE FIELD2 OCTOTHORPE FIELD3;
     
     XCTAssertThrows([csv componentsSeparatedByDelimiter:'#' options:CHCSVParserOptionsRecognizesComments], @"failed");
-    
 }
 
 - (void)testAllowedDelimiter_Backslash {
@@ -318,7 +317,6 @@ TEST_ARRAYS(_parsed, _expected); \
     NSString *csv = FIELD1 BACKSLASH FIELD2 BACKSLASH FIELD3;
     
     XCTAssertThrows([csv componentsSeparatedByDelimiter:'\\' options:CHCSVParserOptionsRecognizesBackslashesAsEscapes], @"failed");
-    
 }
 
 - (void)testAllowedDelimiter_Equal {

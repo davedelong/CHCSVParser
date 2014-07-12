@@ -85,21 +85,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     return [self initWithInputStream:stream usedEncoding:NULL delimiter:delimiter];
 }
 
-// deprecated
-- (id)initWithCSVString:(NSString *)csv delimiter:(unichar)delimiter {
-    return [self initWithDelimitedString:csv delimiter:delimiter];
-}
-
-// deprecated
-- (id)initWithContentsOfCSVFile:(NSString *)csvFilePath {
-    return [self initWithContentsOfCSVURL:[NSURL fileURLWithPath:csvFilePath]];
-}
-
-// deprecated
-- (id)initWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter {
-    return [self initWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] delimiter:delimiter];
-}
-
 - (id)initWithInputStream:(NSInputStream *)stream usedEncoding:(NSStringEncoding *)encoding delimiter:(unichar)delimiter {
     NSParameterAssert(stream);
     NSParameterAssert(delimiter);
@@ -167,16 +152,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     if (_delimiter == EQUAL && _recognizesLeadingEqualSign) {
         [NSException raise:NSInternalInconsistencyException format:@"Cannot recognize leading equal sign when using '=' as the delimiter"];
     }
-}
-
-// deprecated
-- (void)setStripsLeadingAndTrailingWhitespace:(BOOL)stripsLeadingAndTrailingWhitespace {
-    self.trimsWhitespace = stripsLeadingAndTrailingWhitespace;
-}
-
-// deprecated
-- (BOOL)stripsLeadingAndTrailingWhitespace {
-    return self.trimsWhitespace;
 }
 
 #pragma mark -
@@ -842,32 +817,9 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
     return [[NSString alloc] initWithData:buffer encoding:NSUTF8StringEncoding];
 }
 
-// Deprecated methods
-
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath {
-    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:0 delimiter:COMMA error:nil];
-}
-
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter {
-    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:0 delimiter:delimiter error:nil];
-}
-
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options {
-    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:options delimiter:COMMA error:nil];
-}
-
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
-    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:options delimiter:delimiter error:nil];
-}
-
-+ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
-    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:options delimiter:delimiter error:error];
-}
-
 @end
 
 @implementation NSString (CHCSVAdditions)
-
 
 - (NSArray *)CSVComponents {
     return [self componentsSeparatedByDelimiter:COMMA options:0 error:nil];
@@ -890,20 +842,6 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
     NSInputStream *stream = [NSInputStream inputStreamWithData:csvData];
     
     return _CHCSVParserParse(stream, options, delimiter, error);
-}
-
-// Deprecated methods
-
-- (NSArray *)CSVComponentsWithDelimiter:(unichar)delimiter {
-    return [self componentsSeparatedByDelimiter:delimiter options:0 error:nil];
-}
-
-- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
-    return [self componentsSeparatedByDelimiter:delimiter options:options error:nil];
-}
-
-- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
-    return [self componentsSeparatedByDelimiter:delimiter options:options error:error];
 }
 
 @end
@@ -974,6 +912,72 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
     }
     
     return NO;
+}
+
+@end
+
+#pragma mark - Deprecated methods
+
+@implementation CHCSVParser (Deprecated)
+
+- (id)initWithCSVString:(NSString *)csv delimiter:(unichar)delimiter {
+    return [self initWithDelimitedString:csv delimiter:delimiter];
+}
+
+- (id)initWithContentsOfCSVFile:(NSString *)csvFilePath {
+    return [self initWithContentsOfCSVURL:[NSURL fileURLWithPath:csvFilePath]];
+}
+
+- (id)initWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter {
+    return [self initWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] delimiter:delimiter];
+}
+
+- (void)setStripsLeadingAndTrailingWhitespace:(BOOL)stripsLeadingAndTrailingWhitespace {
+    self.trimsWhitespace = stripsLeadingAndTrailingWhitespace;
+}
+
+- (BOOL)stripsLeadingAndTrailingWhitespace {
+    return self.trimsWhitespace;
+}
+
+@end
+
+@implementation NSArray (CHCSVAdditions_Deprecated)
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:0 delimiter:COMMA error:nil];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath delimiter:(unichar)delimiter {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:0 delimiter:delimiter error:nil];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:options delimiter:COMMA error:nil];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:options delimiter:delimiter error:nil];
+}
+
++ (instancetype)arrayWithContentsOfCSVFile:(NSString *)csvFilePath options:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
+    return [self arrayWithContentsOfDelimitedURL:[NSURL fileURLWithPath:csvFilePath] options:options delimiter:delimiter error:error];
+}
+
+@end
+
+@implementation NSString (CHCSVAdditions_Deprecated)
+
+- (NSArray *)CSVComponentsWithDelimiter:(unichar)delimiter {
+    return [self componentsSeparatedByDelimiter:delimiter options:0 error:nil];
+}
+
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter {
+    return [self componentsSeparatedByDelimiter:delimiter options:options error:nil];
+}
+
+- (NSArray *)CSVComponentsWithOptions:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
+    return [self componentsSeparatedByDelimiter:delimiter options:options error:error];
 }
 
 @end
