@@ -28,14 +28,32 @@
 #import "CHCSVParser.h"
 
 #define TEST_ARRAYS(_actual, _expected) do {\
-XCTAssertEqualObjects(_actual, _expected, @"failed"); \
+    XCTAssertEqual(_actual.count, _expected.count, @"incorrect number of records"); \
+    if (_actual.count == _expected.count) { \
+        for (NSUInteger _record = 0; _record < _actual.count; ++_record) { \
+            NSArray *_actualRow = _actual[_record]; \
+            NSArray *_expectedRow = _expected[_record]; \
+            XCTAssertEqual(_actualRow.count, _expectedRow.count, @"incorrect number of fields on line %lu", _record + 1); \
+            if (_actualRow.count == _expectedRow.count) { \
+                for (NSUInteger _field = 0; _field < _actualRow.count; ++_field) { \
+                    id _actualField = _actualRow[_field]; \
+                    id _expectedField = _expectedRow[_field]; \
+                    XCTAssertEqualObjects(_actualField, _expectedField, @"mismatched field #%lu on line %lu", _field, _record + 1); \
+                    if ([_actualField isEqual:_expectedField] == NO) { \
+                        NSLog(@"expected data: %@", [_expectedField dataUsingEncoding:NSUTF8StringEncoding]); \
+                        NSLog(@"actual data:   %@", [_actualField dataUsingEncoding:NSUTF8StringEncoding]); \
+                    } \
+                } \
+            } \
+        } \
+    } \
 } while(0)
 
 #define TEST(_csv, _expected, ...) do {\
-NSUInteger _optionList[] = {0, ##__VA_ARGS__}; \
-NSUInteger _option = _optionList[(sizeof(_optionList)/sizeof(NSUInteger)) == 2 ? 1 : 0]; \
-NSArray *_parsed = [(_csv) CSVComponentsWithOptions:(_option)]; \
-TEST_ARRAYS(_parsed, _expected); \
+    NSUInteger _optionList[] = {0, ##__VA_ARGS__}; \
+    NSUInteger _option = _optionList[(sizeof(_optionList)/sizeof(NSUInteger)) == 2 ? 1 : 0]; \
+    NSArray *_parsed = [(_csv) CSVComponentsWithOptions:(_option)]; \
+    TEST_ARRAYS(_parsed, _expected); \
 } while(0)
 
 @implementation UnitTests
