@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		550ED4281973491500E7D173 /* Issue64.csv in Resources */ = {isa = PBXBuildFile; fileRef = 550ED4271973491500E7D173 /* Issue64.csv */; };
 		557FCEB61203F938009FCDBA /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557FCEB51203F938009FCDBA /* CoreServices.framework */; };
 		557FD05D1204A731009FCDBA /* UnitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD05B1204A72B009FCDBA /* UnitTests.m */; };
 		55B60C47180DB1F900B18D7C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55B60C46180DB1F900B18D7C /* XCTest.framework */; };
@@ -19,6 +20,7 @@
 /* Begin PBXFileReference section */
 		08FB7796FE84155DC02AAC07 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		550ED4271973491500E7D173 /* Issue64.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue64.csv; sourceTree = "<group>"; };
 		5560A19E173743A300DDD1D3 /* UnitTestContent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UnitTestContent.h; sourceTree = "<group>"; };
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		557FD0531204A70D009FCDBA /* Unit Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Unit Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -108,6 +110,7 @@
 				5560A19E173743A300DDD1D3 /* UnitTestContent.h */,
 				557FD05A1204A72B009FCDBA /* UnitTests.h */,
 				557FD05B1204A72B009FCDBA /* UnitTests.m */,
+				550ED4271973491500E7D173 /* Issue64.csv */,
 			);
 			path = "Unit Tests";
 			sourceTree = "<group>";
@@ -183,6 +186,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				550ED4281973491500E7D173 /* Issue64.csv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

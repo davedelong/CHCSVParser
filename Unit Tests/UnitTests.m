@@ -127,6 +127,25 @@
     TEST(csv, expected);
 }
 
+- (void)testGithubIssue64 {
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSURL *fileURL = [bundle URLForResource:@"Issue64" withExtension:@"csv"];
+    
+    NSArray *actual = [NSArray arrayWithContentsOfCSVURL:fileURL];
+    NSArray *expected = @[@[@"SplashID vID File -v2.0"],
+                          @[@"F"],
+                          @[@"T",@"21",@"Web Logins",@"Description",@"Username",@"Password",@"URL",@"Field 5",@"4",@""],
+                          @[@"F",@"21",@"test",@"me",@"23123123",@"www.ya.ru",@"",@"",@"4",@"",@"",@"",@"",@"",@"",@"Personal",@"\"aasdasd\r\radasdasd\""],
+                          @[@"T",@"3",@"Credit Cards",@"Description",@"Card #",@"Expiry Date",@"Name",@"PIN",@"18",@""],
+                          @[@"F",@"3",@"карта",@"123123123213",@"23/23",@"Лдлоло Лдлодло",@"23223",@"",@"18",@"",@"",@"",@"",@"",@"",@"Unfiled",@"\"фывфывыфв\r\r\rфывфыв\""],
+                          @[@"T",@"21",@"Web Logins",@"Description",@"Username",@"Password",@"URL",@"Field 5",@"4",@""],
+                          @[@"F",@"21",@"test 2",@"me",@"23123123",@"www.ya.ru",@"f5",@"f6",@"4",@"",@"",@"",@"",@"",@"",@"Personal",@"\"aasdasd\r\radasdasd\""],
+                          @[@"T",@"3",@"Credit Cards",@"Description",@"Card #",@"Expiry Date",@"Name",@"PIN",@"18",@""],
+                          @[@"F",@"3",@"карта 2",@"123123123213",@"23/23",@"Лдлоло Лдлодло",@"23223",@"",@"18",@"",@"",@"",@"",@"",@"",@"Unfiled",@"\"фывфывыфв\r\r\rфывфыв\""]];
+    
+    TEST_ARRAYS(actual, expected);
+}
+
 - (void)testGithubIssue65 {
     NSString *csv = FIELD1 @"æ" COMMA FIELD2 @"ø" COMMA FIELD3 @"å";
     NSArray *expected = @[@[FIELD1 @"æ", FIELD2 @"ø", FIELD3 @"å"]];
