@@ -11,6 +11,7 @@
 #define SEMICOLON @";"
 #define DOUBLEQUOTE @"\""
 #define NEWLINE @"\n"
+#define TAB @"\t"
 #define SPACE @" "
 #define BACKSLASH @"\\"
 #define OCTOTHORPE @"#"

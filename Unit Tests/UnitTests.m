@@ -52,6 +52,33 @@ TEST_ARRAYS(_parsed, _expected); \
     TEST(csv, expected);
 }
 
+- (void)testGithubIssue35 {
+    NSString *tsv = @"1,a" TAB @"1,b" TAB @"1,c" TAB @"1,\"d\"" NEWLINE
+    @"2,a" TAB @"2,b" TAB @"2,c" TAB @"2,d" NEWLINE
+    @"3,a" TAB @"3,b" TAB @"3,c" TAB @"3,d" NEWLINE
+    @"4,a" TAB @"4,b" TAB @"4,c" TAB @"4,d" NEWLINE
+    @"5,a" TAB @"5,b" TAB @"5,c" TAB @"5,d" NEWLINE
+    @"6,a" TAB @"6,b" TAB @"6,c" TAB @"6,d" NEWLINE
+    @"7,a" TAB @"7,b" TAB @"7,c" TAB @"7,d" NEWLINE
+    @"8,a" TAB @"8,b" TAB @"8,c" TAB @"8,d" NEWLINE
+    @"9,a" TAB @"9,b" TAB @"9,c" TAB @"9,d" NEWLINE
+    @"10,a" TAB @"10,b" TAB @"10,c" TAB @"10,d";
+    
+    NSArray *expected = @[@[@"1,a", @"1,b", @"1,c", @"1,\"d\""],
+                          @[@"2,a", @"2,b", @"2,c", @"2,d"],
+                          @[@"3,a", @"3,b", @"3,c", @"3,d"],
+                          @[@"4,a", @"4,b", @"4,c", @"4,d"],
+                          @[@"5,a", @"5,b", @"5,c", @"5,d"],
+                          @[@"6,a", @"6,b", @"6,c", @"6,d"],
+                          @[@"7,a", @"7,b", @"7,c", @"7,d"],
+                          @[@"8,a", @"8,b", @"8,c", @"8,d"],
+                          @[@"9,a", @"9,b", @"9,c", @"9,d"],
+                          @[@"10,a", @"10,b", @"10,c", @"10,d"]];
+    
+    NSArray *actual = [tsv componentsSeparatedByDelimiter:'\t'];
+    TEST_ARRAYS(actual, expected);
+}
+
 - (void)testGithubIssue38 {
     NSString *csv = FIELD1 COMMA FIELD2 COMMA FIELD3 NEWLINE OCTOTHORPE;
     NSArray *expected = @[@[FIELD1, FIELD2, FIELD3]];
