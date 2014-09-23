@@ -333,7 +333,7 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
      */
     CHCSVParserOptionsTrimsWhitespace = 1 << 3,
     /**
-     *  When you specify this option, instead of gettin an Array of Arrays of Strings,
+     *  When you specify this option, instead of getting an Array of Arrays of Strings,
      *  you get an Array of @c CHCSVOrderedDictionary instances.
      *  If the file only contains a single line, then an empty array is returned.
      */
