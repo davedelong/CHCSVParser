@@ -414,6 +414,23 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
 + (instancetype)arrayWithContentsOfDelimitedURL:(NSURL *)fileURL options:(CHCSVParserOptions)options delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error;
 
 /**
+ *  A convenience constructor to parse a delimited file
+ *
+ *  @param fileURL          The @c NSURL to the delimited file
+ *  @param options          A bitwise-OR of @c CHCSVParserOptions to control how parsing should occur
+ *  @param usedEncoding     A pointer to an @c NSStringEncoding. If non-nil, this will be filled in with the encoding used to parse the stream
+ *  @param delimiter        The delimiter used in the file
+ *  @param error            A pointer to an @c NSError*, which will be filled in if parsing fails
+ *
+ *  @return An @c NSArray of @c NSArrays of @c NSStrings, if parsing succeeds; @c nil otherwise.
+ */
++ (instancetype)arrayWithContentsOfDelimitedURL:(NSURL *)fileURL
+                                        options:(CHCSVParserOptions)options
+                                   usedEncoding:(inout NSStringEncoding *)usedEncoding
+                                      delimiter:(unichar)delimiter
+                                          error:(NSError *__autoreleasing *)error;
+
+/**
  *  If the receiver is an @c NSArray of @c NSArrays of objects, this will turn it into a comma-delimited string
  *  Returns the string of CSV, if writing succeeds; @c nil otherwise.
  */
