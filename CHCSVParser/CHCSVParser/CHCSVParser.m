@@ -749,32 +749,6 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 @end
 
-//NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions options, unichar delimiter, NSError *__autoreleasing *error);
-//NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions options, unichar delimiter, NSError *__autoreleasing *error) {
-//    CHCSVParser *parser = [[CHCSVParser alloc] initWithInputStream:inputStream usedEncoding:nil delimiter:delimiter];
-//    
-//    BOOL usesFirstLineAsKeys = !!(options & CHCSVParserOptionsUsesFirstLineAsKeys);
-//    _CHCSVAggregator *aggregator = usesFirstLineAsKeys ? [[_CHCSVKeyedAggregator alloc] init] : [[_CHCSVAggregator alloc] init];
-//    parser.delegate = aggregator;
-//    
-//    parser.recognizesBackslashesAsEscapes = !!(options & CHCSVParserOptionsRecognizesBackslashesAsEscapes);
-//    parser.sanitizesFields = !!(options & CHCSVParserOptionsSanitizesFields);
-//    parser.recognizesComments = !!(options & CHCSVParserOptionsRecognizesComments);
-//    parser.trimsWhitespace = !!(options & CHCSVParserOptionsTrimsWhitespace);
-//    parser.recognizesLeadingEqualSign = !!(options & CHCSVParserOptionsRecognizesLeadingEqualSign);
-//    
-//    [parser parse];
-//    
-//    if (aggregator.error != nil) {
-//        if (error) {
-//            *error = aggregator.error;
-//        }
-//        return nil;
-//    } else {
-//        return aggregator.lines;
-//    }
-//}
-
 NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions options, NSStringEncoding *usedEncoding, unichar delimiter, NSError *__autoreleasing *error);
 NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions options, NSStringEncoding *usedEncoding, unichar delimiter, NSError *__autoreleasing *error) {
     CHCSVParser *parser = [[CHCSVParser alloc] initWithInputStream:inputStream usedEncoding:usedEncoding delimiter:delimiter];
