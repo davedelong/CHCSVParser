@@ -52,6 +52,13 @@ If you wish to write CSV directly into an `NSString`, you should create an `NSOu
 
 Like `CHCSVParser`, `CHCSVWriter` can be customized with a delimiter other than `,` during initialization.
 
+For those of you having trouble opening the written .csv file in Excel (commas "`,`" are not correctly recognized as column-separators), add the following lines to the top of your .csv file:
+
+```swift
+   writer.writeField("sep=,");
+   writer.finishLine();
+   ```
+
 ###Convenience Methods
 
 There are a couple of category methods on `NSArray` and `NSString` to simplify the common reading and writing of delimited files.
