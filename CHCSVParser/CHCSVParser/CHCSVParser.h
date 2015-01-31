@@ -289,6 +289,15 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
 - (void)writeLineOfFields:(id<NSFastEnumeration>)fields;
 
 /**
+ *  Write the contents of an @c NSDictionary as a new line
+ *
+ *  @param dictionary The @c NSDictionary whose values will be written to the output stream.
+ *  Values will be written in the order specified by the first line of fields written to the stream.
+ *  If no lines have been written yet, this method will throw an exception.
+ */
+- (void)writeLineWithDictionary:(NSDictionary *)dictionary;
+
+/**
  *  Write a comment to the stream
  *
  *  If another line is already in progress, it is terminated and a new line is begun.
@@ -353,6 +362,9 @@ typedef NS_OPTIONS(NSUInteger, CHCSVParserOptions) {
  *  An @c NSDictionary subclass that maintains a strong ordering of its key-value pairs
  */
 @interface CHCSVOrderedDictionary : NSDictionary
+
+- (instancetype)initWithObjects:(NSArray *)objects forKeys:(NSArray *)keys NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithCoder:(NSCoder *)aDecoder NS_DESIGNATED_INITIALIZER;
 
 - (id)objectAtIndexedSubscript:(NSUInteger)idx;
 - (id)objectAtIndex:(NSUInteger)idx;

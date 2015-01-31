@@ -571,7 +571,9 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     NSData *_bom;
     NSCharacterSet *_illegalCharacters;
     
+    NSUInteger _currentLine;
     NSUInteger _currentField;
+    NSMutableArray *_firstLineKeys;
 }
 
 - (instancetype)initForWritingToCSVFile:(NSString *)path {
@@ -609,6 +611,8 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         [illegalCharacters addCharactersInString:delimiterString];
         [illegalCharacters addCharactersInString:@"\""];
         _illegalCharacters = [illegalCharacters copy];
+        
+        _firstLineKeys = [NSMutableArray array];
     }
     return self;
 }
@@ -640,7 +644,13 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     if (_currentField > 0) {
         [self _writeDelimiter];
     }
+    
+    if (_currentLine == 0) {
+        [_firstLineKeys addObject:field];
+    }
+    
     NSString *string = field ? [field description] : @"";
+    
     if ([string rangeOfCharacterFromSet:_illegalCharacters].location != NSNotFound) {
         // replace double quotes with double double quotes
         string = [string stringByReplacingOccurrencesOfString:@"\"" withString:@"\"\""];
@@ -654,6 +664,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 - (void)finishLine {
     [self _writeString:@"\n"];
     _currentField = 0;
+    _currentLine++;
 }
 
 - (void)_finishLineIfNecessary {
@@ -667,6 +678,20 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     for (id field in fields) {
         [self writeField:field];
+    }
+    [self finishLine];
+}
+
+- (void)writeLineWithDictionary:(NSDictionary *)dictionary {
+    if (_currentLine == 0) {
+        [NSException raise:NSInternalInconsistencyException format:@"Cannot write a dictionary unless a line of keys has already been given"];
+    }
+    
+    [self _finishLineIfNecessary];
+    
+    for (id key in _firstLineKeys) {
+        id value = [dictionary objectForKey:key];
+        [self writeField:value];
     }
     [self finishLine];
 }
@@ -862,6 +887,14 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
 - (instancetype)initWithObjects:(const id [])objects forKeys:(const id<NSCopying> [])keys count:(NSUInteger)cnt {
     return [self initWithObjects:[NSArray arrayWithObjects:objects count:cnt]
                          forKeys:[NSArray arrayWithObjects:keys count:cnt]];
+}
+
+- (instancetype)init {
+    return [self initWithObjects:@[] forKeys:@[]];
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+    return [super initWithCoder:aDecoder];
 }
 
 - (NSArray *)allKeys {
