@@ -394,6 +394,26 @@ TEST_ARRAYS(_parsed, _expected); \
     parsed = [NSArray arrayWithContentsOfDelimitedURL:url delimiter:';'];
     
     TEST_ARRAYS(parsed, expected);
+    
+    // Rather than embedding the entire contents of this file within the source here,
+    // I'm going to assume that if there are the correct number of records and
+    // the correct number of fields per record, then it probably parsed correctly.
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSURL *fileURL = [bundle URLForResource:@"Issue79" withExtension:@"csv"];
+    NSArray *contents = [NSArray arrayWithContentsOfDelimitedURL:fileURL delimiter:';'];
+    XCTAssertEqual(contents.count, 1112, @"Unexpected number of lines: %ld", contents.count);
+    [contents enumerateObjectsUsingBlock:^(NSArray *line, NSUInteger idx, BOOL *stop) {
+        XCTAssertEqual(line.count, 14, @"Unexpected number of lines on record %ld: %ld", idx, line.count);
+    }];
+    
+    // try loading the file as an array of ordered dictionaries
+    contents = [NSArray arrayWithContentsOfDelimitedURL:fileURL options:CHCSVParserOptionsUsesFirstLineAsKeys delimiter:';'];
+    XCTAssertEqual(contents.count, 1111, @"Unexpected number of lines: %ld", contents.count);
+    NSArray *keys = @[@"id_entrance",@"name",@"id_station",@"direction",@"lat",@"lon",@"max_width",@"min_step",@"min_step_ramp",@"lift",@"lift_minus_step",@"min_rail_width",@"max_rail_width",@"max_angle"];
+    [contents enumerateObjectsUsingBlock:^(CHCSVOrderedDictionary *record, NSUInteger idx, BOOL *stop) {
+        XCTAssertEqual(record.count, 14, @"Unexpected number of lines on record %ld: %ld", idx, record.count);
+        XCTAssertEqualObjects(record.allKeys, keys, @"Unexpected record keys: %@", record.allKeys);
+    }];
 }
 
 - (void)testEmptyFields {
