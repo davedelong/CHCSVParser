@@ -58,6 +58,40 @@ TEST_ARRAYS(_parsed, _expected); \
 
 @implementation UnitTests
 
+- (NSURL *)temporaryURLForDelimitedString:(NSString *)string {
+    static NSURL *temporaryFolder = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSURL *tmp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
+        tmp = [tmp URLByAppendingPathComponent:@"CHCSVParser" isDirectory:YES];
+        
+        NSDateFormatter *f = [[NSDateFormatter alloc] init];
+        f.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+        f.calendar = [NSCalendar calendarWithIdentifier:NSCalendarIdentifierGregorian];
+        f.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+        f.dateFormat = @"yyyy.MM.dd.HH.mm.ss.SSSSS";
+        
+        NSString *folderName = [f stringFromDate:[NSDate date]];
+        temporaryFolder = [tmp URLByAppendingPathComponent:folderName isDirectory:YES];
+        XCTAssertNotNil(temporaryFolder, @"Unable to locate temporary directory");
+        
+        NSError *error = nil;
+        BOOL created = [[NSFileManager defaultManager] createDirectoryAtURL:temporaryFolder withIntermediateDirectories:YES attributes:nil error:&error];
+        
+        XCTAssertTrue(created, @"Unable to create temporary directory (%@)", error);
+        
+        NSLog(@"Writing files to %@", temporaryFolder);
+    });
+    NSString *name = [NSUUID UUID].UUIDString;
+    NSURL *url = [temporaryFolder URLByAppendingPathComponent:name];
+    
+    NSError *error = nil;
+    BOOL written = [string writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:&error];
+    XCTAssertTrue(written, @"Unable to write string to temporary folder: %@", error);
+    
+    return url;
+}
+
 - (void)testAvailableEncodings {
     const CFStringEncoding *encodings = CFStringGetListOfAvailableEncodings();
     
@@ -137,10 +171,8 @@ TEST_ARRAYS(_parsed, _expected); \
 - (void)testGithubIssue50Workaround {
     NSString *csv = @"TRẦN,species_code,Scientific name,Author name,Common name,Family,Description,Habitat,\"Leaf size min (cm, 0 decimal digit)\",\"Leaf size max (cm, 0 decimal digit)\",Distribution,Current National Conservation Status,Growth requirements,Horticultural features,Uses,Associated fauna,Reference,species_id";
     
-    NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:NSStringFromSelector(_cmd)];
-    [csv writeToFile:file atomically:NO encoding:NSUTF8StringEncoding error:nil];
-    
-    NSArray *actual = [NSArray arrayWithContentsOfCSVURL:[NSURL fileURLWithPath:file]];
+    NSURL *url = [self temporaryURLForDelimitedString:csv];
+    NSArray *actual = [NSArray arrayWithContentsOfCSVURL:url];
     
     NSArray *expected = @[@[@"TRẦN",@"species_code",@"Scientific name",@"Author name",@"Common name",@"Family",@"Description",@"Habitat",@"\"Leaf size min (cm, 0 decimal digit)\"",@"\"Leaf size max (cm, 0 decimal digit)\"",@"Distribution",@"Current National Conservation Status",@"Growth requirements",@"Horticultural features",@"Uses",@"Associated fauna",@"Reference",@"species_id"]];
     XCTAssertEqualObjects(actual, expected, @"failed");
@@ -349,6 +381,19 @@ TEST_ARRAYS(_parsed, _expected); \
                  @[@"29", @"DOCKX Gert", @"LTB", @"LOTTO BELISOL"],
                  @[@"173", @"DUCHESNE Antoine", @"EUC", @"TEAM EUROPCAR"]];
     TEST_ARRAYS(actual, expected);
+}
+
+- (void)testGithubIssue79 {
+    NSString *scsv = @"16681;6;Orehovyj boulevard, ul. Musy Dzhalilja (odd side);20;out;55.6141571054;37.7460757208;800;34;34;0;0;0;0;0;1";
+    NSArray *parsed = [scsv componentsSeparatedByDelimiter:';'];
+    NSArray *expected = @[@[@"16681",@"6",@"Orehovyj boulevard, ul. Musy Dzhalilja (odd side)",@"20",@"out",@"55.6141571054",@"37.7460757208",@"800",@"34",@"34",@"0",@"0",@"0",@"0",@"0",@"1"]];
+    
+    TEST_ARRAYS(parsed, expected);
+    
+    NSURL *url = [self temporaryURLForDelimitedString:scsv];
+    parsed = [NSArray arrayWithContentsOfDelimitedURL:url delimiter:';'];
+    
+    TEST_ARRAYS(parsed, expected);
 }
 
 - (void)testEmptyFields {
