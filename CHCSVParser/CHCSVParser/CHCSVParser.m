@@ -651,7 +651,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     
     NSString *string = field ? [field description] : @"";
     
-    if ([string rangeOfCharacterFromSet:_illegalCharacters].location != NSNotFound) {
+    if (self.alwaysDoubleQuote || [string rangeOfCharacterFromSet:_illegalCharacters].location != NSNotFound) {
         // replace double quotes with double double quotes
         string = [string stringByReplacingOccurrencesOfString:@"\"" withString:@"\"\""];
         // surround in double quotes
