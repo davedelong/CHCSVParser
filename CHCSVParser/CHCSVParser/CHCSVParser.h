@@ -243,6 +243,11 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
 @interface CHCSVWriter : NSObject
 
 /**
+ * Defines that writer should always surround fields with double quote sign
+ */
+@property (nonatomic, assign) BOOL alwaysDoubleQuote;
+
+/**
  *  Initializes a @c CHCSVWriter to write to the provided file path. Assumes @c NSUTF8Encoding and the comma delimiter
  *
  *  @param path The path to the CSV file
