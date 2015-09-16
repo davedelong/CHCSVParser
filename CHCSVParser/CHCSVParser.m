@@ -569,6 +569,10 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     NSUInteger _currentField;
 }
 
+- (instancetype)init {
+    return [self init];
+}
+
 - (instancetype)initForWritingToCSVFile:(NSString *)path {
     NSOutputStream *stream = [NSOutputStream outputStreamToFileAtPath:path append:NO];
     return [self initWithOutputStream:stream encoding:NSUTF8StringEncoding delimiter:COMMA];
