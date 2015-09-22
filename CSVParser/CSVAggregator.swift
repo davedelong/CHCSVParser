@@ -14,7 +14,7 @@ public struct CSVField {
     public let value: String
 }
 
-public struct CSVRecord: SequenceType, ArrayLiteralConvertible {
+public struct CSVRecord: SequenceType, ArrayLiteralConvertible, DictionaryLiteralConvertible {
     public let index: UInt
     public let fields: Array<CSVField>
     
@@ -22,6 +22,13 @@ public struct CSVRecord: SequenceType, ArrayLiteralConvertible {
         index = 0
         fields = Array(elements.enumerate()).map { (index, element) in
             CSVField(index: UInt(index), key: nil, value: element)
+        }
+    }
+
+    public init(dictionaryLiteral elements: (String, String)...) {
+        index = 0
+        fields = Array(elements.enumerate()).map { (index, element) in
+            CSVField(index: UInt(index), key: element.0, value: element.1)
         }
     }
     
@@ -40,8 +47,8 @@ public struct CSVRecord: SequenceType, ArrayLiteralConvertible {
     }
     
     public subscript (index: Int) -> String? {
-        if index < fields.count { return fields[index].value }
-        return nil
+        if index < 0 || index >= fields.count { return nil }
+        return fields[index].value
     }
     
     public subscript (index: String) -> String? {

@@ -25,6 +25,9 @@
 		558D3E981BAE0E24002849FB /* CSVAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E971BAE0E24002849FB /* CSVAggregator.swift */; settings = {ASSET_TAGS = (); }; };
 		558D3E9A1BAE1153002849FB /* GithubIssues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E991BAE1153002849FB /* GithubIssues.swift */; settings = {ASSET_TAGS = (); }; };
 		558D3E9C1BAE118A002849FB /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E9B1BAE118A002849FB /* TestHelpers.swift */; settings = {ASSET_TAGS = (); }; };
+		558D3EA01BAE45B0002849FB /* Issue64.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9D1BAE45B0002849FB /* Issue64.csv */; settings = {ASSET_TAGS = (); }; };
+		558D3EA11BAE45B0002849FB /* Issue65.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9E1BAE45B0002849FB /* Issue65.csv */; settings = {ASSET_TAGS = (); }; };
+		558D3EA21BAE45B0002849FB /* Issue79.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9F1BAE45B0002849FB /* Issue79.csv */; settings = {ASSET_TAGS = (); }; };
 		55B60C47180DB1F900B18D7C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55B60C46180DB1F900B18D7C /* XCTest.framework */; };
 		55C61C61199C0B4600770AA2 /* Issue65.csv in Resources */ = {isa = PBXBuildFile; fileRef = 55C61C60199C0B4600770AA2 /* Issue65.csv */; };
 		8DD76F9C0486AA7600D96B5E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB779EFE84155DC02AAC07 /* Foundation.framework */; };
@@ -49,7 +52,6 @@
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		557FD0531204A70D009FCDBA /* Unit Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Unit Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		557FD0541204A70D009FCDBA /* Unit Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Unit Tests-Info.plist"; sourceTree = "<group>"; };
-		557FD05A1204A72B009FCDBA /* UnitTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTests.h; sourceTree = "<group>"; };
 		557FD05B1204A72B009FCDBA /* UnitTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnitTests.m; sourceTree = "<group>"; };
 		558D3E6B1BADC8A4002849FB /* CSVParser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CSVParser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		558D3E6D1BADC8A4002849FB /* CSVParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CSVParser.h; sourceTree = "<group>"; };
@@ -68,6 +70,9 @@
 		558D3E971BAE0E24002849FB /* CSVAggregator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVAggregator.swift; sourceTree = "<group>"; };
 		558D3E991BAE1153002849FB /* GithubIssues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GithubIssues.swift; sourceTree = "<group>"; };
 		558D3E9B1BAE118A002849FB /* TestHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
+		558D3E9D1BAE45B0002849FB /* Issue64.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue64.csv; sourceTree = "<group>"; };
+		558D3E9E1BAE45B0002849FB /* Issue65.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue65.csv; sourceTree = "<group>"; };
+		558D3E9F1BAE45B0002849FB /* Issue79.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue79.csv; sourceTree = "<group>"; };
 		55B60C46180DB1F900B18D7C /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		55C61C60199C0B4600770AA2 /* Issue65.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue65.csv; sourceTree = "<group>"; };
 		8DD76FA10486AA7600D96B5E /* CHCSVParser */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CHCSVParser; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -147,7 +152,6 @@
 			children = (
 				557FD0541204A70D009FCDBA /* Unit Tests-Info.plist */,
 				5560A19E173743A300DDD1D3 /* UnitTestContent.h */,
-				557FD05A1204A72B009FCDBA /* UnitTests.h */,
 				557FD05B1204A72B009FCDBA /* UnitTests.m */,
 				550ED4271973491500E7D173 /* Issue64.csv */,
 				55C61C60199C0B4600770AA2 /* Issue65.csv */,
@@ -178,6 +182,9 @@
 				558D3E791BADC8A4002849FB /* CSVParserTests.swift */,
 				558D3E991BAE1153002849FB /* GithubIssues.swift */,
 				558D3E9B1BAE118A002849FB /* TestHelpers.swift */,
+				558D3E9D1BAE45B0002849FB /* Issue64.csv */,
+				558D3E9E1BAE45B0002849FB /* Issue65.csv */,
+				558D3E9F1BAE45B0002849FB /* Issue79.csv */,
 				558D3E7B1BADC8A4002849FB /* Info.plist */,
 			);
 			path = CSVParserTests;
@@ -341,6 +348,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				558D3EA01BAE45B0002849FB /* Issue64.csv in Resources */,
+				558D3EA11BAE45B0002849FB /* Issue65.csv in Resources */,
+				558D3EA21BAE45B0002849FB /* Issue79.csv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -749,6 +759,7 @@
 				558D3E7E1BADC8A4002849FB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		558D3E7F1BADC8A4002849FB /* Build configuration list for PBXNativeTarget "CSVParserTests" */ = {
 			isa = XCConfigurationList;
@@ -757,6 +768,7 @@
 				558D3E811BADC8A4002849FB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

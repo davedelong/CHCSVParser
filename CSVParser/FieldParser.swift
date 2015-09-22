@@ -93,7 +93,7 @@ struct FieldParser {
     }
     
     func parseEscapedField(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {
-        var field = "\""
+        var raw = "\""
         var sanitized = ""
         
         assert(stream.next() == Character.DoubleQuote, "Unexpected character opening escaped field")
@@ -105,10 +105,10 @@ struct FieldParser {
                 if next == Character.Backslash && configuration.recognizeBackslashAsEscape {
                     isBackslashEscaped = true
                     stream.next()
-                    field.append(next)
+                    raw.append(next)
                 } else if next == Character.DoubleQuote && stream.peek(1) == Character.DoubleQuote {
                     sanitized.append(Character.DoubleQuote)
-                    field.append(Character.DoubleQuote); field.append(Character.DoubleQuote)
+                    raw.append(Character.DoubleQuote); raw.append(Character.DoubleQuote)
                     stream.next()
                     stream.next()
                 } else if next == Character.DoubleQuote {
@@ -116,13 +116,13 @@ struct FieldParser {
                     // this is the closing field quote
                     break
                 } else {
-                    field.append(next)
+                    raw.append(next)
                     sanitized.append(next)
                     stream.next()
                 }
                 
             } else {
-                field.append(next)
+                raw.append(next)
                 sanitized.append(next)
                 
                 isBackslashEscaped = false
@@ -130,26 +130,17 @@ struct FieldParser {
             }
         }
         
-        if stream.peek() == Character.Backslash {
+        if stream.peek() == Character.DoubleQuote {
+            raw.append(Character.DoubleQuote)
+            
             stream.next()
             if configuration.sanitizeFields {
                 return sanitized
             } else {
-                return field
+                return raw
             }
         } else {
-            let actual: String
-            if let n = stream.peek() {
-                actual = String(n)
-            } else {
-                actual = "nothing"
-            }
-            let description = "Unexpected field terminator. Expected \" but got \(actual)"
-            let error = NSError(domain: "com.davedelong.chcsvparser", code: 1, userInfo: [NSLocalizedDescriptionKey: description,
-                "line": line,
-                "field": index,
-                "characterIndex": stream.currentIndex])
-            throw error
+            throw CSVError(kind: .UnexpectedFieldTerminator, line: line, field: index, characterIndex: stream.currentIndex)
         }
     }
 }

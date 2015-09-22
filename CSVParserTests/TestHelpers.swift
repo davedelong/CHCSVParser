@@ -14,23 +14,76 @@ let Field2 = "Field2"
 let Field3 = "Field3"
 let UTFField4 = "ḟīễłđ➃"
 
-func parse(csv: String, _ expected: Array<CSVRecord>, configuration: CSVParserConfiguration = CSVParserConfiguration(), file: String = __FILE__, line: UInt = __LINE__) {
+let EMPTY = ""
+let COMMA = ","
+let SEMICOLON = ";"
+let DOUBLEQUOTE = "\""
+let NEWLINE = "\n"
+let TAB = "\t"
+let SPACE = " "
+let BACKSLASH = "\\"
+let OCTOTHORPE = "#"
+let EQUAL = "="
+
+let FIELD1 = "field1"
+let FIELD2 = "field2"
+let FIELD3 = "field3"
+let UTF8FIELD4 = "ḟīễłđ➃"
+
+let QUOTED_FIELD1 = DOUBLEQUOTE + FIELD1 + DOUBLEQUOTE
+let QUOTED_FIELD2 = DOUBLEQUOTE + FIELD2 + DOUBLEQUOTE
+let QUOTED_FIELD3 = DOUBLEQUOTE + FIELD3 + DOUBLEQUOTE
+
+let MULTILINE_FIELD = FIELD1 + NEWLINE + FIELD2
+
+func parse(csv: String, _ expected: Array<CSVRecord>, _ configuration: CSVParserConfiguration = CSVParserConfiguration(), file: String = __FILE__, line: UInt = __LINE__) {
+    guard let parsed = XCTAssertNoThrows(try csv.delimitedComponents(configuration, useFirstLineAsKeys: false)) else { return }
+    XCTAssertEqualRecordArrays(parsed, expected, file: file, line: line)
+}
+
+func XCTAssertEqualRecordArrays(actual: Array<CSVRecord>, _ expected: Array<CSVRecord>, file: String = __FILE__, line: UInt = __LINE__) -> Bool {
+    XCTAssertEqual(actual.count, expected.count, "incorrect number of records", file: file, line: line)
+    guard actual.count == expected.count else { return false }
     
-    if let parsed = try? csv.delimitedComponents(configuration, useFirstLineAsKeys: false) {
-        XCTAssertEqual(parsed.count, expected.count, "incorrect number of records", file: file, line: line)
-        if parsed.count == expected.count {
-            for (p, e) in zip(parsed, expected) {
-                XCTAssertEqual(p.fields.count, e.fields.count, "incorrect number of fields on line \(p.index)", file: file, line: line)
-                if p.fields.count == e.fields.count {
-                    for (pf, ef) in zip(p.fields, e.fields) {
-                        XCTAssertEqual(pf.value, ef.value, "mismatched field #\(pf.index) on line \(p.index)", file: file, line: line)
-                        if pf.value != ef.value {
-                            NSLog("expected data: \(ef.value.dataUsingEncoding(NSUTF8StringEncoding))")
-                            NSLog("actual data  : \(pf.value.dataUsingEncoding(NSUTF8StringEncoding))")
-                        }
-                    }
-                }
-            }
+    for (a, e) in zip(actual, expected) {
+        XCTAssertEqual(a.fields.count, e.fields.count, "incorrect number of fields on line \(a.index)", file: file, line: line)
+        guard a.fields.count == e.fields.count else { return false }
+        for (pf, ef) in zip(a.fields, e.fields) {
+            XCTAssertEqual(pf.value, ef.value, "mismatched field #\(pf.index) on line \(a.index)", file: file, line: line)
+            guard pf.value == ef.value else { return false }
         }
+    }
+    
+    return true
+}
+
+func XCTAssertNoThrows(@autoclosure expression: () throws -> Void, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> Bool {
+    var ok = false
+    do {
+        try expression()
+        ok = true
+    } catch let e {
+        let failMessage = "Unexpected exception: \(e). \(message)"
+        XCTFail(failMessage, file: file, line: line)
+    }
+    return ok
+}
+
+func XCTAssertNoThrows<T>(@autoclosure expression: () throws -> T, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> T? {
+    var t: T? = nil
+    do {
+        t = try expression()
+    } catch let e {
+        let failMessage = "Unexpected exception: \(e). \(message)"
+        XCTFail(failMessage, file: file, line: line)
+    }
+    return t
+}
+
+func XCTAssertThrows<T>(@autoclosure expression: () throws -> T, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) {
+    do {
+        let _ = try expression()
+        XCTFail("Expected thrown error", file: file, line: line)
+    } catch _ {
     }
 }
