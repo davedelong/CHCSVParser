@@ -11,11 +11,11 @@ import Foundation
 struct FieldParser {
     
     func parse(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> Bool {
-        guard let peek = stream.peek() else { return false }
+        let peek = stream.peek()
         
         // there are more characters
         
-        if peek == configuration.delimiter || peek.isNewline {
+        if peek == nil || peek == configuration.delimiter || peek?.isNewline == true {
             configuration.onReadField?(field: "", index: index)
             return true
         }

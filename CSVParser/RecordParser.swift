@@ -32,7 +32,7 @@ internal struct RecordParser {
         var currentField: UInt = 0
         while try fieldParser.parse(stream, configuration: configuration, line: line, index: currentField) {
             currentField++
-            guard let next = stream.peek() else { continue }
+            guard let next = stream.peek() else { break }
             
             // if the next character is a delimiter, consume it
             // if the next character is a newline, break
