@@ -87,3 +87,16 @@ func XCTAssertThrows<T>(@autoclosure expression: () throws -> T, _ message: Stri
     } catch _ {
     }
 }
+
+extension XCTestCase {
+    
+    internal func resource(name: String, type: String = "csv", file: String = __FILE__, line: UInt = __LINE__) -> NSURL? {
+        let bundle = NSBundle(forClass: self.dynamicType)
+        if let url = bundle.URLForResource(name, withExtension: type) {
+            return url
+        }
+        XCTFail("Unable to load file \(name).\(type)", file: file, line: line)
+        return nil
+    }
+    
+}
