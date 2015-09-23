@@ -15,6 +15,7 @@ public struct CSVError: ErrorType {
         case UnexpectedRecordTerminator
         case UnexpectedFieldTerminator
         case UnexpectedDelimiter
+        case IllegalNumberOfFields
     }
     
     public let kind: Kind

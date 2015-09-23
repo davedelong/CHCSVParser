@@ -21,7 +21,7 @@ public struct CSVParserConfiguration {
     public var onBeginDocument: Optional<() -> Void> = nil
     public var onEndDocument: Optional<() -> Void> = nil
     public var onBeginLine: Optional<(line: UInt) -> Void> = nil
-    public var onEndLine: Optional<(line: UInt) -> Void> = nil
+    public var onEndLine: Optional<(line: UInt) throws -> Void> = nil
     public var onReadField: Optional<(field: String, index: UInt) -> Void> = nil
     public var onReadComment: Optional<(comment: String) -> Void> = nil
     

@@ -24,7 +24,7 @@ internal struct RecordParser {
             try parseRecord(stream, configuration: configuration, line: line)
         }
         
-        configuration.onEndLine?(line: line)
+        try configuration.onEndLine?(line: line)
         return true
     }
     

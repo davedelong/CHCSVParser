@@ -32,7 +32,7 @@ public struct CSVRecord: SequenceType, ArrayLiteralConvertible, DictionaryLitera
         }
     }
     
-    public init(index i: UInt, array: Array<String>, keys: Array<String>? = nil) {
+    private init(index i: UInt, array: Array<String>, keys: Array<String>? = nil) {
         index = i
         if let keys = keys {
             let keyValue = zip(keys, array)
@@ -102,11 +102,17 @@ private class CSVAggregator {
         currentLine = []
     }
     
-    func endLine(line: UInt) {
+    func endLine(line: UInt) throws {
         if let fields = currentLine {
             if line == 0 && useFirstLineAsKeys {
                 keys = currentLine
             } else {
+                if useFirstLineAsKeys {
+                    guard keys?.count == fields.count else {
+                        let field = max(fields.count - 1, 0)
+                        throw CSVError(kind: .IllegalNumberOfFields, line: line, field: UInt(field), characterIndex: 0)
+                    }
+                }
                 let record = CSVRecord(index: line, array: fields, keys: keys)
                 lines.append(record)
             }
