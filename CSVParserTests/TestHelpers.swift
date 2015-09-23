@@ -37,7 +37,7 @@ let QUOTED_FIELD3 = DOUBLEQUOTE + FIELD3 + DOUBLEQUOTE
 let MULTILINE_FIELD = FIELD1 + NEWLINE + FIELD2
 
 func parse(csv: String, _ expected: Array<CSVRecord>, _ configuration: CSVParserConfiguration = CSVParserConfiguration(), file: String = __FILE__, line: UInt = __LINE__) {
-    guard let parsed = XCTAssertNoThrows(try csv.delimitedComponents(configuration, useFirstLineAsKeys: false)) else { return }
+    guard let parsed = XCTAssertNoThrows(try csv.delimitedComponents(configuration, useFirstLineAsKeys: false), file: file, line: line) else { return }
     XCTAssertEqualRecordArrays(parsed, expected, file: file, line: line)
 }
 
