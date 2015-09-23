@@ -29,8 +29,6 @@ struct FieldParser {
             field = try parseEscapedField(stream, configuration: configuration, line: line, index: index)
             
         } else if configuration.recognizeLeadingEqualSign && stream.peek() == Character.Equal && stream.peek(1) == Character.DoubleQuote {
-            // consume the equal
-            stream.next()
             //parse an escaped field
             field = try parseEscapedField(stream, configuration: configuration, line: line, index: index)
             
@@ -93,10 +91,19 @@ struct FieldParser {
     }
     
     func parseEscapedField(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {
-        var raw = "\""
+        var raw = ""
         var sanitized = ""
         
-        assert(stream.next() == Character.DoubleQuote, "Unexpected character opening escaped field")
+        if configuration.recognizeLeadingEqualSign && stream.peek() == Character.Equal {
+            stream.next()
+            raw.append(Character.Equal)
+        }
+        
+        guard let next = stream.next() where next == Character.DoubleQuote else {
+            fatalError("Unexpected character opening escaped field")
+        }
+        
+        raw.append(Character.DoubleQuote)
         var isBackslashEscaped = false
         
         while let next = stream.peek() {
