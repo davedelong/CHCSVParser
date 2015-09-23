@@ -118,5 +118,9 @@ private class CSVAggregator {
         currentLine?.append(field)
     }
     
-    func readComment(comment: String) { }
+    func readComment(comment: String) {
+        if currentLine?.isEmpty == true {
+            currentLine = nil
+        }
+    }
 }
