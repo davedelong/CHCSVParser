@@ -11,6 +11,7 @@ import Foundation
 public struct CSVError: ErrorType {
     
     public enum Kind {
+        case IllegalDelimiter
         case UnexpectedRecordTerminator
         case UnexpectedFieldTerminator
         case UnexpectedDelimiter

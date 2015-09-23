@@ -42,6 +42,14 @@ public class CSVParser<S: SequenceType where S.Generator.Element == Character> {
     }
     
     public func parse() throws {
+        if (configuration.delimiter == Character.Equal && configuration.recognizeLeadingEqualSign) ||
+            (configuration.delimiter == Character.Backslash && configuration.recognizeBackslashAsEscape) ||
+            (configuration.delimiter == Character.Octothorpe && configuration.recognizeComments) ||
+            configuration.delimiter.isNewline || configuration.delimiter == Character.DoubleQuote {
+                
+            throw CSVError(kind: .IllegalDelimiter, line: 0, field: 0, characterIndex: 0)
+        }
+        
         let documentParser = DocumentParser()
         let stream = PeekingGenerator(sequence: sequence)
         try documentParser.parse(stream, configuration: configuration)
