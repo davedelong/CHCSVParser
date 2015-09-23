@@ -233,7 +233,7 @@ class CSVParserTests: XCTestCase {
     
     func testFirstLineAsKeys_SingleLine() {
         let csv = FIELD1+COMMA+FIELD2+COMMA+FIELD3+NEWLINE
-        let expected: Array<CSVRecord> = [[FIELD1, FIELD2, FIELD3], []]
+        let expected: Array<CSVRecord> = []
         
         guard let parsed = XCTAssertNoThrows(try csv.delimitedComponents(useFirstLineAsKeys: true)) else { return }
         XCTAssertEqualRecordArrays(parsed, expected)
@@ -305,7 +305,7 @@ class CSVParserTests: XCTestCase {
         let csv = FIELD1+COMMA+EQUAL+QUOTED_FIELD2+COMMA+EQUAL+QUOTED_FIELD3
         let expected: Array<CSVRecord> = [[FIELD1, EQUAL+QUOTED_FIELD2, EQUAL+QUOTED_FIELD3]]
         
-        var config = CSVParserConfiguration(delimiter: "=")
+        var config = CSVParserConfiguration()
         config.recognizeLeadingEqualSign = true
         parse(csv, expected, config)
     }
@@ -314,7 +314,7 @@ class CSVParserTests: XCTestCase {
         let csv = FIELD1+COMMA+EQUAL+QUOTED_FIELD2+COMMA+EQUAL+QUOTED_FIELD3
         let expected: Array<CSVRecord> = [[FIELD1, FIELD2, FIELD3]]
         
-        var config = CSVParserConfiguration(delimiter: "=")
+        var config = CSVParserConfiguration()
         config.recognizeLeadingEqualSign = true
         config.sanitizeFields = true
         parse(csv, expected, config)
