@@ -57,6 +57,7 @@ public class FileCharacterGenerator: GeneratorType {
         
         // we only want to try to load more if we have fewer than 1024 characters
         guard characters.count < loadMoreThreshold else { return }
+        // we can only read from the stream if it has something to be read
         guard input.hasBytesAvailable else { return }
         
         var buffer = Array<UInt8>(count: pageSize, repeatedValue: 0)
@@ -66,10 +67,9 @@ public class FileCharacterGenerator: GeneratorType {
         
         guard pendingByteBuffer.length > 0 else { return }
         
-        if bom.length > 0 {
-            pendingByteBuffer.replaceBytesInRange(NSMakeRange(0, 0), withBytes: bom.bytes)
-        }
-        
+        // this encoding may require a BOM in order to parse correctly
+        // insert the bom into the byte buffer
+        pendingByteBuffer.insertPrefix(bom)
         
         var length = pendingByteBuffer.length
         while length > bom.length {
@@ -84,6 +84,7 @@ public class FileCharacterGenerator: GeneratorType {
             }
         }
         
+        // we want to guarantee that the BOM is removed from the buffer for next time
         pendingByteBuffer.removePrefix(bom)
         
         if input.streamStatus == .AtEnd {

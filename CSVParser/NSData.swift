@@ -20,6 +20,11 @@ extension NSData {
 
 extension NSMutableData {
     
+    internal func insertPrefix(prefix: NSData) {
+        guard prefix.length > 0 else { return }
+        replaceBytesInRange(NSMakeRange(0, 0), withBytes: prefix.bytes)
+    }
+    
     internal func removePrefix(prefix: NSData) {
         guard prefix.length > 0 else { return }
         guard hasPrefix(prefix) else { return }
