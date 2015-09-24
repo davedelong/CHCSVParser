@@ -57,6 +57,25 @@ func XCTAssertEqualRecordArrays(actual: Array<CSVRecord>, _ expected: Array<CSVR
     return true
 }
 
+func XCTAssertEqualSequences<S1: SequenceType, S2: SequenceType where S2.Generator.Element == S1.Generator.Element, S2.Generator.Element: Equatable>(actual: S1, _ expected: S2, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> Bool {
+    var itemIndex = 0
+    
+    var actualGenerator = actual.generate()
+    var expectedGenerator = expected.generate()
+    
+    while let actualNext = actualGenerator.next(), let expectedNext = expectedGenerator.next() {
+        guard actualNext == expectedNext else {
+            let description = "Expected \(expectedNext) but got \(actualNext) at character index \(itemIndex)"
+            let finalMessage = message.isEmpty ? description : "\(message). \(description)"
+            XCTFail(finalMessage, file: file, line: line)
+            return false
+        }
+        itemIndex++
+    }
+    
+    return true
+}
+
 func XCTAssertNoThrows(@autoclosure expression: () throws -> Void, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> Bool {
     var ok = false
     do {
@@ -88,6 +107,8 @@ func XCTAssertThrows<T>(@autoclosure expression: () throws -> T, _ message: Stri
     }
 }
 
+
+private var temporaryFolderLogging = Dictionary<String, Bool>()
 extension XCTestCase {
     
     internal func resource(name: String, type: String = "csv", file: String = __FILE__, line: UInt = __LINE__) -> NSURL? {
@@ -99,4 +120,27 @@ extension XCTestCase {
         return nil
     }
     
+    internal func temporaryFile(name: String, function: String = __FUNCTION__) -> NSURL {
+        let tmp: NSString = NSTemporaryDirectory()
+        let classFolder: NSString = tmp.stringByAppendingPathComponent("\(self.dynamicType)")
+        let functionFolder: NSString = classFolder.stringByAppendingPathComponent(function)
+        let file = functionFolder.stringByAppendingPathComponent(name)
+        
+        do {
+            let fm = NSFileManager.defaultManager()
+            let folder = functionFolder as String
+            var isDir: ObjCBool = false
+            if fm.fileExistsAtPath(folder, isDirectory: &isDir) == false || isDir.boolValue == false {
+                _ = try fm.createDirectoryAtPath(folder, withIntermediateDirectories: true, attributes: nil)
+            }
+            
+            if temporaryFolderLogging[folder] != true {
+                temporaryFolderLogging[folder] = true
+                print("\t\(functionFolder)")
+            }
+        } catch _ { }
+        
+        
+        return NSURL(fileURLWithPath: file)
+    }
 }
