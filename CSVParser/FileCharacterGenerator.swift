@@ -68,6 +68,7 @@ public class FileCharacterGenerator: GeneratorType {
                 
                 let swiftString = string as String
                 characters.appendContentsOf(swiftString.characters)
+                break
             } else {
                 length--
             }
