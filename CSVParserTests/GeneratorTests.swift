@@ -63,4 +63,17 @@ class GeneratorTests: XCTestCase {
         _testString(simpleString)
     }
     
+    func testLargeFile() {
+        
+        guard let file = resource("Issue79") else {
+            XCTFail("Cannot load resource")
+            return
+        }
+        
+        let sequence = FileSequence(file: file, encoding: NSUTF8StringEncoding)
+        guard let contents = XCTAssertNoThrows(try String(contentsOfURL: file, encoding: NSUTF8StringEncoding)) else { return }
+        
+        XCTAssertEqualSequences(sequence, contents.characters)
+    }
+    
 }
