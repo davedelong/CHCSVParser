@@ -118,6 +118,28 @@ class CSVParserTests: XCTestCase {
         parse(csv, expected, configuration)
     }
     
+    func testEscapedFieldWithBackslashes() {
+        let csv = DOUBLEQUOTE+FIELD1+BACKSLASH+DOUBLEQUOTE+FIELD2+DOUBLEQUOTE
+        let expected: Array<CSVRecord> = [[DOUBLEQUOTE+FIELD1+BACKSLASH+DOUBLEQUOTE+FIELD2+DOUBLEQUOTE]]
+        var configuration = CSVParserConfiguration()
+        configuration.recognizeBackslashAsEscape = true
+        parse(csv, expected, configuration)
+    }
+    
+    func testUnclosedField() {
+        let csv = DOUBLEQUOTE+FIELD1
+        
+        XCTAssertThrows(try csv.delimitedComponents())
+    }
+    
+    func testStandardEscapedQuote() {
+        let csv = DOUBLEQUOTE+FIELD1+DOUBLEQUOTE+DOUBLEQUOTE+FIELD2+DOUBLEQUOTE
+        let expected: Array<CSVRecord> = [[FIELD1+DOUBLEQUOTE+FIELD2]]
+        var configuration = CSVParserConfiguration()
+        configuration.sanitizeFields = true
+        parse(csv, expected, configuration)
+    }
+    
     func testUnrecognizedComment() {
         let csv = FIELD1+NEWLINE+OCTOTHORPE+FIELD2
         let expected: Array<CSVRecord> = [[FIELD1], [OCTOTHORPE+FIELD2]]
@@ -131,6 +153,77 @@ class CSVParserTests: XCTestCase {
         var configuration = CSVParserConfiguration()
         configuration.recognizeComments = true
         parse(csv, expected, configuration)
+    }
+    
+    func testCommentWithEscapes() {
+        let csv = FIELD1+NEWLINE+OCTOTHORPE+FIELD2+BACKSLASH+NEWLINE+FIELD3
+        let expected: Array<CSVRecord> = [[FIELD1]]
+        
+        var configuration = CSVParserConfiguration()
+        configuration.recognizeComments = true
+        configuration.recognizeBackslashAsEscape = true
+        parse(csv, expected, configuration)
+    }
+    
+    func testInterspersedComment() {
+        let csv = FIELD1+NEWLINE+OCTOTHORPE+FIELD2+NEWLINE+FIELD3
+        let expected: Array<CSVRecord> = [[FIELD1], [FIELD3]]
+        
+        var configuration = CSVParserConfiguration()
+        configuration.recognizeComments = true
+        parse(csv, expected, configuration)
+    }
+    
+    func testTrimmedComment() {
+        let csv = OCTOTHORPE+SPACE+SPACE+FIELD1+SPACE+SPACE
+        
+        var configuration = CSVParserConfiguration()
+        configuration.recognizeComments = true
+        configuration.trimWhitespace = true
+        configuration.onReadComment = { comment in
+            XCTAssertEqual(comment, OCTOTHORPE+SPACE+SPACE+FIELD1)
+        }
+        configuration.onReadField = { _ in
+            XCTFail("Should not have read a field")
+        }
+        
+        let parser = CSVParser(characterSequence: csv.characters, configuration: configuration)
+        XCTAssertNoThrows(try parser.parse())
+    }
+    
+    func testSanitizedComment() {
+        let csv = OCTOTHORPE+SPACE+SPACE+FIELD1+SPACE+SPACE
+        
+        var configuration = CSVParserConfiguration()
+        configuration.recognizeComments = true
+        configuration.sanitizeFields = true
+        configuration.onReadComment = { comment in
+            XCTAssertEqual(comment, SPACE+SPACE+FIELD1+SPACE+SPACE)
+        }
+        configuration.onReadField = { _ in
+            XCTFail("Should not have read a field")
+        }
+        
+        let parser = CSVParser(characterSequence: csv.characters, configuration: configuration)
+        XCTAssertNoThrows(try parser.parse())
+    }
+    
+    func testTrimmedAndSanitizedComment() {
+        let csv = OCTOTHORPE+SPACE+SPACE+FIELD1+SPACE+SPACE
+        
+        var configuration = CSVParserConfiguration()
+        configuration.recognizeComments = true
+        configuration.sanitizeFields = true
+        configuration.trimWhitespace = true
+        configuration.onReadComment = { comment in
+            XCTAssertEqual(comment, FIELD1)
+        }
+        configuration.onReadField = { _ in
+            XCTFail("Should not have read a field")
+        }
+        
+        let parser = CSVParser(characterSequence: csv.characters, configuration: configuration)
+        XCTAssertNoThrows(try parser.parse())
     }
     
     func testTrailingNewline() {
