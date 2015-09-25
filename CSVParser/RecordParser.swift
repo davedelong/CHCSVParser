@@ -18,7 +18,7 @@ internal struct RecordParser {
         configuration.onBeginLine?(line: line)
         
         if stream.peek() == Character.Octothorpe && configuration.recognizeComments {
-            let comment = parseComment(stream, configuration: configuration)
+            let comment = try parseComment(stream, configuration: configuration)
             configuration.onReadComment?(comment: comment)
         } else {
             try parseRecord(stream, configuration: configuration, line: line)
@@ -48,7 +48,7 @@ internal struct RecordParser {
         }
     }
     
-    func parseComment(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration) -> String {
+    func parseComment(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration) throws -> String {
         guard stream.next() == Character.Octothorpe else {
             fatalError("Implementation flaw")
         }
@@ -75,6 +75,10 @@ internal struct RecordParser {
                 comment.append(next)
                 stream.next()
             }
+        }
+        
+        if isBackslashEscaped == true {
+            throw CSVError(kind: .IncompleteField, line: nil, field: nil, characterIndex: stream.currentIndex)
         }
         
         switch (configuration.sanitizeFields, configuration.trimWhitespace) {

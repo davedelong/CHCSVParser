@@ -82,6 +82,10 @@ struct FieldParser {
             }
         }
         
+        if isBackslashEscaped == true {
+            throw CSVError(kind: .IncompleteField, line: line, field: index, characterIndex: stream.currentIndex)
+        }
+        
         let next = stream.peek()
         if next == nil || next == configuration.delimiter || (next?.isNewline ?? false) {
             return configuration.sanitizeFields ? sanitized : field
@@ -135,6 +139,10 @@ struct FieldParser {
                 isBackslashEscaped = false
                 stream.next() // consume the character
             }
+        }
+        
+        if isBackslashEscaped == true {
+            throw CSVError(kind: .IncompleteField, line: line, field: index, characterIndex: stream.currentIndex)
         }
         
         if stream.peek() == Character.DoubleQuote {

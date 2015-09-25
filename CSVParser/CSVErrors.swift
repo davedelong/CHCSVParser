@@ -15,12 +15,13 @@ public struct CSVError: ErrorType {
         case UnexpectedRecordTerminator
         case UnexpectedFieldTerminator
         case UnexpectedDelimiter
+        case IncompleteField
         case IllegalNumberOfFields
     }
     
     public let kind: Kind
-    public let line: UInt
-    public let field: UInt
+    public let line: UInt?
+    public let field: UInt?
     public let characterIndex: UInt
     
 }

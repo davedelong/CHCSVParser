@@ -11,6 +11,15 @@ import CSVParser
 
 class GithubIssues: XCTestCase {
     
+    func testIssue1() {
+        let csv = FIELD1+COMMA+FIELD2+NEWLINE+FIELD3+COMMA+FIELD1+BACKSLASH
+        
+        var config = CSVParserConfiguration()
+        config.recognizeBackslashAsEscape = true
+        
+        XCTAssertThrows(try csv.delimitedComponents(config))
+    }
+    
     func testIssue35() {
         let tsv = "1,a\t1,b\t1,c\t1,\"d\"\n" + "2,a\t2,b\t2,c\t2,d\n" + "3,a\t3,b\t3,c\t3,d\n" + "4,a\t4,b\t4,c\t4,d\n" + "5,a\t5,b\t5,c\t5,d\n" + "6,a\t6,b\t6,c\t6,d\n" + "7,a\t7,b\t7,c\t7,d\n" + "8,a\t8,b\t8,c\t8,d\n" + "9,a\t9,b\t9,c\t9,d\n" + "10,a\t10,b\t10,c\t10,d"
         
