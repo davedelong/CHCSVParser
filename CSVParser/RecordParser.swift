@@ -15,9 +15,9 @@ internal struct RecordParser {
         guard stream.peek() != nil else { return .Continue }
         
         // there are more characters, which means there are more things to parse
-        let beginLineDisposition = configuration.onBeginLine?(line: line) ?? .Continue
+        let beginLineDisposition = configuration.onBeginLine?(line, stream.progress()) ?? .Continue
         guard beginLineDisposition == .Continue else {
-            _ = try configuration.onEndLine?(line: line)
+            _ = try configuration.onEndLine?(line, stream.progress())
             return beginLineDisposition
         }
         
@@ -25,14 +25,14 @@ internal struct RecordParser {
         if stream.peek() == Character.Octothorpe && configuration.recognizeComments {
             lineDisposition = try parseComment(stream, configuration: configuration)
             guard lineDisposition == .Continue else {
-                _ = try configuration.onEndLine?(line: line)
+                _ = try configuration.onEndLine?(line, stream.progress())
                 return lineDisposition
             }
         } else {
             lineDisposition = try parseRecord(stream, configuration: configuration, line: line)
         }
         
-        let endLineDisposition = try configuration.onEndLine?(line: line) ?? .Continue
+        let endLineDisposition = try configuration.onEndLine?(line, stream.progress()) ?? .Continue
         
         return lineDisposition == .Cancel ? lineDisposition : endLineDisposition
     }
@@ -103,6 +103,6 @@ internal struct RecordParser {
             case (false, false): final = comment
         }
         
-        return configuration.onReadComment?(comment: final) ?? .Continue
+        return configuration.onReadComment?(final, stream.progress()) ?? .Continue
     }
 }

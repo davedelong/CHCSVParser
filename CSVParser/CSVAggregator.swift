@@ -98,14 +98,14 @@ private class CSVAggregator {
         return .Continue
     }
     
-    func endDocument() { }
+    func endDocument(progress: CSVProgress) { }
     
-    func beginLine(line: UInt) -> ParsingDisposition {
+    func beginLine(line: UInt, progress: CSVProgress) -> ParsingDisposition {
         currentLine = []
         return .Continue
     }
     
-    func endLine(line: UInt) throws -> ParsingDisposition {
+    func endLine(line: UInt, progress: CSVProgress) throws -> ParsingDisposition {
         if let fields = currentLine {
             if line == 0 && useFirstLineAsKeys {
                 keys = currentLine
@@ -124,12 +124,12 @@ private class CSVAggregator {
         return .Continue
     }
     
-    func readField(field: String, index: UInt) -> ParsingDisposition {
+    func readField(field: String, index: UInt, progress: CSVProgress) -> ParsingDisposition {
         currentLine?.append(field)
         return .Continue
     }
     
-    func readComment(comment: String) -> ParsingDisposition {
+    func readComment(comment: String, progress: CSVProgress) -> ParsingDisposition {
         if currentLine?.isEmpty == true {
             currentLine = nil
         }

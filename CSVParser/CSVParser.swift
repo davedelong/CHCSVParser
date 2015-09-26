@@ -13,6 +13,11 @@ public enum ParsingDisposition {
     case Cancel
 }
 
+public struct CSVProgress {
+    public let bytesRead: UInt
+    public let charactersRead: UInt
+}
+
 public struct CSVParserConfiguration {
     
     public let delimiter: Character
@@ -23,12 +28,12 @@ public struct CSVParserConfiguration {
     public var trimWhitespace = false
     public var recognizeLeadingEqualSign = false
     
-    public var onBeginDocument: Optional<() -> ParsingDisposition> = nil
-    public var onEndDocument: Optional<() -> Void> = nil
-    public var onBeginLine: Optional<(line: UInt) -> ParsingDisposition> = nil
-    public var onEndLine: Optional<(line: UInt) throws -> ParsingDisposition> = nil
-    public var onReadField: Optional<(field: String, index: UInt) -> ParsingDisposition> = nil
-    public var onReadComment: Optional<(comment: String) -> ParsingDisposition> = nil
+    public var onBeginDocument: (Void -> ParsingDisposition)? = nil
+    public var onEndDocument: (CSVProgress -> Void)? = nil
+    public var onBeginLine: ((UInt, CSVProgress) -> ParsingDisposition)? = nil
+    public var onEndLine: ((UInt, CSVProgress) throws -> ParsingDisposition)? = nil
+    public var onReadField: ((String, UInt, CSVProgress) -> ParsingDisposition)? = nil
+    public var onReadComment: ((String, CSVProgress) -> ParsingDisposition)? = nil
     
     public init(delimiter d: Character = ",") {
         delimiter = d

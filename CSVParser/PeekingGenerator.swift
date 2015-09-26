@@ -50,4 +50,10 @@ internal class PeekingGenerator<E> {
         return nil
     }
     
+    func progress() -> CSVProgress {
+        if let reporter = generator as? ByteReporting {
+            return CSVProgress(bytesRead: reporter.bytesRead, charactersRead: currentIndex)
+        }
+        return CSVProgress(bytesRead: 0, charactersRead: currentIndex)
+    }
 }

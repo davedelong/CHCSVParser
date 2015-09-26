@@ -16,7 +16,7 @@ struct FieldParser {
         // there are more characters
         
         if peek == nil || peek == configuration.delimiter || peek?.isNewline == true {
-            return configuration.onReadField?(field: "", index: index) ?? .Continue
+            return configuration.onReadField?("", index, stream.progress()) ?? .Continue
         }
         
         // consume the leading whitespace
@@ -41,7 +41,7 @@ struct FieldParser {
         // restore the whitespace around the field
         
         let final = configuration.trimWhitespace ? field.trim() : leadingWS + field + trailingWS
-        let expectedDisposition = configuration.onReadField?(field: final, index: index) ?? .Continue
+        let expectedDisposition = configuration.onReadField?(final, index, stream.progress()) ?? .Continue
         
         if stream.peek() == nil { return .Cancel }
         return expectedDisposition

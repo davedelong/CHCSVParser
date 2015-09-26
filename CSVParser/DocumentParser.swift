@@ -15,7 +15,7 @@ internal struct DocumentParser {
         let disposition = configuration.onBeginDocument?() ?? .Continue
         
         guard disposition == .Continue else {
-            configuration.onEndDocument?()
+            configuration.onEndDocument?(stream.progress())
             return
         }
         
@@ -33,6 +33,6 @@ internal struct DocumentParser {
             stream.next() // consume the newline
         }
         
-        configuration.onEndDocument?()
+        configuration.onEndDocument?(stream.progress())
     }
 }

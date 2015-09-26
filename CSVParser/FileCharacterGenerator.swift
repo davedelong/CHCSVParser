@@ -11,7 +11,11 @@ import Foundation
 private let DefaultPageSize = 4096
 private let DefaultLoadMoreThreshold = 1024
 
-public class FileCharacterGenerator: GeneratorType {
+public protocol ByteReporting {
+    var bytesRead: UInt { get }
+}
+
+public class FileCharacterGenerator: GeneratorType, ByteReporting {
     public typealias Element = Character
     
     private let input: NSInputStream
@@ -23,8 +27,10 @@ public class FileCharacterGenerator: GeneratorType {
     private var pendingByteBuffer = NSMutableData()
     private var characters = Array<Character>()
     
+    public private(set) var bytesRead: UInt
+    
     public init(file: NSURL, encoding: NSStringEncoding = NSMacOSRomanStringEncoding, pageSize: Int = 4096, loadThreshold: Int = 1024) {
-        
+        self.bytesRead = 0
         self.input = NSInputStream(URL: file) ?? NSInputStream()
         self.bom = encoding.bom
         self.encoding = encoding
@@ -63,6 +69,7 @@ public class FileCharacterGenerator: GeneratorType {
         var buffer = Array<UInt8>(count: pageSize, repeatedValue: 0)
         
         let bytesRead = input.read(&buffer, maxLength: pageSize)
+        self.bytesRead += UInt(bytesRead)
         pendingByteBuffer.appendBytes(buffer, length: bytesRead)
         
         guard pendingByteBuffer.length > 0 else { return }
