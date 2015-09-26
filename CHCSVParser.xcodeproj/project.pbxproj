@@ -7,15 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		550ED4281973491500E7D173 /* Issue64.csv in Resources */ = {isa = PBXBuildFile; fileRef = 550ED4271973491500E7D173 /* Issue64.csv */; };
-		5515D4461AAB72FF00DC1D5B /* Issue79.csv in Resources */ = {isa = PBXBuildFile; fileRef = 5515D4451AAB72FF00DC1D5B /* Issue79.csv */; };
 		55542D381BB246F000CAE75A /* FileSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D371BB246F000CAE75A /* FileSequence.swift */; settings = {ASSET_TAGS = (); }; };
 		55542D3A1BB2471D00CAE75A /* NSStringEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D391BB2471D00CAE75A /* NSStringEncoding.swift */; settings = {ASSET_TAGS = (); }; };
 		55542D3C1BB24DF800CAE75A /* FileCharacterGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3B1BB24DF800CAE75A /* FileCharacterGenerator.swift */; settings = {ASSET_TAGS = (); }; };
 		55542D3E1BB2E02500CAE75A /* NSData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3D1BB2E02500CAE75A /* NSData.swift */; settings = {ASSET_TAGS = (); }; };
 		55542D401BB2E42B00CAE75A /* GeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3F1BB2E42B00CAE75A /* GeneratorTests.swift */; settings = {ASSET_TAGS = (); }; };
 		557FCEB61203F938009FCDBA /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557FCEB51203F938009FCDBA /* CoreServices.framework */; };
-		557FD05D1204A731009FCDBA /* UnitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD05B1204A72B009FCDBA /* UnitTests.m */; };
 		558D3E6E1BADC8A4002849FB /* CSVParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 558D3E6D1BADC8A4002849FB /* CSVParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		558D3E751BADC8A4002849FB /* CSVParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 558D3E6B1BADC8A4002849FB /* CSVParser.framework */; settings = {ASSET_TAGS = (); }; };
 		558D3E7A1BADC8A4002849FB /* CSVParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E791BADC8A4002849FB /* CSVParserTests.swift */; };
@@ -34,7 +31,6 @@
 		558D3EA11BAE45B0002849FB /* Issue65.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9E1BAE45B0002849FB /* Issue65.csv */; settings = {ASSET_TAGS = (); }; };
 		558D3EA21BAE45B0002849FB /* Issue79.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9F1BAE45B0002849FB /* Issue79.csv */; settings = {ASSET_TAGS = (); }; };
 		55B60C47180DB1F900B18D7C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55B60C46180DB1F900B18D7C /* XCTest.framework */; };
-		55C61C61199C0B4600770AA2 /* Issue65.csv in Resources */ = {isa = PBXBuildFile; fileRef = 55C61C60199C0B4600770AA2 /* Issue65.csv */; };
 		8DD76F9C0486AA7600D96B5E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB779EFE84155DC02AAC07 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
@@ -50,19 +46,13 @@
 
 /* Begin PBXFileReference section */
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		550ED4271973491500E7D173 /* Issue64.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue64.csv; sourceTree = "<group>"; };
-		5515D4451AAB72FF00DC1D5B /* Issue79.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue79.csv; sourceTree = "<group>"; };
-		5515D44F1AABCE7B00DC1D5B /* Unit Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Unit Tests-Bridging-Header.h"; sourceTree = "<group>"; };
 		55542D371BB246F000CAE75A /* FileSequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileSequence.swift; sourceTree = "<group>"; };
 		55542D391BB2471D00CAE75A /* NSStringEncoding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSStringEncoding.swift; sourceTree = "<group>"; };
 		55542D3B1BB24DF800CAE75A /* FileCharacterGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileCharacterGenerator.swift; sourceTree = "<group>"; };
 		55542D3D1BB2E02500CAE75A /* NSData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSData.swift; sourceTree = "<group>"; };
 		55542D3F1BB2E42B00CAE75A /* GeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratorTests.swift; sourceTree = "<group>"; };
-		5560A19E173743A300DDD1D3 /* UnitTestContent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UnitTestContent.h; sourceTree = "<group>"; };
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		557FD0531204A70D009FCDBA /* Unit Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Unit Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		557FD0541204A70D009FCDBA /* Unit Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Unit Tests-Info.plist"; sourceTree = "<group>"; };
-		557FD05B1204A72B009FCDBA /* UnitTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnitTests.m; sourceTree = "<group>"; };
 		558D3E6B1BADC8A4002849FB /* CSVParser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CSVParser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		558D3E6D1BADC8A4002849FB /* CSVParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CSVParser.h; sourceTree = "<group>"; };
 		558D3E6F1BADC8A4002849FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -84,7 +74,6 @@
 		558D3E9E1BAE45B0002849FB /* Issue65.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue65.csv; sourceTree = "<group>"; };
 		558D3E9F1BAE45B0002849FB /* Issue79.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue79.csv; sourceTree = "<group>"; };
 		55B60C46180DB1F900B18D7C /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		55C61C60199C0B4600770AA2 /* Issue65.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue65.csv; sourceTree = "<group>"; };
 		8DD76FA10486AA7600D96B5E /* CHCSVParser */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CHCSVParser; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -129,7 +118,6 @@
 			children = (
 				558D3E6C1BADC8A4002849FB /* CSVParser */,
 				558D3E781BADC8A4002849FB /* CSVParserTests */,
-				5560A19D1737433900DDD1D3 /* Unit Tests */,
 				08FB779DFE84155DC02AAC07 /* External Frameworks and Libraries */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 			);
@@ -155,20 +143,6 @@
 				558D3E741BADC8A4002849FB /* CSVParserTests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		5560A19D1737433900DDD1D3 /* Unit Tests */ = {
-			isa = PBXGroup;
-			children = (
-				557FD0541204A70D009FCDBA /* Unit Tests-Info.plist */,
-				5560A19E173743A300DDD1D3 /* UnitTestContent.h */,
-				557FD05B1204A72B009FCDBA /* UnitTests.m */,
-				550ED4271973491500E7D173 /* Issue64.csv */,
-				55C61C60199C0B4600770AA2 /* Issue65.csv */,
-				5515D4451AAB72FF00DC1D5B /* Issue79.csv */,
-				5515D44F1AABCE7B00DC1D5B /* Unit Tests-Bridging-Header.h */,
-			);
-			path = "Unit Tests";
 			sourceTree = "<group>";
 		};
 		558D3E6C1BADC8A4002849FB /* CSVParser */ = {
@@ -346,9 +320,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				550ED4281973491500E7D173 /* Issue64.csv in Resources */,
-				55C61C61199C0B4600770AA2 /* Issue65.csv in Resources */,
-				5515D4461AAB72FF00DC1D5B /* Issue79.csv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,7 +363,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				557FD05D1204A731009FCDBA /* UnitTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
