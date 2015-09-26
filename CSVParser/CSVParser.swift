@@ -8,6 +8,11 @@
 
 import Foundation
 
+public enum ParsingDisposition {
+    case Continue
+    case Cancel
+}
+
 public struct CSVParserConfiguration {
     
     public let delimiter: Character
@@ -18,12 +23,12 @@ public struct CSVParserConfiguration {
     public var trimWhitespace = false
     public var recognizeLeadingEqualSign = false
     
-    public var onBeginDocument: Optional<() -> Void> = nil
+    public var onBeginDocument: Optional<() -> ParsingDisposition> = nil
     public var onEndDocument: Optional<() -> Void> = nil
-    public var onBeginLine: Optional<(line: UInt) -> Void> = nil
-    public var onEndLine: Optional<(line: UInt) throws -> Void> = nil
-    public var onReadField: Optional<(field: String, index: UInt) -> Void> = nil
-    public var onReadComment: Optional<(comment: String) -> Void> = nil
+    public var onBeginLine: Optional<(line: UInt) -> ParsingDisposition> = nil
+    public var onEndLine: Optional<(line: UInt) throws -> ParsingDisposition> = nil
+    public var onReadField: Optional<(field: String, index: UInt) -> ParsingDisposition> = nil
+    public var onReadComment: Optional<(comment: String) -> ParsingDisposition> = nil
     
     public init(delimiter d: Character = ",") {
         delimiter = d
@@ -47,7 +52,7 @@ public class CSVParser<S: SequenceType where S.Generator.Element == Character> {
             (configuration.delimiter == Character.Octothorpe && configuration.recognizeComments) ||
             configuration.delimiter.isNewline || configuration.delimiter == Character.DoubleQuote {
                 
-            throw CSVError(kind: .IllegalDelimiter, line: 0, field: 0, characterIndex: 0)
+            throw CSVError(kind: .IllegalDelimiter, line: nil, field: nil, characterIndex: 0)
         }
         
         let documentParser = DocumentParser()

@@ -10,14 +10,13 @@ import Foundation
 
 struct FieldParser {
     
-    func parse(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> Bool {
+    func parse(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> ParsingDisposition {
         let peek = stream.peek()
         
         // there are more characters
         
         if peek == nil || peek == configuration.delimiter || peek?.isNewline == true {
-            configuration.onReadField?(field: "", index: index)
-            return true
+            return configuration.onReadField?(field: "", index: index) ?? .Continue
         }
         
         // consume the leading whitespace
@@ -42,9 +41,10 @@ struct FieldParser {
         // restore the whitespace around the field
         
         let final = configuration.trimWhitespace ? field.trim() : leadingWS + field + trailingWS
-        configuration.onReadField?(field: final, index: index)
+        let expectedDisposition = configuration.onReadField?(field: final, index: index) ?? .Continue
         
-        return true
+        if stream.peek() == nil { return .Cancel }
+        return expectedDisposition
     }
     
     func parseWhitespace(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration) -> String {
@@ -87,11 +87,11 @@ struct FieldParser {
         }
         
         let next = stream.peek()
-        if next == nil || next == configuration.delimiter || (next?.isNewline ?? false) {
+        if next == nil || next == configuration.delimiter || next?.isNewline == true {
             return configuration.sanitizeFields ? sanitized : field
         }
         
-        throw CSVError(kind: .UnexpectedFieldTerminator, line: line, field: index, characterIndex: stream.currentIndex)
+        fatalError("Implementation flaw; Unexpectedly finished parsing unescaped field")
     }
     
     func parseEscapedField(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {
@@ -141,21 +141,17 @@ struct FieldParser {
             }
         }
         
-        if isBackslashEscaped == true {
+        guard isBackslashEscaped == false else {
             throw CSVError(kind: .IncompleteField, line: line, field: index, characterIndex: stream.currentIndex)
         }
         
-        if stream.peek() == Character.DoubleQuote {
-            raw.append(Character.DoubleQuote)
-            
-            stream.next()
-            if configuration.sanitizeFields {
-                return sanitized
-            } else {
-                return raw
-            }
-        } else {
+        guard stream.peek() == Character.DoubleQuote else {
             throw CSVError(kind: .UnexpectedFieldTerminator, line: line, field: index, characterIndex: stream.currentIndex)
         }
+        
+        raw.append(Character.DoubleQuote)
+        stream.next()
+        
+        return configuration.sanitizeFields ? sanitized : raw
     }
 }

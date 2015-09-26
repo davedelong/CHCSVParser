@@ -11,26 +11,38 @@ import Foundation
 internal struct RecordParser {
     let fieldParser = FieldParser()
     
-    func parse(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt) throws -> Bool {
-        guard stream.peek() != nil else { return false }
+    func parse(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
+        guard stream.peek() != nil else { return .Continue }
         
         // there are more characters, which means there are more things to parse
-        configuration.onBeginLine?(line: line)
-        
-        if stream.peek() == Character.Octothorpe && configuration.recognizeComments {
-            let comment = try parseComment(stream, configuration: configuration)
-            configuration.onReadComment?(comment: comment)
-        } else {
-            try parseRecord(stream, configuration: configuration, line: line)
+        let beginLineDisposition = configuration.onBeginLine?(line: line) ?? .Continue
+        guard beginLineDisposition == .Continue else {
+            _ = try configuration.onEndLine?(line: line)
+            return beginLineDisposition
         }
         
-        try configuration.onEndLine?(line: line)
-        return true
+        let lineDisposition: ParsingDisposition
+        if stream.peek() == Character.Octothorpe && configuration.recognizeComments {
+            lineDisposition = try parseComment(stream, configuration: configuration)
+            guard lineDisposition == .Continue else {
+                _ = try configuration.onEndLine?(line: line)
+                return lineDisposition
+            }
+        } else {
+            lineDisposition = try parseRecord(stream, configuration: configuration, line: line)
+        }
+        
+        let endLineDisposition = try configuration.onEndLine?(line: line) ?? .Continue
+        
+        return lineDisposition == .Cancel ? lineDisposition : endLineDisposition
     }
     
-    func parseRecord(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt) throws {
+    func parseRecord(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
         var currentField: UInt = 0
-        while try fieldParser.parse(stream, configuration: configuration, line: line, index: currentField) {
+        while true {
+            let fieldDisposition = try fieldParser.parse(stream, configuration: configuration, line: line, index: currentField)
+            if fieldDisposition == .Cancel { return fieldDisposition }
+            
             currentField++
             guard let next = stream.peek() else { break }
             
@@ -46,11 +58,13 @@ internal struct RecordParser {
             }
             
         }
+        
+        return .Continue
     }
     
-    func parseComment(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration) throws -> String {
+    func parseComment(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration) throws -> ParsingDisposition {
         guard stream.next() == Character.Octothorpe else {
-            fatalError("Implementation flaw")
+            fatalError("Implementation flaw; starting to parse comment with no leading #")
         }
         var comment = "#"
         var sanitized = ""
@@ -81,11 +95,14 @@ internal struct RecordParser {
             throw CSVError(kind: .IncompleteField, line: nil, field: nil, characterIndex: stream.currentIndex)
         }
         
+        let final: String
         switch (configuration.sanitizeFields, configuration.trimWhitespace) {
-            case (true, true): return sanitized.trim()
-            case (true, false): return sanitized
-            case (false, true): return comment.trim()
-            case (false, false): return comment
+            case (true, true): final = sanitized.trim()
+            case (true, false): final = sanitized
+            case (false, true): final = comment.trim()
+            case (false, false): final = comment
         }
+        
+        return configuration.onReadComment?(comment: final) ?? .Continue
     }
 }

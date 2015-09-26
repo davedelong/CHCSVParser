@@ -182,9 +182,11 @@ class CSVParserTests: XCTestCase {
         configuration.trimWhitespace = true
         configuration.onReadComment = { comment in
             XCTAssertEqual(comment, OCTOTHORPE+SPACE+SPACE+FIELD1)
+            return .Continue
         }
         configuration.onReadField = { _ in
             XCTFail("Should not have read a field")
+            return .Cancel
         }
         
         let parser = CSVParser(characterSequence: csv.characters, configuration: configuration)
@@ -199,9 +201,11 @@ class CSVParserTests: XCTestCase {
         configuration.sanitizeFields = true
         configuration.onReadComment = { comment in
             XCTAssertEqual(comment, SPACE+SPACE+FIELD1+SPACE+SPACE)
+            return .Continue
         }
         configuration.onReadField = { _ in
             XCTFail("Should not have read a field")
+            return .Cancel
         }
         
         let parser = CSVParser(characterSequence: csv.characters, configuration: configuration)
@@ -217,9 +221,11 @@ class CSVParserTests: XCTestCase {
         configuration.trimWhitespace = true
         configuration.onReadComment = { comment in
             XCTAssertEqual(comment, FIELD1)
+            return .Continue
         }
         configuration.onReadField = { _ in
             XCTFail("Should not have read a field")
+            return .Cancel
         }
         
         let parser = CSVParser(characterSequence: csv.characters, configuration: configuration)
@@ -252,7 +258,7 @@ class CSVParserTests: XCTestCase {
         parse(csv, expected)
     }
     
-    // MARK - Testing Backslashes
+    // MARK: Testing Backslashes
     
     func testUnrecognizedBackslash() {
         let csv = FIELD1+COMMA+FIELD2+BACKSLASH+COMMA+FIELD3
@@ -298,7 +304,24 @@ class CSVParserTests: XCTestCase {
         parse(csv, expected, configuration)
     }
     
-    // MARK - Testing First Line as Keys
+    func testCommentWithDanglingBackslash() {
+        let csv = OCTOTHORPE+FIELD1+BACKSLASH
+        
+        var config = CSVParserConfiguration()
+        config.recognizeComments = true
+        config.recognizeBackslashAsEscape = true
+        XCTAssertThrows(try csv.delimitedComponents(config))
+    }
+    
+    func testEscapedFieldWithDanglingBackslash() {
+        let csv = DOUBLEQUOTE+FIELD1+BACKSLASH
+        
+        var config = CSVParserConfiguration()
+        config.recognizeBackslashAsEscape = true
+        XCTAssertThrows(try csv.delimitedComponents(config))
+    }
+    
+    // MARK: Testing First Line as Keys
     
     func testOrderedDictionary() {
         let record: CSVRecord = [FIELD1: FIELD1, FIELD2: FIELD2, FIELD3: FIELD3]
@@ -342,7 +365,7 @@ class CSVParserTests: XCTestCase {
         XCTAssertThrows(try csv.delimitedComponents(useFirstLineAsKeys: true))
     }
     
-    // MARK - Testing Valid Delimiters
+    // MARK: Testing Valid Delimiters
     
     func testAllowedDelimiter_Octothorpe() {
         let csv = FIELD1+OCTOTHORPE+FIELD2+OCTOTHORPE+FIELD3
@@ -392,7 +415,7 @@ class CSVParserTests: XCTestCase {
         XCTAssertThrows(try csv.delimitedComponents(config))
     }
     
-    // MARK - Testing Leading Equal
+    // MARK: Testing Leading Equal
     
     func testLeadingEqual() {
         let csv = FIELD1+COMMA+EQUAL+QUOTED_FIELD2+COMMA+EQUAL+QUOTED_FIELD3
@@ -411,6 +434,93 @@ class CSVParserTests: XCTestCase {
         config.recognizeLeadingEqualSign = true
         config.sanitizeFields = true
         parse(csv, expected, config)
+    }
+    
+    // MARK: Testing Cancellation
+    
+    func testDocumentCancellation() {
+        let csv = FIELD1+COMMA+FIELD2
+        
+        var config = CSVParserConfiguration()
+        config.onBeginDocument = {
+            return .Cancel
+        }
+        config.onBeginLine = { _ in
+            XCTFail("Should not begin line")
+            return .Cancel
+        }
+        
+        let parser = CSVParser(characterSequence: csv.characters, configuration: config)
+        XCTAssertNoThrows(try parser.parse())
+    }
+    
+    func testBeginLineCancellation() {
+        let csv = FIELD1+COMMA+FIELD2
+        
+        var config = CSVParserConfiguration()
+        config.onBeginLine = { _ in
+            return .Cancel
+        }
+        config.onReadField = { _ in
+            XCTFail("Should not read field")
+            return .Cancel
+        }
+        
+        let parser = CSVParser(characterSequence: csv.characters, configuration: config)
+        XCTAssertNoThrows(try parser.parse())
+    }
+    
+    func testEndLineCancellation() {
+        let csv = FIELD1+COMMA+FIELD2+NEWLINE+FIELD1+COMMA+FIELD2
+        
+        var config = CSVParserConfiguration()
+        var beginLineCount = 0
+        
+        config.onBeginLine = { _ in
+            beginLineCount++
+            return .Continue
+        }
+        config.onEndLine = { _ in
+            return .Cancel
+        }
+        
+        let parser = CSVParser(characterSequence: csv.characters, configuration: config)
+        XCTAssertNoThrows(try parser.parse())
+        XCTAssertEqual(beginLineCount, 1)
+    }
+    
+    func testFieldCancellation() {
+        let csv = FIELD1+COMMA+FIELD2+NEWLINE+FIELD1+COMMA+FIELD2
+        
+        var config = CSVParserConfiguration()
+        var readFieldCount = 0
+        
+        config.onReadField = { _ in
+            readFieldCount++
+            return .Cancel
+        }
+        
+        let parser = CSVParser(characterSequence: csv.characters, configuration: config)
+        XCTAssertNoThrows(try parser.parse())
+        XCTAssertEqual(readFieldCount, 1)
+    }
+    
+    func testCommentCancellation() {
+        let csv = OCTOTHORPE+FIELD1+COMMA+FIELD2+NEWLINE+FIELD1+COMMA+FIELD2
+        
+        var config = CSVParserConfiguration()
+        config.recognizeComments = true
+        
+        config.onReadField = { _ in
+            XCTFail("Should not read field")
+            return .Cancel
+        }
+        config.onReadComment = { _ in
+            return .Cancel
+        }
+        
+        let parser = CSVParser(characterSequence: csv.characters, configuration: config)
+        XCTAssertNoThrows(try parser.parse())
     }
     
 }
