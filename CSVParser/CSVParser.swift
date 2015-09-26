@@ -16,6 +16,11 @@ public enum ParsingDisposition {
 public struct CSVProgress {
     public let bytesRead: UInt
     public let charactersRead: UInt
+    
+    public init(bytesRead: UInt = 0, charactersRead: UInt = 0) {
+        self.bytesRead = bytesRead
+        self.charactersRead = charactersRead
+    }
 }
 
 public struct CSVParserConfiguration {
@@ -57,7 +62,7 @@ public class CSVParser<S: SequenceType where S.Generator.Element == Character> {
             (configuration.delimiter == Character.Octothorpe && configuration.recognizeComments) ||
             configuration.delimiter.isNewline || configuration.delimiter == Character.DoubleQuote {
                 
-            throw CSVError(kind: .IllegalDelimiter, line: nil, field: nil, characterIndex: 0)
+            throw CSVError(kind: .IllegalDelimiter, line: nil, field: nil, progress: CSVProgress())
         }
         
         let documentParser = DocumentParser()

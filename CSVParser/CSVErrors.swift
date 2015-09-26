@@ -22,6 +22,6 @@ public struct CSVError: ErrorType {
     public let kind: Kind
     public let line: UInt?
     public let field: UInt?
-    public let characterIndex: UInt
+    public let progress: CSVProgress
     
 }

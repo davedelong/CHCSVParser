@@ -180,7 +180,7 @@ class CSVParserTests: XCTestCase {
         var configuration = CSVParserConfiguration()
         configuration.recognizeComments = true
         configuration.trimWhitespace = true
-        configuration.onReadComment = { comment in
+        configuration.onReadComment = { comment, _ in
             XCTAssertEqual(comment, OCTOTHORPE+SPACE+SPACE+FIELD1)
             return .Continue
         }
@@ -199,7 +199,7 @@ class CSVParserTests: XCTestCase {
         var configuration = CSVParserConfiguration()
         configuration.recognizeComments = true
         configuration.sanitizeFields = true
-        configuration.onReadComment = { comment in
+        configuration.onReadComment = { comment, _ in
             XCTAssertEqual(comment, SPACE+SPACE+FIELD1+SPACE+SPACE)
             return .Continue
         }
@@ -219,7 +219,7 @@ class CSVParserTests: XCTestCase {
         configuration.recognizeComments = true
         configuration.sanitizeFields = true
         configuration.trimWhitespace = true
-        configuration.onReadComment = { comment in
+        configuration.onReadComment = { comment, _ in
             XCTAssertEqual(comment, FIELD1)
             return .Continue
         }

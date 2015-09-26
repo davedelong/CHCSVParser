@@ -83,7 +83,7 @@ struct FieldParser {
         }
         
         if isBackslashEscaped == true {
-            throw CSVError(kind: .IncompleteField, line: line, field: index, characterIndex: stream.currentIndex)
+            throw CSVError(kind: .IncompleteField, line: line, field: index, progress: stream.progress())
         }
         
         let next = stream.peek()
@@ -142,11 +142,11 @@ struct FieldParser {
         }
         
         guard isBackslashEscaped == false else {
-            throw CSVError(kind: .IncompleteField, line: line, field: index, characterIndex: stream.currentIndex)
+            throw CSVError(kind: .IncompleteField, line: line, field: index, progress: stream.progress())
         }
         
         guard stream.peek() == Character.DoubleQuote else {
-            throw CSVError(kind: .UnexpectedFieldTerminator, line: line, field: index, characterIndex: stream.currentIndex)
+            throw CSVError(kind: .UnexpectedFieldTerminator, line: line, field: index, progress: stream.progress())
         }
         
         raw.append(Character.DoubleQuote)

@@ -54,7 +54,7 @@ internal struct RecordParser {
             } else if next.isNewline {
                 break
             } else {
-                throw CSVError(kind: .UnexpectedDelimiter, line: line, field: currentField, characterIndex: stream.currentIndex)
+                throw CSVError(kind: .UnexpectedDelimiter, line: line, field: currentField, progress: stream.progress())
             }
             
         }
@@ -92,7 +92,7 @@ internal struct RecordParser {
         }
         
         if isBackslashEscaped == true {
-            throw CSVError(kind: .IncompleteField, line: nil, field: nil, characterIndex: stream.currentIndex)
+            throw CSVError(kind: .IncompleteField, line: nil, field: nil, progress: stream.progress())
         }
         
         let final: String
