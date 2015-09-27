@@ -14,12 +14,12 @@ internal extension String {
         if self.isEmpty { return self }
         
         var startIndex = self.startIndex
-        while self[startIndex].isWhitespace {
+        while Character.Whitespaces.contains(self[startIndex]) {
             startIndex = startIndex.successor()
         }
         
         var endIndex = self.endIndex.predecessor()
-        while self[endIndex].isWhitespace {
+        while Character.Whitespaces.contains(self[endIndex]) {
             endIndex = endIndex.predecessor()
         }
         

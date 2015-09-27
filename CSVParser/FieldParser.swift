@@ -11,11 +11,14 @@ import Foundation
 struct FieldParser {
     
     func parse<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> ParsingDisposition {
-        let peek = stream.peek()
+        // check for more characters
+        guard let peek = stream.peek() else {
+            // no characters; report an empty field
+            return configuration.onReadField?("", index, stream.progress()) ?? .Continue
+        }
         
-        // there are more characters
-        
-        if peek == nil || peek == configuration.delimiter || peek?.isNewline == true {
+        if peek == configuration.delimiter || configuration.recordTerminators.contains(peek) {
+            // field terminator; report an empty field
             return configuration.onReadField?("", index, stream.progress()) ?? .Continue
         }
         
@@ -49,7 +52,7 @@ struct FieldParser {
     
     func parseWhitespace<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration) -> String {
         var w = ""
-        while let peek = stream.peek() where peek.isWhitespace && peek != configuration.delimiter {
+        while let peek = stream.peek() where Character.Whitespaces.contains(peek) && peek != configuration.delimiter {
             w.append(peek)
             stream.next()
         }
@@ -67,7 +70,7 @@ struct FieldParser {
                     field.append(next)
                     stream.next()
                     isBackslashEscaped = true
-                } else if next.isNewline || next == configuration.delimiter {
+                } else if configuration.recordTerminators.contains(next) || next == configuration.delimiter {
                     break
                 } else {
                     field.append(next)
@@ -86,12 +89,13 @@ struct FieldParser {
             throw CSVError(kind: .IncompleteField, line: line, field: index, progress: stream.progress())
         }
         
-        let next = stream.peek()
-        if next == nil || next == configuration.delimiter || next?.isNewline == true {
-            return configuration.sanitizeFields ? sanitized : field
+        if let next = stream.peek() {
+            guard next == configuration.delimiter || configuration.recordTerminators.contains(next) else {
+                fatalError("Implementation flaw; Unexpectedly finished parsing unescaped field")
+            }
         }
-        
-        fatalError("Implementation flaw; Unexpectedly finished parsing unescaped field")
+        // end of field
+        return configuration.sanitizeFields ? sanitized : field
     }
     
     func parseEscapedField<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {

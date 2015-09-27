@@ -26,6 +26,7 @@ public struct CSVProgress {
 public struct CSVParserConfiguration {
     
     public let delimiter: Character
+    public let recordTerminators: Set<Character>
     
     public var recognizeBackslashAsEscape = false
     public var sanitizeFields = false
@@ -40,8 +41,9 @@ public struct CSVParserConfiguration {
     public var onReadField: ((String, UInt, CSVProgress) -> ParsingDisposition)? = nil
     public var onReadComment: ((String, CSVProgress) -> ParsingDisposition)? = nil
     
-    public init(delimiter d: Character = ",") {
-        delimiter = d
+    public init(delimiter d: Character = ",", recordTerminators: Set<Character> = Character.Newlines) {
+        self.delimiter = d
+        self.recordTerminators = recordTerminators
     }
     
 }
@@ -60,7 +62,7 @@ public class CSVParser<S: SequenceType where S.Generator.Element == Character> {
         if (configuration.delimiter == Character.Equal && configuration.recognizeLeadingEqualSign) ||
             (configuration.delimiter == Character.Backslash && configuration.recognizeBackslashAsEscape) ||
             (configuration.delimiter == Character.Octothorpe && configuration.recognizeComments) ||
-            configuration.delimiter.isNewline || configuration.delimiter == Character.DoubleQuote {
+            configuration.recordTerminators.contains(configuration.delimiter) || configuration.delimiter == Character.DoubleQuote {
                 
             throw CSVError(kind: .IllegalDelimiter, line: nil, field: nil, progress: CSVProgress())
         }

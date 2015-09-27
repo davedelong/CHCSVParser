@@ -415,6 +415,16 @@ class CSVParserTests: XCTestCase {
         XCTAssertThrows(try csv.delimitedComponents(config))
     }
     
+    // MARK: Testing Record Terminators
+    
+    func testCustomRecordTerminators() {
+        let csv = FIELD1+COMMA+FIELD2+OCTOTHORPE+FIELD1+COMMA+FIELD2+COMMA+FIELD3
+        let expected: Array<CSVRecord> = [[FIELD1, FIELD2], [FIELD1, FIELD2, FIELD3]]
+        
+        let config = CSVParserConfiguration(recordTerminators: ["#"])
+        parse(csv, expected, config)
+    }
+    
     // MARK: Testing Leading Equal
     
     func testLeadingEqual() {

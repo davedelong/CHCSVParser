@@ -26,8 +26,10 @@ internal struct DocumentParser {
             
             currentLine++
             
-            guard stream.peek() == nil || stream.peek()?.isNewline == true else {
-                throw CSVError(kind: .UnexpectedRecordTerminator, line: currentLine, field: 0, progress: stream.progress())
+            if let peek = stream.peek() {
+                guard configuration.recordTerminators.contains(peek) else {
+                    throw CSVError(kind: .UnexpectedRecordTerminator, line: currentLine, field: 0, progress: stream.progress())
+                }
             }
             
             stream.next() // consume the newline

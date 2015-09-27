@@ -51,7 +51,7 @@ internal struct RecordParser {
             // otherwise produce an error and break
             if next == configuration.delimiter {
                 stream.next()
-            } else if next.isNewline {
+            } else if configuration.recordTerminators.contains(next) {
                 break
             } else {
                 throw CSVError(kind: .UnexpectedDelimiter, line: line, field: currentField, progress: stream.progress())
@@ -76,7 +76,7 @@ internal struct RecordParser {
                     isBackslashEscaped = true
                     comment.append(next)
                     stream.next()
-                } else if next.isNewline {
+                } else if configuration.recordTerminators.contains(next) {
                     break
                 } else {
                     comment.append(next)
