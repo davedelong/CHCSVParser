@@ -10,7 +10,7 @@ import Foundation
 
 struct FieldParser {
     
-    func parse(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> ParsingDisposition {
+    func parse<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> ParsingDisposition {
         let peek = stream.peek()
         
         // there are more characters
@@ -47,7 +47,7 @@ struct FieldParser {
         return expectedDisposition
     }
     
-    func parseWhitespace(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration) -> String {
+    func parseWhitespace<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration) -> String {
         var w = ""
         while let peek = stream.peek() where peek.isWhitespace && peek != configuration.delimiter {
             w.append(peek)
@@ -56,7 +56,7 @@ struct FieldParser {
         return w
     }
     
-    func parseUnescapedField(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {
+    func parseUnescapedField<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {
         var field = ""
         var sanitized = ""
         
@@ -94,7 +94,7 @@ struct FieldParser {
         fatalError("Implementation flaw; Unexpectedly finished parsing unescaped field")
     }
     
-    func parseEscapedField(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {
+    func parseEscapedField<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {
         var raw = ""
         var sanitized = ""
         

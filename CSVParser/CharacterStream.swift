@@ -1,5 +1,5 @@
 //
-//  PeekingGenerator.swift
+//  CharacterStream.swift
 //  CHCSVParser
 //
 //  Created by Dave DeLong on 9/19/15.
@@ -8,18 +8,17 @@
 
 import Foundation
 
-internal class PeekingGenerator<E> {
-    typealias Element = E
+internal class CharacterStream<G: GeneratorType where G.Element == Character>: GeneratorType {
     
-    private var generator: AnyGenerator<E>
-    private var peekBuffer = Array<E>()
+    private var generator: G
+    private var peekBuffer = Array<Character>()
     internal private(set) var currentIndex: UInt = 0
     
-    init<S: SequenceType where S.Generator.Element == E>(sequence: S) {
-        self.generator = AnySequence(sequence).generate()
+    init<S: SequenceType where S.Generator == G>(sequence: S) {
+        self.generator = sequence.generate()
     }
     
-    func next() -> Element? {
+    func next() -> Character? {
         if let n = peekBuffer.first {
             peekBuffer.removeFirst()
             currentIndex++
@@ -34,8 +33,8 @@ internal class PeekingGenerator<E> {
         return nil
     }
     
-    func peek(delta: Int = 0) -> Element? {
-        guard delta >= 0 else { fatalError("delta cannot be negative") }
+    func peek(delta: Int = 0) -> Character? {
+        guard delta >= 0 else { fatalError("Implementation flaw; peek delta cannot be negative") }
         while peekBuffer.count < delta + 1 {
             if let next = generator.next() {
                 peekBuffer.append(next)

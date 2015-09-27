@@ -11,7 +11,7 @@ import Foundation
 internal struct RecordParser {
     let fieldParser = FieldParser()
     
-    func parse(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
+    func parse<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
         guard stream.peek() != nil else { return .Continue }
         
         // there are more characters, which means there are more things to parse
@@ -37,7 +37,7 @@ internal struct RecordParser {
         return lineDisposition == .Cancel ? lineDisposition : endLineDisposition
     }
     
-    func parseRecord(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
+    func parseRecord<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
         var currentField: UInt = 0
         while true {
             let fieldDisposition = try fieldParser.parse(stream, configuration: configuration, line: line, index: currentField)
@@ -62,7 +62,7 @@ internal struct RecordParser {
         return .Continue
     }
     
-    func parseComment(stream: PeekingGenerator<Character>, configuration: CSVParserConfiguration) throws -> ParsingDisposition {
+    func parseComment<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration) throws -> ParsingDisposition {
         guard stream.next() == Character.Octothorpe else {
             fatalError("Implementation flaw; starting to parse comment with no leading #")
         }

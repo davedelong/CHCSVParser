@@ -66,7 +66,7 @@ public class CSVParser<S: SequenceType where S.Generator.Element == Character> {
         }
         
         let documentParser = DocumentParser()
-        let stream = PeekingGenerator(sequence: sequence)
+        let stream = CharacterStream(sequence: sequence)
         try documentParser.parse(stream, configuration: configuration)
     }
     
