@@ -20,7 +20,8 @@ public struct FileSequence: SequenceType {
     }
     
     public func generate() -> GeneratorType {
-        return FileCharacterGenerator(file: file, encoding: encoding)
+        let stream = NSInputStream(URL: file) ?? NSInputStream()
+        return FileCharacterGenerator(inputStream: stream, encoding: encoding)
     }
     
 }

@@ -29,9 +29,9 @@ public class FileCharacterGenerator: GeneratorType, ByteReporting {
     
     public private(set) var bytesRead: UInt
     
-    public init(file: NSURL, encoding: NSStringEncoding = NSMacOSRomanStringEncoding, pageSize: Int = 4096, loadThreshold: Int = 1024) {
+    public init(inputStream: NSInputStream, encoding: NSStringEncoding = NSMacOSRomanStringEncoding, pageSize: Int = 4096, loadThreshold: Int = 1024) {
         self.bytesRead = 0
-        self.input = NSInputStream(URL: file) ?? NSInputStream()
+        self.input = inputStream
         self.bom = encoding.bom
         self.encoding = encoding
         
