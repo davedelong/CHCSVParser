@@ -1,5 +1,5 @@
 //
-//  FileCharacterGenerator.swift
+//  StreamCharacterGenerator.swift
 //  CHCSVParser
 //
 //  Created by Dave DeLong on 9/22/15.
@@ -15,7 +15,7 @@ public protocol ByteReporting {
     var bytesRead: UInt { get }
 }
 
-public class FileCharacterGenerator: GeneratorType, ByteReporting {
+public class StreamCharacterGenerator: GeneratorType, ByteReporting {
     public typealias Element = Character
     
     private let input: NSInputStream

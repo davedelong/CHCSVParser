@@ -9,7 +9,7 @@
 import Foundation
 
 public struct FileSequence: SequenceType {
-    public typealias GeneratorType = FileCharacterGenerator
+    public typealias GeneratorType = StreamCharacterGenerator
     
     private let file: NSURL
     private let encoding: NSStringEncoding
@@ -21,7 +21,7 @@ public struct FileSequence: SequenceType {
     
     public func generate() -> GeneratorType {
         let stream = NSInputStream(URL: file) ?? NSInputStream()
-        return FileCharacterGenerator(inputStream: stream, encoding: encoding)
+        return StreamCharacterGenerator(inputStream: stream, encoding: encoding)
     }
     
 }

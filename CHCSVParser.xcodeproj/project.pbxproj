@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		55542D381BB246F000CAE75A /* FileSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D371BB246F000CAE75A /* FileSequence.swift */; settings = {ASSET_TAGS = (); }; };
 		55542D3A1BB2471D00CAE75A /* NSStringEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D391BB2471D00CAE75A /* NSStringEncoding.swift */; settings = {ASSET_TAGS = (); }; };
-		55542D3C1BB24DF800CAE75A /* FileCharacterGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3B1BB24DF800CAE75A /* FileCharacterGenerator.swift */; settings = {ASSET_TAGS = (); }; };
+		55542D3C1BB24DF800CAE75A /* StreamCharacterGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3B1BB24DF800CAE75A /* StreamCharacterGenerator.swift */; settings = {ASSET_TAGS = (); }; };
 		55542D3E1BB2E02500CAE75A /* NSData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3D1BB2E02500CAE75A /* NSData.swift */; settings = {ASSET_TAGS = (); }; };
 		55542D401BB2E42B00CAE75A /* GeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3F1BB2E42B00CAE75A /* GeneratorTests.swift */; settings = {ASSET_TAGS = (); }; };
 		557FCEB61203F938009FCDBA /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557FCEB51203F938009FCDBA /* CoreServices.framework */; };
@@ -48,7 +48,7 @@
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		55542D371BB246F000CAE75A /* FileSequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileSequence.swift; sourceTree = "<group>"; };
 		55542D391BB2471D00CAE75A /* NSStringEncoding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSStringEncoding.swift; sourceTree = "<group>"; };
-		55542D3B1BB24DF800CAE75A /* FileCharacterGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileCharacterGenerator.swift; sourceTree = "<group>"; };
+		55542D3B1BB24DF800CAE75A /* StreamCharacterGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamCharacterGenerator.swift; sourceTree = "<group>"; };
 		55542D3D1BB2E02500CAE75A /* NSData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSData.swift; sourceTree = "<group>"; };
 		55542D3F1BB2E42B00CAE75A /* GeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratorTests.swift; sourceTree = "<group>"; };
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -153,7 +153,7 @@
 				558D3E941BADF3C0002849FB /* CSVErrors.swift */,
 				558D3E971BAE0E24002849FB /* CSVAggregator.swift */,
 				55542D371BB246F000CAE75A /* FileSequence.swift */,
-				55542D3B1BB24DF800CAE75A /* FileCharacterGenerator.swift */,
+				55542D3B1BB24DF800CAE75A /* StreamCharacterGenerator.swift */,
 				558D3E961BAE0C3B002849FB /* Parsers */,
 				558D3E881BADE526002849FB /* Character.swift */,
 				558D3E921BADEE56002849FB /* String.swift */,
@@ -374,7 +374,7 @@
 				55542D3A1BB2471D00CAE75A /* NSStringEncoding.swift in Sources */,
 				558D3E8D1BADE5B9002849FB /* RecordParser.swift in Sources */,
 				558D3E981BAE0E24002849FB /* CSVAggregator.swift in Sources */,
-				55542D3C1BB24DF800CAE75A /* FileCharacterGenerator.swift in Sources */,
+				55542D3C1BB24DF800CAE75A /* StreamCharacterGenerator.swift in Sources */,
 				55542D381BB246F000CAE75A /* FileSequence.swift in Sources */,
 				558D3E8F1BADE5E3002849FB /* FieldParser.swift in Sources */,
 				558D3E831BADC9C4002849FB /* CSVParser.swift in Sources */,
