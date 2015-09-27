@@ -12,8 +12,12 @@ extension NSData {
     
     internal func hasPrefix(prefix: NSData) -> Bool {
         guard length >= prefix.length else { return false }
-        let actualPrefix = subdataWithRange(NSMakeRange(0, prefix.length))
-        return actualPrefix == prefix
+        
+        // the guard statement already guaranteed prefix.length < self.length
+        let searchRange = NSMakeRange(0, prefix.length)
+        
+        let range = rangeOfData(prefix, options: .Anchored, range: searchRange)
+        return range.location == 0 // return true iff the prefix was found at the start
     }
     
 }

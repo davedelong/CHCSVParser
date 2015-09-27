@@ -58,12 +58,17 @@ func XCTAssertEqualRecordArrays(actual: Array<CSVRecord>, _ expected: Array<CSVR
 }
 
 func XCTAssertEqualSequences<S1: SequenceType, S2: SequenceType where S2.Generator.Element == S1.Generator.Element, S2.Generator.Element: Equatable>(actual: S1, _ expected: S2, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> Bool {
+
+    let actualGenerator = actual.generate()
+    let expectedGenerator = expected.generate()
+    
+    return XCTAssertEqualGenerators(actualGenerator, expectedGenerator, message, file: file, line: line)
+}
+
+func XCTAssertEqualGenerators<G1: GeneratorType, G2: GeneratorType where G2.Element == G1.Element, G2.Element: Equatable>(var actual: G1, var _ expected: G2, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> Bool {
     var itemIndex = 0
     
-    var actualGenerator = actual.generate()
-    var expectedGenerator = expected.generate()
-    
-    while let actualNext = actualGenerator.next(), let expectedNext = expectedGenerator.next() {
+    while let actualNext = actual.next(), let expectedNext = expected.next() {
         guard actualNext == expectedNext else {
             let description = "Expected \(expectedNext) but got \(actualNext) at character index \(itemIndex)"
             let finalMessage = message.isEmpty ? description : "\(message). \(description)"
