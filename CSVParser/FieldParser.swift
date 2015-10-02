@@ -44,10 +44,7 @@ struct FieldParser {
         // restore the whitespace around the field
         
         let final = configuration.trimWhitespace ? field.trim() : leadingWS + field + trailingWS
-        let expectedDisposition = configuration.onReadField?(final, index, stream.progress()) ?? .Continue
-        
-        if stream.peek() == nil { return .Cancel }
-        return expectedDisposition
+        return configuration.onReadField?(final, index, stream.progress()) ?? .Continue
     }
     
     func parseWhitespace<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration) -> String {

@@ -14,30 +14,23 @@ internal struct RecordParser {
     func parse<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
         guard stream.peek() != nil else { return .Continue }
         
-        // there are more characters, which means there are more things to parse
-        let beginLineDisposition = configuration.onBeginLine?(line, stream.progress()) ?? .Continue
-        guard beginLineDisposition == .Continue else {
-            _ = try configuration.onEndLine?(line, stream.progress())
-            return beginLineDisposition
-        }
-        
-        let lineDisposition: ParsingDisposition
+        let recordDisposition: ParsingDisposition
         if stream.peek() == Character.Octothorpe && configuration.recognizeComments {
-            lineDisposition = try parseComment(stream, configuration: configuration)
-            guard lineDisposition == .Continue else {
-                _ = try configuration.onEndLine?(line, stream.progress())
-                return lineDisposition
-            }
+            recordDisposition = try parseComment(stream, configuration: configuration, line: line)
         } else {
-            lineDisposition = try parseRecord(stream, configuration: configuration, line: line)
+            recordDisposition = try parseRecord(stream, configuration: configuration, line: line)
         }
         
-        let endLineDisposition = try configuration.onEndLine?(line, stream.progress()) ?? .Continue
-        
-        return lineDisposition == .Cancel ? lineDisposition : endLineDisposition
+        return recordDisposition
     }
     
     func parseRecord<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
+        let beginDisposition = configuration.onBeginLine?(line, stream.progress()) ?? .Continue
+        guard beginDisposition == .Continue else {
+            _ = try configuration.onEndLine?(line, stream.progress())
+            return beginDisposition
+        }
+        
         var currentField: UInt = 0
         while true {
             let fieldDisposition = try fieldParser.parse(stream, configuration: configuration, line: line, index: currentField)
@@ -59,10 +52,16 @@ internal struct RecordParser {
             
         }
         
-        return .Continue
+        return try configuration.onEndLine?(line, stream.progress()) ?? .Continue
     }
     
-    func parseComment<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration) throws -> ParsingDisposition {
+    func parseComment<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
+        let beginDisposition = configuration.onBeginLine?(line, stream.progress()) ?? .Continue
+        guard beginDisposition == .Continue else {
+            _ = try configuration.onEndLine?(line, stream.progress())
+            return beginDisposition
+        }
+        
         guard stream.next() == Character.Octothorpe else {
             fatalError("Implementation flaw; starting to parse comment with no leading #")
         }
@@ -103,6 +102,9 @@ internal struct RecordParser {
             case (false, false): final = comment
         }
         
-        return configuration.onReadComment?(final, stream.progress()) ?? .Continue
+        let commentDisposition = configuration.onReadComment?(final, stream.progress()) ?? .Continue
+        let recordDisposition = try configuration.onEndLine?(line, stream.progress()) ?? .Continue
+        
+        return commentDisposition == .Cancel ? commentDisposition : recordDisposition
     }
 }
