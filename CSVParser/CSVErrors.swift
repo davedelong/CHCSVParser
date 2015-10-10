@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct CSVError: ErrorType {
+public struct CSVParserError: ErrorType {
     
     public enum Kind {
         case IllegalDelimiter

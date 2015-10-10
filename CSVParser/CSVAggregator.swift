@@ -113,7 +113,7 @@ private class CSVAggregator {
                 if useFirstLineAsKeys {
                     guard keys?.count == fields.count else {
                         let field = max(fields.count - 1, 0)
-                        throw CSVError(kind: .IllegalNumberOfFields, line: line, field: UInt(field), progress: progress)
+                        throw CSVParserError(kind: .IllegalNumberOfFields, line: line, field: UInt(field), progress: progress)
                     }
                 }
                 let record = CSVRecord(index: line, array: fields, keys: keys)

@@ -47,7 +47,7 @@ internal struct RecordParser {
             } else if configuration.recordTerminators.contains(next) {
                 break
             } else {
-                throw CSVError(kind: .UnexpectedDelimiter, line: line, field: currentField, progress: stream.progress())
+                throw CSVParserError(kind: .UnexpectedDelimiter, line: line, field: currentField, progress: stream.progress())
             }
             
         }
@@ -91,7 +91,7 @@ internal struct RecordParser {
         }
         
         if isBackslashEscaped == true {
-            throw CSVError(kind: .IncompleteField, line: nil, field: nil, progress: stream.progress())
+            throw CSVParserError(kind: .IncompleteField, line: nil, field: nil, progress: stream.progress())
         }
         
         let final: String

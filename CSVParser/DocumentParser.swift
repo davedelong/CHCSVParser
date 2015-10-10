@@ -28,7 +28,7 @@ internal struct DocumentParser {
             
             if let peek = stream.peek() {
                 guard configuration.recordTerminators.contains(peek) else {
-                    throw CSVError(kind: .UnexpectedRecordTerminator, line: currentLine, field: 0, progress: stream.progress())
+                    throw CSVParserError(kind: .UnexpectedRecordTerminator, line: currentLine, field: 0, progress: stream.progress())
                 }
             }
             

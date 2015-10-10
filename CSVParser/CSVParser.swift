@@ -64,7 +64,7 @@ public class CSVParser<S: SequenceType where S.Generator.Element == Character> {
             (configuration.delimiter == Character.Octothorpe && configuration.recognizeComments) ||
             configuration.recordTerminators.contains(configuration.delimiter) || configuration.delimiter == Character.DoubleQuote {
                 
-            throw CSVError(kind: .IllegalDelimiter, line: nil, field: nil, progress: CSVProgress())
+            throw CSVParserError(kind: .IllegalDelimiter, line: nil, field: nil, progress: CSVProgress())
         }
         
         let documentParser = DocumentParser()
