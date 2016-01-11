@@ -646,7 +646,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     }
     
     if (_currentLine == 0) {
-        [_firstLineKeys addObject:field];
+        [_firstLineKeys addObject:field?:@""];
     }
     
     NSString *string = field ? [field description] : @"";
@@ -740,7 +740,7 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 }
 
 - (void)parser:(CHCSVParser *)parser didReadField:(NSString *)field atIndex:(NSInteger)fieldIndex {
-    [self.currentLine addObject:field];
+    [self.currentLine addObject:field?:@""];
 }
 
 - (void)parser:(CHCSVParser *)parser didFailWithError:(NSError *)error {
