@@ -44,10 +44,10 @@ public final class Parser {
         public var onBeginDocument: (Void) -> Disposition = { _ in return .continue }
         public var onEndDocument: (CSV.Progress, Parser.Error?) -> Void = { _ in }
         
-        public var onBeginLine: (UInt, CSV.Progress) -> Disposition = { _ in return .continue }
-        public var onEndLine: (UInt, CSV.Progress) -> Disposition = { _ in return .continue }
+        public var onBeginLine: (CSV.Progress) -> Disposition = { _ in return .continue }
+        public var onEndLine: (CSV.Progress) -> Disposition = { _ in return .continue }
         
-        public var onReadField: (String, UInt, UInt, CSV.Progress) -> Disposition = { _ in return .continue }
+        public var onReadField: (String, CSV.Progress) -> Disposition = { _ in return .continue }
         public var onReadComment: (String, CSV.Progress) -> Disposition = { _ in return .continue }
         
         public init(delimiter d: Character = ",", recordTerminators: Set<Character> = Character.Newlines) {
@@ -75,7 +75,7 @@ public final class Parser {
             (configuration.delimiter == Character.Octothorpe && configuration.recognizeComments) ||
             configuration.recordTerminators.contains(configuration.delimiter) || configuration.delimiter == Character.DoubleQuote {
                 
-            throw Parser.Error(kind: .illegalDelimiter(configuration.delimiter), line: nil, field: nil, progress: CSV.Progress())
+            throw Parser.Error(kind: .illegalDelimiter(configuration.delimiter), progress: CSV.Progress())
         }
         
         let documentParser = _DocumentParser()

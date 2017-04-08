@@ -25,7 +25,8 @@ internal struct _DocumentParser: _Parser {
             }
         }
         
-        state.configuration.onEndDocument(stream.progress(), disposition.error)
+        let progress = stream.progress(line: state.currentLine)
+        state.configuration.onEndDocument(progress, disposition.error)
         return disposition
     }
 }

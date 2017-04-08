@@ -157,6 +157,7 @@
 			children = (
 				558D3E6D1BADC8A4002849FB /* CSVParser.h */,
 				558D3E941BADF3C0002849FB /* Errors.swift */,
+				5598C0F01D9171A6006F3877 /* Progress.swift */,
 				5598C0EB1D916DF0006F3877 /* Reading */,
 				5598C0F31D918D01006F3877 /* Writing */,
 				5598C0F21D918CFA006F3877 /* Helpers */,
@@ -197,7 +198,6 @@
 			isa = PBXGroup;
 			children = (
 				558D3E821BADC9C4002849FB /* Parser.swift */,
-				5598C0F01D9171A6006F3877 /* Progress.swift */,
 				558D3E901BADE615002849FB /* CharacterIterator.swift */,
 				558D3E961BAE0C3B002849FB /* Parsers */,
 			);

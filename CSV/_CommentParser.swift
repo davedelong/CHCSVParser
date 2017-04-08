@@ -47,16 +47,17 @@ internal struct _CommentParser: _Parser {
             }
         }
         
+        let progress = stream.progress(line: state.currentLine, field: nil)
         if isBackslashEscaped == true {
             // technically this should only happen if the final character of the stream is a backslash, and we're allowing backslashes
-            let error = Parser.Error(kind: .incompleteField, line: state.currentLine, field: 0, progress: stream.progress())
+            let error = Parser.Error(kind: .incompleteField, progress: progress)
             return .error(error)
         }
         
         let field = state.configuration.sanitizeFields ? sanitized : comment
         let final = state.configuration.trimWhitespace ? field.trimmingCharacters(in: .whitespacesAndNewlines) : field
         
-        let disposition = state.configuration.onReadComment(final, stream.progress())
+        let disposition = state.configuration.onReadComment(final, progress)
         
         return disposition
         

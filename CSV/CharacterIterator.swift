@@ -34,7 +34,6 @@ internal final class CharacterIterator: IteratorProtocol {
     }
     
     func peek(_ delta: UInt = 0) -> Character? {
-        guard delta >= 0 else { fatalError("Implementation flaw; peek delta cannot be negative") }
         while UInt(peekBuffer.count) < delta + 1 {
             if let next = iterator.next() {
                 peekBuffer.append(next)
@@ -49,10 +48,10 @@ internal final class CharacterIterator: IteratorProtocol {
         return nil
     }
     
-    func progress() -> CSV.Progress {
+    func progress(line: UInt? = nil, field: UInt? = nil) -> CSV.Progress {
         if let reporter = iterator as? ByteReporting {
-            return CSV.Progress(bytesRead: reporter.bytesRead, charactersRead: currentIndex)
+            return CSV.Progress(bytesRead: reporter.bytesRead, charactersRead: currentIndex, line: line, field: field)
         }
-        return CSV.Progress(bytesRead: 0, charactersRead: currentIndex)
+        return CSV.Progress(bytesRead: 0, charactersRead: currentIndex, line: line, field: field)
     }
 }

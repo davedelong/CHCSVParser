@@ -97,12 +97,16 @@ private class Aggregator {
     
     func endDocument(_ progress: Progress, _ error: Parser.Error?) { }
     
-    func beginLine(_ line: UInt, progress: CSV.Progress) -> Parser.Disposition {
+    func beginLine(_ progress: CSV.Progress) -> Parser.Disposition {
         currentLine = []
         return .continue
     }
     
-    func endLine(_ line: UInt, _ progress: CSV.Progress) -> Parser.Disposition {
+    func endLine(_ progress: CSV.Progress) -> Parser.Disposition {
+        guard let line = progress.line else {
+            fatalError("Got an end-of-line callback, but no line")
+        }
+        
         if let fields = currentLine {
             if line == 0 && useFirstLineAsKeys {
                 keys = currentLine
@@ -110,7 +114,8 @@ private class Aggregator {
                 if useFirstLineAsKeys {
                     guard keys?.count == fields.count else {
                         let field = max(fields.count - 1, 0)
-                        let error = Parser.Error(kind: .illegalNumberOfFields, line: line, field: UInt(field), progress: progress)
+                        let newProgress = CSV.Progress(bytesRead: progress.bytesRead, charactersRead: progress.charactersRead, line: line, field: UInt(field))
+                        let error = Parser.Error(kind: .illegalNumberOfFields, progress: newProgress)
                         return .error(error)
                     }
                 }
@@ -122,7 +127,7 @@ private class Aggregator {
         return .continue
     }
     
-    func readField(_ field: String, _ line: UInt, _ fieldIndex: UInt, progress: CSV.Progress) -> Parser.Disposition {
+    func readField(_ field: String, progress: CSV.Progress) -> Parser.Disposition {
         currentLine?.append(field)
         return .continue
     }

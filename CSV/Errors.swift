@@ -32,9 +32,9 @@ public extension Parser {
         }
         
         public let kind: Kind
-        public let line: UInt?
-        public let field: UInt?
         public let progress: CSV.Progress
+        public var line: UInt? { return progress.line }
+        public var field: UInt? { return progress.field }
         
         public var character: Character? {
             switch kind {
@@ -48,14 +48,6 @@ public extension Parser {
         public static func ==(lhs: Parser.Error, rhs: Parser.Error) -> Bool {
             guard lhs.kind == rhs.kind else { return false }
             guard lhs.progress == rhs.progress else { return false }
-            
-            if let lLine = lhs.line, let rLine = rhs.line {
-                guard lLine == rLine else { return false }
-            }
-            
-            if let lField = lhs.field, let rField = rhs.field {
-                guard lField == rField else { return false }
-            }
             
             return true
         }
