@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct FieldParser: _Parser {
+struct _FieldParser: _Parser {
     
     func parse(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator

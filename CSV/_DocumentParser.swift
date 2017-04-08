@@ -8,8 +8,8 @@
 
 import Foundation
 
-internal struct DocumentParser: _Parser {
-    let recordParser = RecordParser()
+internal struct _DocumentParser: _Parser {
+    let recordParser = _RecordParser()
     
     func parse(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator

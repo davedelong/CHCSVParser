@@ -8,9 +8,9 @@
 
 import Foundation
 
-internal struct RecordParser: _Parser {
-    let fieldParser = FieldParser()
-    let commentParser = CommentParser()
+internal struct _RecordParser: _Parser {
+    let fieldParser = _FieldParser()
+    let commentParser = _CommentParser()
     
     func parse(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator

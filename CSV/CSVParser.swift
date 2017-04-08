@@ -78,7 +78,7 @@ public final class Parser {
             throw Parser.Error(kind: .illegalDelimiter(configuration.delimiter), line: nil, field: nil, progress: CSV.Progress())
         }
         
-        let documentParser = DocumentParser()
+        let documentParser = _DocumentParser()
         let stream = CharacterIterator(iterator: sequence.makeIterator())
         
         let state = State(configuration: configuration, characterIterator: stream)

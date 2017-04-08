@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal struct CommentParser: _Parser {
+internal struct _CommentParser: _Parser {
     
     func parse(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator
