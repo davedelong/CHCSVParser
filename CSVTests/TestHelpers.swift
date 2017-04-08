@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import CSVParser
+import CSV
 
 let Field1 = "Field1"
 let Field2 = "Field2"
@@ -36,12 +36,12 @@ let QUOTED_FIELD3 = DOUBLEQUOTE + FIELD3 + DOUBLEQUOTE
 
 let MULTILINE_FIELD = FIELD1 + NEWLINE + FIELD2
 
-func parse(_ csv: String, _ expected: Array<CSVRecord>, _ configuration: CSVParser.Configuration = CSVParser.Configuration(), file: StaticString = #file, line: UInt = #line) -> Bool {
+func parse(_ csv: String, _ expected: Array<Record>, _ configuration: CSV.Parser.Configuration = CSV.Parser.Configuration(), file: StaticString = #file, line: UInt = #line) -> Bool {
     guard let parsed = XCTAssertNoThrows(try csv.delimitedComponents(configuration, useFirstLineAsKeys: false), file: file, line: line) else { return false }
     return XCTAssertEqualRecordArrays(parsed, expected, file: file, line: line)
 }
 
-func XCTAssertEqualRecordArrays(_ actual: Array<CSVRecord>, _ expected: Array<CSVRecord>, file: StaticString = #file, line: UInt = #line) -> Bool {
+func XCTAssertEqualRecordArrays(_ actual: Array<Record>, _ expected: Array<Record>, file: StaticString = #file, line: UInt = #line) -> Bool {
     XCTAssertEqual(actual.count, expected.count, "incorrect number of records", file: file, line: line)
     guard actual.count == expected.count else { return false }
     

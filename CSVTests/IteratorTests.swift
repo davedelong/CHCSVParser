@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import CSVParser
+import CSV
 
 class IteratorTests: XCTestCase {
     

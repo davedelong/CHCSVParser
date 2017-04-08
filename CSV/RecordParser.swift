@@ -8,11 +8,11 @@
 
 import Foundation
 
-internal struct RecordParser: Parser {
+internal struct RecordParser: _Parser {
     let fieldParser = FieldParser()
     let commentParser = CommentParser()
     
-    func parse(_ state: ParserState) -> CSVParsingDisposition {
+    func parse(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator
         state.currentField = 0
         
@@ -23,7 +23,7 @@ internal struct RecordParser: Parser {
         }
     }
     
-    private func parseRecord(_ state: ParserState) -> CSVParsingDisposition {
+    private func parseRecord(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator
         
         var disposition = state.configuration.onBeginLine(state.currentLine, stream.progress())
@@ -43,7 +43,7 @@ internal struct RecordParser: Parser {
                     break // break out of the field-parsing loop
                 } else {
                     // not a field delimiter, and not a record terminator
-                    let error = CSVParserError(kind: .unexpectedDelimiter(peek), line: state.currentLine, field: state.currentField, progress: stream.progress())
+                    let error = Parser.Error(kind: .unexpectedDelimiter(peek), line: state.currentLine, field: state.currentField, progress: stream.progress())
                     disposition = .error(error)
                 }
             } else {

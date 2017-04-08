@@ -8,9 +8,9 @@
 
 import Foundation
 
-struct FieldParser: Parser {
+struct FieldParser: _Parser {
     
-    func parse(_ state: ParserState) -> CSVParsingDisposition {
+    func parse(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator
         // check for more characters
         guard let peek = stream.peek() else {
@@ -40,7 +40,7 @@ struct FieldParser: Parser {
                 // parse an unescaped field
                 field = try parseUnescapedField(state)
             }
-        } catch let e as CSVParserError {
+        } catch let e as Parser.Error {
             return .error(e)
         } catch let other {
             fatalError("Unexpected error parsing field: \(other)")
@@ -54,7 +54,7 @@ struct FieldParser: Parser {
         return state.configuration.onReadField(final, state.currentLine, state.currentField, stream.progress())
     }
     
-    func parseWhitespace(_ state: ParserState) -> String {
+    func parseWhitespace(_ state: Parser.State) -> String {
         let stream = state.characterIterator
         var w = ""
         while let peek = stream.peek() , Character.Whitespaces.contains(peek) && peek != state.configuration.delimiter {
@@ -64,7 +64,7 @@ struct FieldParser: Parser {
         return w
     }
     
-    func parseUnescapedField(_ state: ParserState) throws -> String {
+    func parseUnescapedField(_ state: Parser.State) throws -> String {
         let stream = state.characterIterator
         
         var field = ""
@@ -93,7 +93,7 @@ struct FieldParser: Parser {
         }
         
         if isBackslashEscaped == true {
-            throw CSVParserError(kind: .incompleteField, line: state.currentLine, field: state.currentField, progress: stream.progress())
+            throw Parser.Error(kind: .incompleteField, line: state.currentLine, field: state.currentField, progress: stream.progress())
         }
         
         if let next = stream.peek() {
@@ -105,7 +105,7 @@ struct FieldParser: Parser {
         return state.configuration.sanitizeFields ? sanitized : field
     }
     
-    func parseEscapedField(_ state: ParserState) throws -> String {
+    func parseEscapedField(_ state: Parser.State) throws -> String {
         let stream = state.characterIterator
         
         var raw = ""
@@ -158,11 +158,11 @@ struct FieldParser: Parser {
         }
         
         guard isBackslashEscaped == false else {
-            throw CSVParserError(kind: .incompleteField, line: state.currentLine, field: state.currentField, progress: stream.progress())
+            throw Parser.Error(kind: .incompleteField, line: state.currentLine, field: state.currentField, progress: stream.progress())
         }
         
         guard stream.peek() == Character.DoubleQuote else {
-            throw CSVParserError(kind: .unexpectedFieldTerminator(stream.peek()), line: state.currentLine, field: state.currentField, progress: stream.progress())
+            throw Parser.Error(kind: .unexpectedFieldTerminator(stream.peek()), line: state.currentLine, field: state.currentField, progress: stream.progress())
         }
         
         raw.append(Character.DoubleQuote)

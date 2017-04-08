@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct CSVProgress: Equatable {
+public struct Progress: Equatable {
     public let bytesRead: UInt
     public let charactersRead: UInt
     
@@ -17,7 +17,7 @@ public struct CSVProgress: Equatable {
         self.charactersRead = charactersRead
     }
     
-    public static func ==(lhs: CSVProgress, rhs: CSVProgress) -> Bool {
+    public static func ==(lhs: Progress, rhs: Progress) -> Bool {
         return lhs.bytesRead == rhs.bytesRead && lhs.charactersRead == rhs.charactersRead
     }
 }

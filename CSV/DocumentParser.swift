@@ -8,10 +8,10 @@
 
 import Foundation
 
-internal struct DocumentParser: Parser {
+internal struct DocumentParser: _Parser {
     let recordParser = RecordParser()
     
-    func parse(_ state: ParserState) -> CSVParsingDisposition {
+    func parse(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator
         
         var disposition = state.configuration.onBeginDocument()

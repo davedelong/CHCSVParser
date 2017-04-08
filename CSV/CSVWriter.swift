@@ -123,7 +123,7 @@ public final class CSVWriter {
         write(data: fieldData)
     }
     
-    public func write(field: CSVField) {
+    public func write(field: Field) {
         write(field: field.value)
     }
     
@@ -141,7 +141,7 @@ public final class CSVWriter {
         finishRecord()
     }
     
-    public func write(record: CSVRecord) {
+    public func write(record: Record) {
         finishRecordIfNecessary()
         for field in record.fields {
             write(field: field.value)

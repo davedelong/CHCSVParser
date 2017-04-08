@@ -8,27 +8,27 @@
 
 import Foundation
 
-public struct CSVField {
+public struct Field {
     public let index: UInt
     public let key: String?
     public let value: String
 }
 
-public struct CSVRecord: Sequence, ExpressibleByArrayLiteral, ExpressibleByDictionaryLiteral {
+public struct Record: Sequence, ExpressibleByArrayLiteral, ExpressibleByDictionaryLiteral {
     public let index: UInt
-    public let fields: Array<CSVField>
+    public let fields: Array<Field>
     
     public init(arrayLiteral elements: String...) {
         index = 0
         fields = Array(elements.enumerated()).map { (index, element) in
-            CSVField(index: UInt(index), key: nil, value: element)
+            Field(index: UInt(index), key: nil, value: element)
         }
     }
 
     public init(dictionaryLiteral elements: (String, String)...) {
         index = 0
         fields = Array(elements.enumerated()).map { (index, element) in
-            CSVField(index: UInt(index), key: element.0, value: element.1)
+            Field(index: UInt(index), key: element.0, value: element.1)
         }
     }
     
@@ -37,11 +37,11 @@ public struct CSVRecord: Sequence, ExpressibleByArrayLiteral, ExpressibleByDicti
         if let keys = keys {
             let keyValue = zip(keys, array)
             fields = Array(keyValue.enumerated()).map { (index, element) in
-                CSVField(index: UInt(index), key: element.0, value: element.1)
+                Field(index: UInt(index), key: element.0, value: element.1)
             }
         } else {
             fields = Array(array.enumerated()).map { (index, element) in
-                CSVField(index: UInt(index), key: nil, value: element)
+                Field(index: UInt(index), key: nil, value: element)
             }
         }
     }
@@ -56,14 +56,14 @@ public struct CSVRecord: Sequence, ExpressibleByArrayLiteral, ExpressibleByDicti
         return match.first?.value
     }
     
-    public func makeIterator() -> AnyIterator<CSVField> {
-        return AnySequence(fields).makeIterator()
+    public func makeIterator() -> AnyIterator<Field> {
+        return AnyIterator(fields.makeIterator())
     }
 }
 
 extension String {
-    public func delimitedComponents(_ configuration: CSVParser.Configuration = CSVParser.Configuration(), useFirstLineAsKeys: Bool = false) throws -> Array<CSVRecord> {
-        let aggregator = CSVAggregator(useFirstLineAsKeys: useFirstLineAsKeys)
+    public func delimitedComponents(_ configuration: Parser.Configuration = Parser.Configuration(), useFirstLineAsKeys: Bool = false) throws -> Array<Record> {
+        let aggregator = Aggregator(useFirstLineAsKeys: useFirstLineAsKeys)
         
         var config = configuration
         config.onBeginDocument = aggregator.beginDocument
@@ -73,17 +73,17 @@ extension String {
         config.onReadComment = aggregator.readComment
         config.onReadField = aggregator.readField
         
-        let parser = CSVParser(characterSequence: self.characters, configuration: config)
+        let parser = Parser(characters: self.characters, configuration: config)
         try parser.parse()
         
         return aggregator.lines
     }
 }
 
-private class CSVAggregator {
+private class Aggregator {
     let useFirstLineAsKeys: Bool
     var keys: Array<String>? = nil
-    var lines = Array<CSVRecord>()
+    var lines = Array<Record>()
     
     var currentLine: Array<String>? = nil
     
@@ -91,18 +91,18 @@ private class CSVAggregator {
         useFirstLineAsKeys = keys
     }
     
-    func beginDocument() -> CSVParsingDisposition {
+    func beginDocument() -> Parser.Disposition {
         return .continue
     }
     
-    func endDocument(_ progress: CSVProgress, _ error: CSVParserError?) { }
+    func endDocument(_ progress: Progress, _ error: Parser.Error?) { }
     
-    func beginLine(_ line: UInt, progress: CSVProgress) -> CSVParsingDisposition {
+    func beginLine(_ line: UInt, progress: CSV.Progress) -> Parser.Disposition {
         currentLine = []
         return .continue
     }
     
-    func endLine(_ line: UInt, _ progress: CSVProgress) -> CSVParsingDisposition {
+    func endLine(_ line: UInt, _ progress: CSV.Progress) -> Parser.Disposition {
         if let fields = currentLine {
             if line == 0 && useFirstLineAsKeys {
                 keys = currentLine
@@ -110,11 +110,11 @@ private class CSVAggregator {
                 if useFirstLineAsKeys {
                     guard keys?.count == fields.count else {
                         let field = max(fields.count - 1, 0)
-                        let error = CSVParserError(kind: .illegalNumberOfFields, line: line, field: UInt(field), progress: progress)
+                        let error = Parser.Error(kind: .illegalNumberOfFields, line: line, field: UInt(field), progress: progress)
                         return .error(error)
                     }
                 }
-                let record = CSVRecord(index: line, array: fields, keys: keys)
+                let record = Record(index: line, array: fields, keys: keys)
                 lines.append(record)
             }
         }
@@ -122,12 +122,12 @@ private class CSVAggregator {
         return .continue
     }
     
-    func readField(_ field: String, _ line: UInt, _ fieldIndex: UInt, progress: CSVProgress) -> CSVParsingDisposition {
+    func readField(_ field: String, _ line: UInt, _ fieldIndex: UInt, progress: CSV.Progress) -> Parser.Disposition {
         currentLine?.append(field)
         return .continue
     }
     
-    func readComment(_ comment: String, progress: CSVProgress) -> CSVParsingDisposition {
+    func readComment(_ comment: String, progress: CSV.Progress) -> Parser.Disposition {
         if currentLine?.isEmpty == true {
             currentLine = nil
         }

@@ -8,9 +8,9 @@
 
 import Foundation
 
-internal struct CommentParser: Parser {
+internal struct CommentParser: _Parser {
     
-    func parse(_ state: ParserState) -> CSVParsingDisposition {
+    func parse(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator
         
         guard stream.next() == Character.Octothorpe else {
@@ -49,7 +49,7 @@ internal struct CommentParser: Parser {
         
         if isBackslashEscaped == true {
             // technically this should only happen if the final character of the stream is a backslash, and we're allowing backslashes
-            let error = CSVParserError(kind: .incompleteField, line: state.currentLine, field: 0, progress: stream.progress())
+            let error = Parser.Error(kind: .incompleteField, line: state.currentLine, field: 0, progress: stream.progress())
             return .error(error)
         }
         
