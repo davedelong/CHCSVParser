@@ -8,24 +8,25 @@
 
 import Foundation
 
-public struct CSVWriterConfiguration {
-    public var delimiter: Character
-    public var recordTerminator: Character
+public final class Writer {
     
-    public var useBackslashAsEscape = false
-    public var allowComments = false
-    
-    public init(delimiter: Character = ",", recordTerminator: Character = "\n") {
-        self.delimiter = delimiter
-        self.recordTerminator = recordTerminator
+    public struct Configuration {
+        public var delimiter: Character
+        public var recordTerminator: Character
+        
+        public var useBackslashAsEscape = false
+        public var allowComments = false
+        
+        public init(delimiter: Character = ",", recordTerminator: Character = "\n") {
+            self.delimiter = delimiter
+            self.recordTerminator = recordTerminator
+        }
     }
-}
-
-public final class CSVWriter {
+    
     private let output: OutputStream
     private let encoding: String.Encoding
     private let bom: Data
-    private let configuration: CSVWriterConfiguration
+    private let configuration: Writer.Configuration
     
     private let pendingBuffer = NSMutableData()
     
@@ -36,7 +37,7 @@ public final class CSVWriter {
     private var currentField = 0
     private var firstLineKeys = Array<String>()
     
-    public init(outputStream: OutputStream, encoding: String.Encoding = .utf8, configuration: CSVWriterConfiguration) throws {
+    public init(outputStream: OutputStream, encoding: String.Encoding = .utf8, configuration: Writer.Configuration) throws {
         self.output = outputStream
         self.encoding = encoding
         self.bom = encoding.bom
@@ -47,19 +48,19 @@ public final class CSVWriter {
         
         
         guard configuration.delimiter != configuration.recordTerminator else {
-            throw CSVWriterError(kind: .illegalRecordTerminator)
+            throw Writer.Error(kind: .illegalRecordTerminator)
         }
         guard configuration.allowComments == false || configuration.delimiter != Character.Octothorpe else {
-            throw CSVWriterError(kind: .illegalDelimiter)
+            throw Writer.Error(kind: .illegalDelimiter)
         }
         guard configuration.allowComments == false || configuration.recordTerminator != Character.Octothorpe else {
-            throw CSVWriterError(kind: .illegalRecordTerminator)
+            throw Writer.Error(kind: .illegalRecordTerminator)
         }
         guard configuration.useBackslashAsEscape == false || configuration.delimiter != Character.Backslash else {
-            throw CSVWriterError(kind: .illegalDelimiter)
+            throw Writer.Error(kind: .illegalDelimiter)
         }
         guard configuration.useBackslashAsEscape == false || configuration.recordTerminator != Character.Backslash else {
-            throw CSVWriterError(kind: .illegalRecordTerminator)
+            throw Writer.Error(kind: .illegalRecordTerminator)
         }
         
         
@@ -151,14 +152,14 @@ public final class CSVWriter {
     
     public func write(fields: Dictionary<String, String>) throws {
         if currentRecord == 0 {
-            throw CSVWriterError(kind: .invalidRecord)
+            throw Writer.Error(kind: .invalidRecord)
         }
         
         finishRecordIfNecessary()
         
         for key in firstLineKeys {
             guard let field = fields[key] else {
-                throw CSVWriterError(kind: .missingField(key))
+                throw Writer.Error(kind: .missingField(key))
             }
             write(field: field)
         }

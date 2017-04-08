@@ -45,7 +45,7 @@ public extension Parser {
             }
         }
         
-        public static func ==(lhs: CSV.Parser.Error, rhs: CSV.Parser.Error) -> Bool {
+        public static func ==(lhs: Parser.Error, rhs: Parser.Error) -> Bool {
             guard lhs.kind == rhs.kind else { return false }
             guard lhs.progress == rhs.progress else { return false }
             
@@ -63,25 +63,29 @@ public extension Parser {
     
 }
 
-public struct CSVWriterError: Error, Equatable {
-    
-    public enum Kind {
-        case illegalDelimiter
-        case illegalRecordTerminator
-        case invalidRecord
-        case missingField(String)
-    }
-    
-    public let kind: Kind
-    
-    public static func ==(lhs: CSVWriterError, rhs: CSVWriterError) -> Bool {
-        switch (lhs.kind, rhs.kind) {
-            case (.illegalDelimiter, .illegalDelimiter): return true
-            case (.illegalRecordTerminator, .illegalRecordTerminator): return true
-            case (.invalidRecord, .invalidRecord): return true
-            case (.missingField(let l), .missingField(let r)): return l == r
-            default: return false
+public extension Writer {
+
+    public struct Error: Swift.Error, Equatable {
+        
+        public enum Kind {
+            case illegalDelimiter
+            case illegalRecordTerminator
+            case invalidRecord
+            case missingField(String)
         }
+        
+        public let kind: Kind
+        
+        public static func ==(lhs: Writer.Error, rhs: Writer.Error) -> Bool {
+            switch (lhs.kind, rhs.kind) {
+                case (.illegalDelimiter, .illegalDelimiter): return true
+                case (.illegalRecordTerminator, .illegalRecordTerminator): return true
+                case (.invalidRecord, .invalidRecord): return true
+                case (.missingField(let l), .missingField(let r)): return l == r
+                default: return false
+            }
+        }
+        
     }
-    
+
 }
