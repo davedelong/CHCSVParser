@@ -8,31 +8,42 @@
 
 import Foundation
 
-extension NSData {
+extension Data {
     
-    internal func hasPrefix(prefix: NSData) -> Bool {
-        guard length >= prefix.length else { return false }
+    internal func hasPrefix(_ prefix: Data) -> Bool {
+        guard count >= prefix.count else { return false }
         
         // the guard statement already guaranteed prefix.length < self.length
-        let searchRange = NSMakeRange(0, prefix.length)
+        guard let range = self.range(of: prefix, options: .anchored, in: 0 ..< prefix.count) else { return false }
+        return range.lowerBound == 0 // return true iff the prefix was found at the start
+    }
+    
+    internal func removing(prefix: Data) -> Data {
+        guard hasPrefix(prefix) else { return self }
         
-        let range = rangeOfData(prefix, options: .Anchored, range: searchRange)
-        return range.location == 0 // return true iff the prefix was found at the start
+        let range: Range<Data.Index> = prefix.count ..< (self.count - prefix.count)
+        
+        return subdata(in: range)
     }
     
 }
 
 extension NSMutableData {
     
-    internal func insertPrefix(prefix: NSData) {
-        guard prefix.length > 0 else { return }
-        replaceBytesInRange(NSMakeRange(0, 0), withBytes: prefix.bytes)
+    internal func hasPrefix(_ prefix: Data) -> Bool {
+        return (self as Data).hasPrefix(prefix)
     }
     
-    internal func removePrefix(prefix: NSData) {
-        guard prefix.length > 0 else { return }
+    internal func insert(prefix: Data) {
+        guard prefix.count > 0 else { return }
+        let nsData = prefix as NSData
+        replaceBytes(in: NSRange(location: 0, length: 0), withBytes: nsData.bytes, length: nsData.length)
+    }
+    
+    internal func remove(prefix: Data) {
+        guard prefix.count > 0 else { return }
         guard hasPrefix(prefix) else { return }
-        replaceBytesInRange(NSMakeRange(0, prefix.length), withBytes: [])
+        replaceBytes(in: NSRange(location: 0, length: prefix.count), withBytes: [], length: 0)
     }
     
 }

@@ -1,5 +1,5 @@
 //
-//  CharacterStream.swift
+//  CharacterIterator.swift
 //  CHCSVParser
 //
 //  Created by Dave DeLong on 9/19/15.
@@ -8,34 +8,34 @@
 
 import Foundation
 
-internal class CharacterStream<G: GeneratorType where G.Element == Character>: GeneratorType {
+internal final class CharacterIterator: IteratorProtocol {
     
-    private var generator: G
-    private var peekBuffer = Array<Character>()
-    internal private(set) var currentIndex: UInt = 0
+    fileprivate var generator: AnyIterator<Character>
+    fileprivate var peekBuffer = Array<Character>()
+    internal fileprivate(set) var currentIndex: UInt = 0
     
-    init<S: SequenceType where S.Generator == G>(sequence: S) {
-        self.generator = sequence.generate()
+    init(sequence: AnySequence<Character>) {
+        self.generator = AnyIterator(sequence.makeIterator())
     }
     
     func next() -> Character? {
         if let n = peekBuffer.first {
             peekBuffer.removeFirst()
-            currentIndex++
+            currentIndex += 1
             return n
         }
         
         if let next = generator.next() {
-            currentIndex++
+            currentIndex += 1
             return next
         }
         
         return nil
     }
     
-    func peek(delta: Int = 0) -> Character? {
+    func peek(_ delta: UInt = 0) -> Character? {
         guard delta >= 0 else { fatalError("Implementation flaw; peek delta cannot be negative") }
-        while peekBuffer.count < delta + 1 {
+        while UInt(peekBuffer.count) < delta + 1 {
             if let next = generator.next() {
                 peekBuffer.append(next)
             } else {
@@ -43,8 +43,8 @@ internal class CharacterStream<G: GeneratorType where G.Element == Character>: G
             }
         }
         
-        if peekBuffer.count > delta {
-            return peekBuffer[delta]
+        if UInt(peekBuffer.count) > delta {
+            return peekBuffer[Int(delta)]
         }
         return nil
     }

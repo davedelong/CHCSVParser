@@ -1,5 +1,5 @@
 //
-//  StreamCharacterGenerator.swift
+//  StreamCharacterIterator.swift
 //  CHCSVParser
 //
 //  Created by Dave DeLong on 9/22/15.
@@ -15,21 +15,21 @@ public protocol ByteReporting {
     var bytesRead: UInt { get }
 }
 
-public class StreamCharacterGenerator: GeneratorType, ByteReporting {
+public final class StreamCharacterIterator: IteratorProtocol, ByteReporting {
     public typealias Element = Character
     
-    private let input: NSInputStream
-    private let bom: NSData
-    private let encoding: NSStringEncoding
+    private let input: InputStream
+    private let bom: Data
+    private let encoding: String.Encoding
     
     private let pageSize: Int
     private let loadMoreThreshold: Int
     private var pendingByteBuffer = NSMutableData()
     private var characters = Array<Character>()
     
-    public private(set) var bytesRead: UInt
+    open fileprivate(set) var bytesRead: UInt
     
-    public init(inputStream: NSInputStream, encoding: NSStringEncoding = NSMacOSRomanStringEncoding, pageSize: Int = 4096, loadThreshold: Int = 1024) {
+    public init(inputStream: InputStream, encoding: String.Encoding = String.Encoding.macOSRoman, pageSize: Int = 4096, loadThreshold: Int = 1024) {
         self.bytesRead = 0
         self.input = inputStream
         self.bom = encoding.bom
@@ -48,59 +48,61 @@ public class StreamCharacterGenerator: GeneratorType, ByteReporting {
     }
     
     deinit {
-        if input.streamStatus != .Closed { input.close() }
+        if input.streamStatus != .closed { input.close() }
     }
     
-    public func next() -> Element? {
+    open func next() -> Element? {
         readMoreIfNecessary()
         if characters.isEmpty { return nil }
         return characters.removeFirst()
     }
     
-    private func readMoreIfNecessary() {
+    fileprivate func readMoreIfNecessary() {
         // we only want to try to load more if we have fewer than 1024 characters
         guard characters.count < loadMoreThreshold else { return }
         
         // open the stream
-        if input.streamStatus == .NotOpen { input.open() }
+        if input.streamStatus == .notOpen { input.open() }
         
         // make sure the stream is open for reading
-        guard [.Opening, .Open, .Reading].contains(input.streamStatus) else { return }
+        guard [.opening, .open, .reading].contains(input.streamStatus) else { return }
         
         // we can only read from the stream if it has something to be read
         guard input.hasBytesAvailable else { return }
         
-        var buffer = Array<UInt8>(count: pageSize, repeatedValue: 0)
+        var buffer = Array<UInt8>(repeating: 0, count: pageSize)
         let bytesRead = input.read(&buffer, maxLength: pageSize)
         
         self.bytesRead += UInt(bytesRead)
-        pendingByteBuffer.appendBytes(buffer, length: bytesRead)
+        pendingByteBuffer.append(buffer, length: bytesRead)
         
         guard pendingByteBuffer.length > 0 else { return }
         
-        // this encoding may require a BOM in order to parse correctly
-        // insert the bom into the byte buffer
-        pendingByteBuffer.insertPrefix(bom)
+        if bom.count > 0 && pendingByteBuffer.hasPrefix(bom) == false {
+            // this encoding may require a BOM in order to parse correctly
+            // insert the bom into the byte buffer
+            pendingByteBuffer.insert(prefix: bom)
+        }
         
         // try to convert as much of the pendingByteBuffer as possible into a String
         var length = pendingByteBuffer.length
-        while length > bom.length {
-            if let string = NSString(bytes: pendingByteBuffer.bytes, length: length, encoding: encoding) {
-                pendingByteBuffer.replaceBytesInRange(NSMakeRange(0, length), withBytes: [])
+        while length > bom.count {
+            if let string = NSString(bytes: pendingByteBuffer.bytes, length: length, encoding: encoding.rawValue) {
+                pendingByteBuffer.replaceBytes(in: NSRange(location: 0, length: length), withBytes: [], length: 0)
                 
                 let swiftString = string as String
-                characters.appendContentsOf(swiftString.characters)
+                characters.append(contentsOf: swiftString.characters)
                 break
             } else {
-                length--
+                length -= 1
             }
         }
         
         // we want to guarantee that the BOM is removed from the buffer for next time
-        pendingByteBuffer.removePrefix(bom)
+        pendingByteBuffer.remove(prefix: bom)
         
         // close the stream if it's done
-        if input.streamStatus == .AtEnd { input.close() }
+        if input.streamStatus == .atEnd { input.close() }
     }
     
 }

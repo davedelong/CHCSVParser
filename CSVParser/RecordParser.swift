@@ -8,103 +8,51 @@
 
 import Foundation
 
-internal struct RecordParser {
+internal struct RecordParser: Parser {
     let fieldParser = FieldParser()
+    let commentParser = CommentParser()
     
-    func parse<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
-        guard stream.peek() != nil else { return .Continue }
+    func parse(_ state: ParserState) -> CSVParsingDisposition {
+        let stream = state.characterIterator
+        state.currentField = 0
         
-        let recordDisposition: ParsingDisposition
-        if stream.peek() == Character.Octothorpe && configuration.recognizeComments {
-            recordDisposition = try parseComment(stream, configuration: configuration, line: line)
+        if stream.peek() == Character.Octothorpe && state.configuration.recognizeComments {
+            return commentParser.parse(state)
         } else {
-            recordDisposition = try parseRecord(stream, configuration: configuration, line: line)
+            return parseRecord(state)
         }
-        
-        return recordDisposition
     }
     
-    func parseRecord<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
-        let beginDisposition = configuration.onBeginLine?(line, stream.progress()) ?? .Continue
-        guard beginDisposition == .Continue else {
-            _ = try configuration.onEndLine?(line, stream.progress())
-            return beginDisposition
-        }
+    private func parseRecord(_ state: ParserState) -> CSVParsingDisposition {
+        let stream = state.characterIterator
         
-        var currentField: UInt = 0
-        while true {
-            let fieldDisposition = try fieldParser.parse(stream, configuration: configuration, line: line, index: currentField)
-            if fieldDisposition == .Cancel { return fieldDisposition }
+        var disposition = state.configuration.onBeginLine(state.currentLine, stream.progress())
+        
+        while disposition == .continue {
+            disposition = fieldParser.parse(state)
             
-            currentField++
-            guard let next = stream.peek() else { break }
-            
-            // if the next character is a delimiter, consume it
-            // if the next character is a newline, break
-            // otherwise produce an error and break
-            if next == configuration.delimiter {
-                stream.next()
-            } else if configuration.recordTerminators.contains(next) {
-                break
-            } else {
-                throw CSVParserError(kind: .UnexpectedDelimiter, line: line, field: currentField, progress: stream.progress())
-            }
-            
-        }
-        
-        return try configuration.onEndLine?(line, stream.progress()) ?? .Continue
-    }
-    
-    func parseComment<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt) throws -> ParsingDisposition {
-        let beginDisposition = configuration.onBeginLine?(line, stream.progress()) ?? .Continue
-        guard beginDisposition == .Continue else {
-            _ = try configuration.onEndLine?(line, stream.progress())
-            return beginDisposition
-        }
-        
-        guard stream.next() == Character.Octothorpe else {
-            fatalError("Implementation flaw; starting to parse comment with no leading #")
-        }
-        var comment = "#"
-        var sanitized = ""
-        
-        var isBackslashEscaped = false
-        while let next = stream.peek() {
-            if isBackslashEscaped == false {
-                if next == Character.Backslash && configuration.recognizeBackslashAsEscape {
-                    isBackslashEscaped = true
-                    comment.append(next)
-                    stream.next()
-                } else if configuration.recordTerminators.contains(next) {
-                    break
+            if let peek = stream.peek() {
+                if peek == state.configuration.delimiter {
+                    // there are more fields
+                    _ = stream.next() // consume the delimiter
+                    state.currentField += 1
+                } else if state.configuration.recordTerminators.contains(peek) {
+                    // we've reached the end of the record
+                    _ = stream.next() // consume the record terminator
+                    
+                    break // break out of the field-parsing loop
                 } else {
-                    comment.append(next)
-                    sanitized.append(next)
-                    stream.next()
+                    // not a field delimiter, and not a record terminator
+                    let error = CSVParserError(kind: .unexpectedDelimiter(peek), line: state.currentLine, field: state.currentField, progress: stream.progress())
+                    disposition = .error(error)
                 }
             } else {
-                isBackslashEscaped = false
-                sanitized.append(next)
-                comment.append(next)
-                stream.next()
+                break
             }
         }
         
-        if isBackslashEscaped == true {
-            throw CSVParserError(kind: .IncompleteField, line: nil, field: nil, progress: stream.progress())
-        }
-        
-        let final: String
-        switch (configuration.sanitizeFields, configuration.trimWhitespace) {
-            case (true, true): final = sanitized.trim()
-            case (true, false): final = sanitized
-            case (false, true): final = comment.trim()
-            case (false, false): final = comment
-        }
-        
-        let commentDisposition = configuration.onReadComment?(final, stream.progress()) ?? .Continue
-        let recordDisposition = try configuration.onEndLine?(line, stream.progress()) ?? .Continue
-        
-        return commentDisposition == .Cancel ? commentDisposition : recordDisposition
+        let endDisposition = state.configuration.onEndLine(state.currentLine, stream.progress())
+        if disposition == .continue { disposition = endDisposition }
+        return disposition
     }
 }

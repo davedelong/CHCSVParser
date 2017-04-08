@@ -8,20 +8,20 @@
 
 import Foundation
 
-public struct FileSequence: SequenceType {
-    public typealias GeneratorType = StreamCharacterGenerator
+public struct FileSequence: Sequence {
+    public typealias Iterator = StreamCharacterIterator
     
-    private let file: NSURL
-    private let encoding: NSStringEncoding
+    fileprivate let file: URL
+    fileprivate let encoding: String.Encoding
     
-    public init(file: NSURL, encoding: NSStringEncoding = NSMacOSRomanStringEncoding) {
+    public init(file: URL, encoding: String.Encoding = String.Encoding.macOSRoman) {
         self.file = file
         self.encoding = encoding
     }
     
-    public func generate() -> GeneratorType {
-        let stream = NSInputStream(URL: file) ?? NSInputStream()
-        return StreamCharacterGenerator(inputStream: stream, encoding: encoding)
+    public func makeIterator() -> Iterator {
+        let stream = InputStream(url: file) ?? InputStream()
+        return StreamCharacterIterator(inputStream: stream, encoding: encoding)
     }
     
 }

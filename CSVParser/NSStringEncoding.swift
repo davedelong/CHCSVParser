@@ -8,17 +8,17 @@
 
 import Foundation
 
-extension NSStringEncoding {
+extension String.Encoding {
     
-    internal var bom: NSData {
-        guard let aData = "a".dataUsingEncoding(self) else { return NSData() }
-        guard let aaData = "aa".dataUsingEncoding(self) else { return NSData() }
-        guard aData.length * 2 != aaData.length else { return NSData() }
+    internal var bom: Data {
+        guard let aData = "a".data(using: self) else { return Data() }
+        guard let aaData = "aa".data(using: self) else { return Data() }
+        guard aData.count * 2 != aaData.count else { return Data() }
         
-        let aLength = aaData.length - aData.length
-        let bomLength = aData.length - aLength
-        let bomRange = NSMakeRange(0, bomLength)
-        return aData.subdataWithRange(bomRange)
+        let aLength = aaData.count - aData.count
+        let bomLength = aData.count - aLength
+        let bomRange: Range<Data.Index> = 0 ..< bomLength
+        return aData.subdata(in: bomRange)
     }
     
 }

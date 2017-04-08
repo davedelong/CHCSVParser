@@ -36,12 +36,12 @@ let QUOTED_FIELD3 = DOUBLEQUOTE + FIELD3 + DOUBLEQUOTE
 
 let MULTILINE_FIELD = FIELD1 + NEWLINE + FIELD2
 
-func parse(csv: String, _ expected: Array<CSVRecord>, _ configuration: CSVParserConfiguration = CSVParserConfiguration(), file: String = __FILE__, line: UInt = __LINE__) {
-    guard let parsed = XCTAssertNoThrows(try csv.delimitedComponents(configuration, useFirstLineAsKeys: false), file: file, line: line) else { return }
-    XCTAssertEqualRecordArrays(parsed, expected, file: file, line: line)
+func parse(_ csv: String, _ expected: Array<CSVRecord>, _ configuration: CSVParser.Configuration = CSVParser.Configuration(), file: StaticString = #file, line: UInt = #line) -> Bool {
+    guard let parsed = XCTAssertNoThrows(try csv.delimitedComponents(configuration, useFirstLineAsKeys: false), file: file, line: line) else { return false }
+    return XCTAssertEqualRecordArrays(parsed, expected, file: file, line: line)
 }
 
-func XCTAssertEqualRecordArrays(actual: Array<CSVRecord>, _ expected: Array<CSVRecord>, file: String = __FILE__, line: UInt = __LINE__) -> Bool {
+func XCTAssertEqualRecordArrays(_ actual: Array<CSVRecord>, _ expected: Array<CSVRecord>, file: StaticString = #file, line: UInt = #line) -> Bool {
     XCTAssertEqual(actual.count, expected.count, "incorrect number of records", file: file, line: line)
     guard actual.count == expected.count else { return false }
     
@@ -57,15 +57,16 @@ func XCTAssertEqualRecordArrays(actual: Array<CSVRecord>, _ expected: Array<CSVR
     return true
 }
 
-func XCTAssertEqualSequences<S1: SequenceType, S2: SequenceType where S2.Generator.Element == S1.Generator.Element, S2.Generator.Element: Equatable>(actual: S1, _ expected: S2, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> Bool {
+func XCTAssertEqualSequences<S1: Sequence, S2: Sequence>(_ actual: S1, _ expected: S2, _ message: String = "", file: StaticString = #file, line: UInt = #line) -> Bool where S2.Iterator.Element == S1.Iterator.Element, S2.Iterator.Element: Equatable {
 
-    let actualGenerator = actual.generate()
-    let expectedGenerator = expected.generate()
+    let actualIterator = actual.makeIterator()
+    let expectedIterator = expected.makeIterator()
     
-    return XCTAssertEqualGenerators(actualGenerator, expectedGenerator, message, file: file, line: line)
+    return XCTAssertEqualIterators(actualIterator, expectedIterator, message, file: file, line: line)
 }
 
-func XCTAssertEqualGenerators<G1: GeneratorType, G2: GeneratorType where G2.Element == G1.Element, G2.Element: Equatable>(var actual: G1, var _ expected: G2, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> Bool {
+func XCTAssertEqualIterators<G1: IteratorProtocol, G2: IteratorProtocol>(_ actual: G1, _ expected: G2, _ message: String = "", file: StaticString = #file, line: UInt = #line) -> Bool where G2.Element == G1.Element, G2.Element: Equatable {
+    var actual = actual, expected = expected
     var itemIndex = 0
     
     while let actualNext = actual.next(), let expectedNext = expected.next() {
@@ -75,13 +76,13 @@ func XCTAssertEqualGenerators<G1: GeneratorType, G2: GeneratorType where G2.Elem
             XCTFail(finalMessage, file: file, line: line)
             return false
         }
-        itemIndex++
+        itemIndex += 1
     }
     
     return true
 }
 
-func XCTAssertNoThrows(@autoclosure expression: () throws -> Void, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> Bool {
+func XCTAssertNoThrows(_ expression: @autoclosure () throws -> Void, _ message: String = "", file: StaticString = #file, line: UInt = #line) -> Bool {
     var ok = false
     do {
         try expression()
@@ -93,7 +94,7 @@ func XCTAssertNoThrows(@autoclosure expression: () throws -> Void, _ message: St
     return ok
 }
 
-func XCTAssertNoThrows<T>(@autoclosure expression: () throws -> T, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) -> T? {
+func XCTAssertNoThrows<T>(_ expression: @autoclosure () throws -> T, _ message: String = "", file: StaticString = #file, line: UInt = #line) -> T? {
     var t: T? = nil
     do {
         t = try expression()
@@ -104,7 +105,7 @@ func XCTAssertNoThrows<T>(@autoclosure expression: () throws -> T, _ message: St
     return t
 }
 
-func XCTAssertThrows<T>(@autoclosure expression: () throws -> T, _ message: String = "", file: String = __FILE__, line: UInt = __LINE__) {
+func XCTAssertThrows<T>(_ expression: @autoclosure () throws -> T, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
     do {
         let _ = try expression()
         XCTFail("Expected thrown error", file: file, line: line)
@@ -116,27 +117,27 @@ func XCTAssertThrows<T>(@autoclosure expression: () throws -> T, _ message: Stri
 private var temporaryFolderLogging = Dictionary<String, Bool>()
 extension XCTestCase {
     
-    internal func resource(name: String, type: String = "csv", file: String = __FILE__, line: UInt = __LINE__) -> NSURL? {
-        let bundle = NSBundle(forClass: self.dynamicType)
-        if let url = bundle.URLForResource(name, withExtension: type) {
+    internal func resource(_ name: String, type: String = "csv", file: StaticString = #file, line: UInt = #line) -> URL? {
+        let bundle = Bundle(for: type(of: self))
+        if let url = bundle.url(forResource: name, withExtension: type) {
             return url
         }
         XCTFail("Unable to load file \(name).\(type)", file: file, line: line)
         return nil
     }
     
-    internal func temporaryFile(name: String, function: String = __FUNCTION__) -> NSURL {
-        let tmp: NSString = NSTemporaryDirectory()
-        let classFolder: NSString = tmp.stringByAppendingPathComponent("\(self.dynamicType)")
-        let functionFolder: NSString = classFolder.stringByAppendingPathComponent(function)
-        let file = functionFolder.stringByAppendingPathComponent(name)
+    internal func temporaryFile(_ name: String, function: String = #function) -> URL {
+        let tmp: NSString = NSTemporaryDirectory() as NSString
+        let classFolder: NSString = tmp.appendingPathComponent("\(type(of: self))") as NSString
+        let functionFolder: NSString = classFolder.appendingPathComponent(function) as NSString
+        let file = functionFolder.appendingPathComponent(name)
         
         do {
-            let fm = NSFileManager.defaultManager()
+            let fm = FileManager.default
             let folder = functionFolder as String
             var isDir: ObjCBool = false
-            if fm.fileExistsAtPath(folder, isDirectory: &isDir) == false || isDir.boolValue == false {
-                _ = try fm.createDirectoryAtPath(folder, withIntermediateDirectories: true, attributes: nil)
+            if fm.fileExists(atPath: folder, isDirectory: &isDir) == false || isDir.boolValue == false {
+                _ = try fm.createDirectory(atPath: folder, withIntermediateDirectories: true, attributes: nil)
             }
             
             if temporaryFolderLogging[folder] != true {
@@ -146,6 +147,6 @@ extension XCTestCase {
         } catch _ { }
         
         
-        return NSURL(fileURLWithPath: file)
+        return URL(fileURLWithPath: file)
     }
 }

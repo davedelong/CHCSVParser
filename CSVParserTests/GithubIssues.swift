@@ -14,7 +14,7 @@ class GithubIssues: XCTestCase {
     func testIssue1() {
         let csv = FIELD1+COMMA+FIELD2+NEWLINE+FIELD3+COMMA+FIELD1+BACKSLASH
         
-        var config = CSVParserConfiguration()
+        var config = CSVParser.Configuration()
         config.recognizeBackslashAsEscape = true
         
         XCTAssertThrows(try csv.delimitedComponents(config))
@@ -23,13 +23,13 @@ class GithubIssues: XCTestCase {
     func testIssue16() {
         let csv = FIELD1+COMMA+NEWLINE+FIELD2+COMMA
         let expected: Array<CSVRecord> = [[FIELD1, ""], [FIELD2, ""]]
-        parse(csv, expected)
+        _ = parse(csv, expected)
     }
     
     func testIssue22() {
         let csv = FIELD1+NEWLINE+FIELD2
         let expected:Array<CSVRecord> = [[FIELD1], [FIELD2]]
-        parse(csv, expected)
+        _ = parse(csv, expected)
     }
     
     func testIssue35() {
@@ -48,25 +48,25 @@ class GithubIssues: XCTestCase {
             ["10,a", "10,b", "10,c", "10,d"],
         ]
         
-        parse(tsv, expected, CSVParserConfiguration(delimiter: "\t"))
+        _ = parse(tsv, expected, CSVParser.Configuration(delimiter: "\t"))
     }
     
     func testIssue38() {
         let csv = "\(Field1),\(Field2),\(Field3)\n#"
         let expected: Array<CSVRecord> = [[Field1, Field2, Field3]]
         
-        var config = CSVParserConfiguration()
+        var config = CSVParser.Configuration()
         config.recognizeComments = true
-        parse(csv, expected, config)
+        _ = parse(csv, expected, config)
     }
     
     func testIssue50() {
         let csv = "TRẦN,species_code,Scientific name,Author name,Common name,Family,Description,Habitat,\"Leaf size min (cm, 0 decimal digit)\",\"Leaf size max (cm, 0 decimal digit)\",Distribution,Current National Conservation Status,Growth requirements,Horticultural features,Uses,Associated fauna,Reference,species_id"
         let expected: Array<CSVRecord> = [["TRẦN","species_code","Scientific name","Author name","Common name","Family","Description","Habitat","\"Leaf size min (cm, 0 decimal digit)\"","\"Leaf size max (cm, 0 decimal digit)\"","Distribution","Current National Conservation Status","Growth requirements","Horticultural features","Uses","Associated fauna","Reference","species_id"]]
         
-        var configuration = CSVParserConfiguration()
+        var configuration = CSVParser.Configuration()
         configuration.recognizeBackslashAsEscape = true
-        parse(csv, expected, configuration)
+        _ = parse(csv, expected, configuration)
     }
     
     func testIssue53() {
@@ -78,13 +78,13 @@ class GithubIssues: XCTestCase {
             ["1", "2", "3"],
             ["I", "II", "III"]
         ]
-        parse(csv, expected)
+        _ = parse(csv, expected)
     }
     
     func testIssue64() {
         guard let fileURL = resource("Issue64") else { return }
         
-        guard let source = XCTAssertNoThrows(try String(contentsOfURL: fileURL)) else { return }
+        guard let source = XCTAssertNoThrows(try String(contentsOf: fileURL)) else { return }
         let expected: Array<CSVRecord> = [["SplashID vID File -v2.0"],
                         ["F"],
                         ["T","21","Web Logins","Description","Username","Password","URL","Field 5","4",""],
@@ -96,13 +96,13 @@ class GithubIssues: XCTestCase {
                         ["T","3","Credit Cards","Description","Card #","Expiry Date","Name","PIN","18",""],
                         ["F","3","карта 2","123123123213","23/23","Лдлоло Лдлодло","23223","","18","","","","","","","Unfiled","\"фывфывыфв\r\r\rфывфыв\""]]
     
-        parse(source, expected)
+        _ = parse(source, expected)
     }
     
     func testIssue65() {
         guard let fileURL = resource("Issue65") else { return }
         
-        guard let source = XCTAssertNoThrows(try String(contentsOfURL: fileURL, encoding: NSMacOSRomanStringEncoding)) else { return }
+        guard let source = XCTAssertNoThrows(try String(contentsOf: fileURL, encoding: String.Encoding.macOSRoman)) else { return }
         let expected: Array<CSVRecord> = [["Bib", "Name", "Teamcode", "Team"],
                         ["71", "DUMOULIN Tom", "GIA", "TEAM GIANT-SHIMANO"],
                         ["41", "CANCELLARA Fabian", "TFR", "TREK FACTORY RACING"],
@@ -259,7 +259,7 @@ class GithubIssues: XCTestCase {
                         ["181", "VAN STAEYEN Michael", "TSV", "TOPSPORT VLAANDEREN - BALOISE"],
                         ["29", "DOCKX Gert", "LTB", "LOTTO BELISOL"],
                         ["173", "DUCHESNE Antoine", "EUC", "TEAM EUROPCAR"]]
-        parse(source, expected)
+        _ = parse(source, expected)
     }
 
 }

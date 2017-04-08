@@ -8,103 +8,115 @@
 
 import Foundation
 
-struct FieldParser {
+struct FieldParser: Parser {
     
-    func parse<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> ParsingDisposition {
+    func parse(_ state: ParserState) -> CSVParsingDisposition {
+        let stream = state.characterIterator
         // check for more characters
         guard let peek = stream.peek() else {
             // no characters; report an empty field
-            return configuration.onReadField?("", index, stream.progress()) ?? .Continue
+            return state.configuration.onReadField("", state.currentLine, state.currentField, stream.progress())
         }
         
-        if peek == configuration.delimiter || configuration.recordTerminators.contains(peek) {
+        if peek == state.configuration.delimiter || state.configuration.recordTerminators.contains(peek) {
             // field terminator; report an empty field
-            return configuration.onReadField?("", index, stream.progress()) ?? .Continue
+            return state.configuration.onReadField("", state.currentLine, state.currentField, stream.progress())
         }
         
         // consume the leading whitespace
-        let leadingWS = parseWhitespace(stream, configuration: configuration)
+        let leadingWS = parseWhitespace(state)
         
         let field: String
-        if stream.peek() == Character.DoubleQuote {
-            // parse an escaped field
-            field = try parseEscapedField(stream, configuration: configuration, line: line, index: index)
-            
-        } else if configuration.recognizeLeadingEqualSign && stream.peek() == Character.Equal && stream.peek(1) == Character.DoubleQuote {
-            //parse an escaped field
-            field = try parseEscapedField(stream, configuration: configuration, line: line, index: index)
-            
-        } else {
-            // parse an unescaped field
-            field = try parseUnescapedField(stream, configuration: configuration, line: line, index: index)
+        do {
+            if stream.peek() == Character.DoubleQuote {
+                // parse an escaped field
+                field = try parseEscapedField(state)
+                
+            } else if state.configuration.recognizeLeadingEqualSign && stream.peek() == Character.Equal && stream.peek(1) == Character.DoubleQuote {
+                //parse an escaped field
+                field = try parseEscapedField(state)
+                
+            } else {
+                // parse an unescaped field
+                field = try parseUnescapedField(state)
+            }
+        } catch let e as CSVParserError {
+            return .error(e)
+        } catch let other {
+            fatalError("Unexpected error parsing field: \(other)")
         }
         
-        let trailingWS = parseWhitespace(stream, configuration: configuration)
+        let trailingWS = parseWhitespace(state)
         
         // restore the whitespace around the field
+        let final = state.configuration.trimWhitespace ? field.trimmingCharacters(in: .whitespaces) : leadingWS + field + trailingWS
         
-        let final = configuration.trimWhitespace ? field.trim() : leadingWS + field + trailingWS
-        return configuration.onReadField?(final, index, stream.progress()) ?? .Continue
+        return state.configuration.onReadField(final, state.currentLine, state.currentField, stream.progress())
     }
     
-    func parseWhitespace<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration) -> String {
+    func parseWhitespace(_ state: ParserState) -> String {
+        let stream = state.characterIterator
         var w = ""
-        while let peek = stream.peek() where Character.Whitespaces.contains(peek) && peek != configuration.delimiter {
+        while let peek = stream.peek() , Character.Whitespaces.contains(peek) && peek != state.configuration.delimiter {
             w.append(peek)
-            stream.next()
+            _ = stream.next()
         }
         return w
     }
     
-    func parseUnescapedField<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {
+    func parseUnescapedField(_ state: ParserState) throws -> String {
+        let stream = state.characterIterator
+        
         var field = ""
         var sanitized = ""
         
         var isBackslashEscaped = false
         while let next = stream.peek() {
             if isBackslashEscaped == false {
-                if next == Character.Backslash && configuration.recognizeBackslashAsEscape {
+                if next == Character.Backslash && state.configuration.recognizeBackslashAsEscape {
                     field.append(next)
-                    stream.next()
+                    _ = stream.next()
                     isBackslashEscaped = true
-                } else if configuration.recordTerminators.contains(next) || next == configuration.delimiter {
+                } else if state.configuration.recordTerminators.contains(next) || next == state.configuration.delimiter {
                     break
                 } else {
                     field.append(next)
                     sanitized.append(next)
-                    stream.next()
+                    _ = stream.next()
                 }
             } else {
                 isBackslashEscaped = false
                 field.append(next)
                 sanitized.append(next)
-                stream.next()
+                _ = stream.next()
             }
         }
         
         if isBackslashEscaped == true {
-            throw CSVParserError(kind: .IncompleteField, line: line, field: index, progress: stream.progress())
+            throw CSVParserError(kind: .incompleteField, line: state.currentLine, field: state.currentField, progress: stream.progress())
         }
         
         if let next = stream.peek() {
-            guard next == configuration.delimiter || configuration.recordTerminators.contains(next) else {
+            guard next == state.configuration.delimiter || state.configuration.recordTerminators.contains(next) else {
                 fatalError("Implementation flaw; Unexpectedly finished parsing unescaped field")
             }
         }
         // end of field
-        return configuration.sanitizeFields ? sanitized : field
+        return state.configuration.sanitizeFields ? sanitized : field
     }
     
-    func parseEscapedField<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration, line: UInt, index: UInt) throws -> String {
+    func parseEscapedField(_ state: ParserState) throws -> String {
+        let stream = state.characterIterator
+        
         var raw = ""
         var sanitized = ""
         
-        if configuration.recognizeLeadingEqualSign && stream.peek() == Character.Equal {
-            stream.next()
+        if state.configuration.recognizeLeadingEqualSign && stream.peek() == Character.Equal {
+            _ = stream.next()
             raw.append(Character.Equal)
         }
         
-        guard let next = stream.next() where next == Character.DoubleQuote else {
+        guard let next = stream.next(), next == Character.DoubleQuote else {
             fatalError("Unexpected character opening escaped field")
         }
         
@@ -114,23 +126,26 @@ struct FieldParser {
         while let next = stream.peek() {
             if isBackslashEscaped == false {
                 
-                if next == Character.Backslash && configuration.recognizeBackslashAsEscape {
+                if next == Character.Backslash && state.configuration.recognizeBackslashAsEscape {
                     isBackslashEscaped = true
-                    stream.next()
+                    _ = stream.next()
                     raw.append(next)
+                    
                 } else if next == Character.DoubleQuote && stream.peek(1) == Character.DoubleQuote {
                     sanitized.append(Character.DoubleQuote)
                     raw.append(Character.DoubleQuote); raw.append(Character.DoubleQuote)
-                    stream.next()
-                    stream.next()
+                    _ = stream.next()
+                    _ = stream.next()
+                    
                 } else if next == Character.DoubleQuote {
                     // quote that is NOT followed by another quote
                     // this is the closing field quote
                     break
+                    
                 } else {
                     raw.append(next)
                     sanitized.append(next)
-                    stream.next()
+                    _ = stream.next()
                 }
                 
             } else {
@@ -138,21 +153,21 @@ struct FieldParser {
                 sanitized.append(next)
                 
                 isBackslashEscaped = false
-                stream.next() // consume the character
+                _ = stream.next() // consume the character
             }
         }
         
         guard isBackslashEscaped == false else {
-            throw CSVParserError(kind: .IncompleteField, line: line, field: index, progress: stream.progress())
+            throw CSVParserError(kind: .incompleteField, line: state.currentLine, field: state.currentField, progress: stream.progress())
         }
         
         guard stream.peek() == Character.DoubleQuote else {
-            throw CSVParserError(kind: .UnexpectedFieldTerminator, line: line, field: index, progress: stream.progress())
+            throw CSVParserError(kind: .unexpectedFieldTerminator(stream.peek()), line: state.currentLine, field: state.currentField, progress: stream.progress())
         }
         
         raw.append(Character.DoubleQuote)
-        stream.next()
+        _ = stream.next()
         
-        return configuration.sanitizeFields ? sanitized : raw
+        return state.configuration.sanitizeFields ? sanitized : raw
     }
 }

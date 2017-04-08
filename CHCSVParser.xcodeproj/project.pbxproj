@@ -7,29 +7,33 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		55542D381BB246F000CAE75A /* FileSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D371BB246F000CAE75A /* FileSequence.swift */; settings = {ASSET_TAGS = (); }; };
-		55542D3A1BB2471D00CAE75A /* NSStringEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D391BB2471D00CAE75A /* NSStringEncoding.swift */; settings = {ASSET_TAGS = (); }; };
-		55542D3C1BB24DF800CAE75A /* StreamCharacterGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3B1BB24DF800CAE75A /* StreamCharacterGenerator.swift */; settings = {ASSET_TAGS = (); }; };
-		55542D3E1BB2E02500CAE75A /* NSData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3D1BB2E02500CAE75A /* NSData.swift */; settings = {ASSET_TAGS = (); }; };
-		55542D401BB2E42B00CAE75A /* GeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3F1BB2E42B00CAE75A /* GeneratorTests.swift */; settings = {ASSET_TAGS = (); }; };
+		55542D381BB246F000CAE75A /* FileSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D371BB246F000CAE75A /* FileSequence.swift */; };
+		55542D3A1BB2471D00CAE75A /* NSStringEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D391BB2471D00CAE75A /* NSStringEncoding.swift */; };
+		55542D3C1BB24DF800CAE75A /* StreamCharacterIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3B1BB24DF800CAE75A /* StreamCharacterIterator.swift */; };
+		55542D3E1BB2E02500CAE75A /* NSData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3D1BB2E02500CAE75A /* NSData.swift */; };
+		55542D401BB2E42B00CAE75A /* IteratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55542D3F1BB2E42B00CAE75A /* IteratorTests.swift */; };
+		5562DF3F1BB82A6B00759087 /* CSVWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5562DF3E1BB82A6B00759087 /* CSVWriter.swift */; };
 		557FCEB61203F938009FCDBA /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557FCEB51203F938009FCDBA /* CoreServices.framework */; };
 		558D3E6E1BADC8A4002849FB /* CSVParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 558D3E6D1BADC8A4002849FB /* CSVParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		558D3E751BADC8A4002849FB /* CSVParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 558D3E6B1BADC8A4002849FB /* CSVParser.framework */; settings = {ASSET_TAGS = (); }; };
+		558D3E751BADC8A4002849FB /* CSVParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 558D3E6B1BADC8A4002849FB /* CSVParser.framework */; };
 		558D3E7A1BADC8A4002849FB /* CSVParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E791BADC8A4002849FB /* CSVParserTests.swift */; };
-		558D3E831BADC9C4002849FB /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E821BADC9C4002849FB /* CSVParser.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E891BADE526002849FB /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E881BADE526002849FB /* Character.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E8B1BADE583002849FB /* DocumentParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E8A1BADE583002849FB /* DocumentParser.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E8D1BADE5B9002849FB /* RecordParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E8C1BADE5B9002849FB /* RecordParser.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E8F1BADE5E3002849FB /* FieldParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E8E1BADE5E3002849FB /* FieldParser.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E911BADE615002849FB /* CharacterStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E901BADE615002849FB /* CharacterStream.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E931BADEE56002849FB /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E921BADEE56002849FB /* String.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E951BADF3C0002849FB /* CSVErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E941BADF3C0002849FB /* CSVErrors.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E981BAE0E24002849FB /* CSVAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E971BAE0E24002849FB /* CSVAggregator.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E9A1BAE1153002849FB /* GithubIssues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E991BAE1153002849FB /* GithubIssues.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3E9C1BAE118A002849FB /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E9B1BAE118A002849FB /* TestHelpers.swift */; settings = {ASSET_TAGS = (); }; };
-		558D3EA01BAE45B0002849FB /* Issue64.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9D1BAE45B0002849FB /* Issue64.csv */; settings = {ASSET_TAGS = (); }; };
-		558D3EA11BAE45B0002849FB /* Issue65.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9E1BAE45B0002849FB /* Issue65.csv */; settings = {ASSET_TAGS = (); }; };
-		558D3EA21BAE45B0002849FB /* Issue79.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9F1BAE45B0002849FB /* Issue79.csv */; settings = {ASSET_TAGS = (); }; };
+		558D3E831BADC9C4002849FB /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E821BADC9C4002849FB /* CSVParser.swift */; };
+		558D3E891BADE526002849FB /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E881BADE526002849FB /* Character.swift */; };
+		558D3E8B1BADE583002849FB /* DocumentParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E8A1BADE583002849FB /* DocumentParser.swift */; };
+		558D3E8D1BADE5B9002849FB /* RecordParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E8C1BADE5B9002849FB /* RecordParser.swift */; };
+		558D3E8F1BADE5E3002849FB /* FieldParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E8E1BADE5E3002849FB /* FieldParser.swift */; };
+		558D3E911BADE615002849FB /* CharacterIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E901BADE615002849FB /* CharacterIterator.swift */; };
+		558D3E951BADF3C0002849FB /* CSVErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E941BADF3C0002849FB /* CSVErrors.swift */; };
+		558D3E981BAE0E24002849FB /* CSVAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E971BAE0E24002849FB /* CSVAggregator.swift */; };
+		558D3E9A1BAE1153002849FB /* GithubIssues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E991BAE1153002849FB /* GithubIssues.swift */; };
+		558D3E9C1BAE118A002849FB /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 558D3E9B1BAE118A002849FB /* TestHelpers.swift */; };
+		558D3EA01BAE45B0002849FB /* Issue64.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9D1BAE45B0002849FB /* Issue64.csv */; };
+		558D3EA11BAE45B0002849FB /* Issue65.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9E1BAE45B0002849FB /* Issue65.csv */; };
+		558D3EA21BAE45B0002849FB /* Issue79.csv in Resources */ = {isa = PBXBuildFile; fileRef = 558D3E9F1BAE45B0002849FB /* Issue79.csv */; };
+		5598C0E81D916C2B006F3877 /* CommentParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5598C0E71D916C2B006F3877 /* CommentParser.swift */; };
+		5598C0EA1D916C4C006F3877 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5598C0E91D916C4C006F3877 /* Parser.swift */; };
+		5598C0EF1D917086006F3877 /* CSVParsingDisposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5598C0EE1D917086006F3877 /* CSVParsingDisposition.swift */; };
+		5598C0F11D9171A6006F3877 /* CSVProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5598C0F01D9171A6006F3877 /* CSVProgress.swift */; };
 		55B60C47180DB1F900B18D7C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55B60C46180DB1F900B18D7C /* XCTest.framework */; };
 		8DD76F9C0486AA7600D96B5E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB779EFE84155DC02AAC07 /* Foundation.framework */; };
 /* End PBXBuildFile section */
@@ -48,9 +52,10 @@
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		55542D371BB246F000CAE75A /* FileSequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileSequence.swift; sourceTree = "<group>"; };
 		55542D391BB2471D00CAE75A /* NSStringEncoding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSStringEncoding.swift; sourceTree = "<group>"; };
-		55542D3B1BB24DF800CAE75A /* StreamCharacterGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamCharacterGenerator.swift; sourceTree = "<group>"; };
+		55542D3B1BB24DF800CAE75A /* StreamCharacterIterator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamCharacterIterator.swift; sourceTree = "<group>"; };
 		55542D3D1BB2E02500CAE75A /* NSData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSData.swift; sourceTree = "<group>"; };
-		55542D3F1BB2E42B00CAE75A /* GeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratorTests.swift; sourceTree = "<group>"; };
+		55542D3F1BB2E42B00CAE75A /* IteratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IteratorTests.swift; sourceTree = "<group>"; };
+		5562DF3E1BB82A6B00759087 /* CSVWriter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVWriter.swift; sourceTree = "<group>"; };
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		557FD0531204A70D009FCDBA /* Unit Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Unit Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		558D3E6B1BADC8A4002849FB /* CSVParser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CSVParser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,8 +69,7 @@
 		558D3E8A1BADE583002849FB /* DocumentParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentParser.swift; sourceTree = "<group>"; };
 		558D3E8C1BADE5B9002849FB /* RecordParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordParser.swift; sourceTree = "<group>"; };
 		558D3E8E1BADE5E3002849FB /* FieldParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FieldParser.swift; sourceTree = "<group>"; };
-		558D3E901BADE615002849FB /* CharacterStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterStream.swift; sourceTree = "<group>"; };
-		558D3E921BADEE56002849FB /* String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
+		558D3E901BADE615002849FB /* CharacterIterator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterIterator.swift; sourceTree = "<group>"; };
 		558D3E941BADF3C0002849FB /* CSVErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVErrors.swift; sourceTree = "<group>"; };
 		558D3E971BAE0E24002849FB /* CSVAggregator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVAggregator.swift; sourceTree = "<group>"; };
 		558D3E991BAE1153002849FB /* GithubIssues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GithubIssues.swift; sourceTree = "<group>"; };
@@ -73,6 +77,11 @@
 		558D3E9D1BAE45B0002849FB /* Issue64.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue64.csv; sourceTree = "<group>"; };
 		558D3E9E1BAE45B0002849FB /* Issue65.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue65.csv; sourceTree = "<group>"; };
 		558D3E9F1BAE45B0002849FB /* Issue79.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue79.csv; sourceTree = "<group>"; };
+		5598C0E71D916C2B006F3877 /* CommentParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentParser.swift; sourceTree = "<group>"; };
+		5598C0E91D916C4C006F3877 /* Parser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
+		5598C0EE1D917086006F3877 /* CSVParsingDisposition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVParsingDisposition.swift; sourceTree = "<group>"; };
+		5598C0F01D9171A6006F3877 /* CSVProgress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVProgress.swift; sourceTree = "<group>"; };
+		5598C0F41D91B16D006F3877 /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.markdown; sourceTree = "<group>"; };
 		55B60C46180DB1F900B18D7C /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		8DD76FA10486AA7600D96B5E /* CHCSVParser */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CHCSVParser; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -149,17 +158,11 @@
 			isa = PBXGroup;
 			children = (
 				558D3E6D1BADC8A4002849FB /* CSVParser.h */,
-				558D3E821BADC9C4002849FB /* CSVParser.swift */,
-				558D3E941BADF3C0002849FB /* CSVErrors.swift */,
-				558D3E971BAE0E24002849FB /* CSVAggregator.swift */,
-				55542D371BB246F000CAE75A /* FileSequence.swift */,
-				55542D3B1BB24DF800CAE75A /* StreamCharacterGenerator.swift */,
-				558D3E961BAE0C3B002849FB /* Parsers */,
-				558D3E881BADE526002849FB /* Character.swift */,
-				558D3E921BADEE56002849FB /* String.swift */,
-				55542D391BB2471D00CAE75A /* NSStringEncoding.swift */,
-				55542D3D1BB2E02500CAE75A /* NSData.swift */,
+				5598C0EB1D916DF0006F3877 /* Reading */,
+				5598C0F31D918D01006F3877 /* Writing */,
+				5598C0F21D918CFA006F3877 /* Helpers */,
 				558D3E6F1BADC8A4002849FB /* Info.plist */,
+				5598C0F41D91B16D006F3877 /* README.markdown */,
 			);
 			path = CSVParser;
 			sourceTree = "<group>";
@@ -168,7 +171,7 @@
 			isa = PBXGroup;
 			children = (
 				558D3E791BADC8A4002849FB /* CSVParserTests.swift */,
-				55542D3F1BB2E42B00CAE75A /* GeneratorTests.swift */,
+				55542D3F1BB2E42B00CAE75A /* IteratorTests.swift */,
 				558D3E991BAE1153002849FB /* GithubIssues.swift */,
 				558D3E9B1BAE118A002849FB /* TestHelpers.swift */,
 				558D3E9D1BAE45B0002849FB /* Issue64.csv */,
@@ -182,12 +185,47 @@
 		558D3E961BAE0C3B002849FB /* Parsers */ = {
 			isa = PBXGroup;
 			children = (
+				5598C0E91D916C4C006F3877 /* Parser.swift */,
 				558D3E8A1BADE583002849FB /* DocumentParser.swift */,
 				558D3E8C1BADE5B9002849FB /* RecordParser.swift */,
+				5598C0E71D916C2B006F3877 /* CommentParser.swift */,
 				558D3E8E1BADE5E3002849FB /* FieldParser.swift */,
-				558D3E901BADE615002849FB /* CharacterStream.swift */,
 			);
 			name = Parsers;
+			sourceTree = "<group>";
+		};
+		5598C0EB1D916DF0006F3877 /* Reading */ = {
+			isa = PBXGroup;
+			children = (
+				558D3E821BADC9C4002849FB /* CSVParser.swift */,
+				5598C0EE1D917086006F3877 /* CSVParsingDisposition.swift */,
+				558D3E941BADF3C0002849FB /* CSVErrors.swift */,
+				5598C0F01D9171A6006F3877 /* CSVProgress.swift */,
+				558D3E901BADE615002849FB /* CharacterIterator.swift */,
+				558D3E961BAE0C3B002849FB /* Parsers */,
+			);
+			name = Reading;
+			sourceTree = "<group>";
+		};
+		5598C0F21D918CFA006F3877 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				55542D371BB246F000CAE75A /* FileSequence.swift */,
+				55542D3B1BB24DF800CAE75A /* StreamCharacterIterator.swift */,
+				558D3E881BADE526002849FB /* Character.swift */,
+				55542D391BB2471D00CAE75A /* NSStringEncoding.swift */,
+				55542D3D1BB2E02500CAE75A /* NSData.swift */,
+			);
+			name = Helpers;
+			sourceTree = "<group>";
+		};
+		5598C0F31D918D01006F3877 /* Writing */ = {
+			isa = PBXGroup;
+			children = (
+				5562DF3E1BB82A6B00759087 /* CSVWriter.swift */,
+				558D3E971BAE0E24002849FB /* CSVAggregator.swift */,
+			);
+			name = Writing;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -283,13 +321,15 @@
 			attributes = {
 				LastSwiftMigration = 0700;
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0800;
 				TargetAttributes = {
 					558D3E6A1BADC8A4002849FB = {
 						CreatedOnToolsVersion = 7.0;
+						LastSwiftMigration = 0800;
 					};
 					558D3E731BADC8A4002849FB = {
 						CreatedOnToolsVersion = 7.0;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -307,10 +347,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8DD76F960486AA7600D96B5E /* Demo */,
-				557FD0521204A70D009FCDBA /* Unit Tests */,
 				558D3E6A1BADC8A4002849FB /* CSVParser */,
 				558D3E731BADC8A4002849FB /* CSVParserTests */,
+				8DD76F960486AA7600D96B5E /* Demo */,
+				557FD0521204A70D009FCDBA /* Unit Tests */,
 			);
 		};
 /* End PBXProject section */
@@ -372,15 +412,19 @@
 			files = (
 				55542D3E1BB2E02500CAE75A /* NSData.swift in Sources */,
 				55542D3A1BB2471D00CAE75A /* NSStringEncoding.swift in Sources */,
+				5598C0EA1D916C4C006F3877 /* Parser.swift in Sources */,
+				5598C0F11D9171A6006F3877 /* CSVProgress.swift in Sources */,
 				558D3E8D1BADE5B9002849FB /* RecordParser.swift in Sources */,
+				5562DF3F1BB82A6B00759087 /* CSVWriter.swift in Sources */,
 				558D3E981BAE0E24002849FB /* CSVAggregator.swift in Sources */,
-				55542D3C1BB24DF800CAE75A /* StreamCharacterGenerator.swift in Sources */,
+				55542D3C1BB24DF800CAE75A /* StreamCharacterIterator.swift in Sources */,
 				55542D381BB246F000CAE75A /* FileSequence.swift in Sources */,
+				5598C0EF1D917086006F3877 /* CSVParsingDisposition.swift in Sources */,
 				558D3E8F1BADE5E3002849FB /* FieldParser.swift in Sources */,
 				558D3E831BADC9C4002849FB /* CSVParser.swift in Sources */,
 				558D3E951BADF3C0002849FB /* CSVErrors.swift in Sources */,
-				558D3E911BADE615002849FB /* CharacterStream.swift in Sources */,
-				558D3E931BADEE56002849FB /* String.swift in Sources */,
+				5598C0E81D916C2B006F3877 /* CommentParser.swift in Sources */,
+				558D3E911BADE615002849FB /* CharacterIterator.swift in Sources */,
 				558D3E891BADE526002849FB /* Character.swift in Sources */,
 				558D3E8B1BADE583002849FB /* DocumentParser.swift in Sources */,
 			);
@@ -391,7 +435,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				558D3E9A1BAE1153002849FB /* GithubIssues.swift in Sources */,
-				55542D401BB2E42B00CAE75A /* GeneratorTests.swift in Sources */,
+				55542D401BB2E42B00CAE75A /* IteratorTests.swift in Sources */,
 				558D3E7A1BADC8A4002849FB /* CSVParserTests.swift in Sources */,
 				558D3E9C1BAE118A002849FB /* TestHelpers.swift in Sources */,
 			);
@@ -449,11 +493,27 @@
 		1DEB927908733DD40010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -463,11 +523,28 @@
 		1DEB927A08733DD40010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};
@@ -548,7 +625,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -578,6 +655,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -600,7 +678,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -625,6 +703,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -671,6 +750,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -708,6 +788,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.davedelong.csvparser.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 3.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

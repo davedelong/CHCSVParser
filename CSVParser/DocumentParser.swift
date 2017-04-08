@@ -8,33 +8,24 @@
 
 import Foundation
 
-internal struct DocumentParser {
+internal struct DocumentParser: Parser {
     let recordParser = RecordParser()
     
-    func parse<G: GeneratorType>(stream: CharacterStream<G>, configuration: CSVParserConfiguration) throws {
-        let disposition = configuration.onBeginDocument?() ?? .Continue
+    func parse(_ state: ParserState) -> CSVParsingDisposition {
+        let stream = state.characterIterator
         
-        guard disposition == .Continue else {
-            configuration.onEndDocument?(stream.progress())
-            return
-        }
+        var disposition = state.configuration.onBeginDocument()
         
-        var currentLine: UInt = 0
-        while stream.peek() != nil {
-            let recordDisposition = try recordParser.parse(stream, configuration: configuration, line: currentLine)
-            if recordDisposition == .Cancel { break }
+        while disposition == .continue && stream.peek() != nil {
+            disposition = recordParser.parse(state)
             
-            currentLine++
-            
-            if let peek = stream.peek() {
-                guard configuration.recordTerminators.contains(peek) else {
-                    throw CSVParserError(kind: .UnexpectedRecordTerminator, line: currentLine, field: 0, progress: stream.progress())
-                }
+            // if there are more characters to be read, make sure it's a record terminator
+            if disposition == .continue && stream.peek() != nil {
+                state.currentLine += 1 // move to the next 0-based line
             }
-            
-            stream.next() // consume the newline
         }
         
-        configuration.onEndDocument?(stream.progress())
+        state.configuration.onEndDocument(stream.progress(), disposition.error)
+        return disposition
     }
 }

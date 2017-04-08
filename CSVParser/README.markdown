@@ -1,6 +1,6 @@
 # CHCSVParser
 
-`CHCSVParser` is a Cocoa parser for CSV files.
+`CHCSVParser` is a Cocoa reader and writer for CSV files.
 
 ## Things missing on the 3.0.0 branch
 
@@ -9,33 +9,33 @@
 
 ## Requirements
 
-- Xcode 7
+- Xcode 8
 - Mac OS X 10.9+
 - iOS 8.0+
 - watchOS 2.0+
 
 ## Usage
 
-`CHCSVParser` is packaged as a Swift framework, and there are several ways to install it:
+`CSVParser` is packaged as a Swift framework, and there are several ways to install it:
 
-1. Add CHCSVParser.xcodeproj to your workspace and link CSVParser.framework into your app.
+1. Add CSVParser.xcodeproj to your workspace and link CSVParser.framework into your app.
 1. Install using Carthage.
 1. Install using CocoaPods.
 
 ###Parsing
-A `CHCSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
+A `CSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
 
-A `CHCSVParser` can be created in one of three ways:
+A `CSVParser` can be created in one of three ways:
 
 1. With a URL to a file
 2. With the contents of an `NSString`
 3. With an `NSInputStream`
 
-`CHCSVParser` can be configured to parse other "character-separated" file formats, such as "TSV" (tab-separated).  You can specify the delimiter of the parser during initialization.  The delimiter can only be one character in length, and cannot be any newline character or `"`. Additionally, depending on which options you set on the parser, you may not use `#`, `\`, or `=` as the delimiter either
+`CSVParser` can be configured to parse other "character-separated" file formats, such as "TSV" (tab-separated).  You can specify the delimiter of the parser during initialization.  The delimiter can only be one character in length, and cannot be any newline character or `"`. Additionally, depending on which options you set on the parser, you may not use `#`, `\`, or `=` as the delimiter either
 
-By default, `CHCSVParser` will not sanitize the output of the fields; in other words, individual fields will be returned exactly as they are found in the CSV file.  However, if you wish the fields to be cleaned (surrounding double quotes stripped, characters unescaped, etc), you can specify this by setting the `sanitizesFields` property to `YES`.
+By default, `CSVParser` will not sanitize the output of the fields; in other words, individual fields will be returned exactly as they are found in the CSV file.  However, if you wish the fields to be cleaned (surrounding double quotes stripped, characters unescaped, etc), you can specify this by setting the `sanitizesFields` property to `YES`.
 
-`CHCSVParser` has other properties to alter the parsing behavior:
+`CSVParser` has other properties to alter the parsing behavior:
 
 - `recognizesBackslashesAsEscapes` allows you to parse delimited files where special characters (the delimiter, newlines, etc) are escaped using a backslash. When this option is enabled, you may not use a backslash as a delimiter. This option is disabled by default.
 
@@ -44,7 +44,7 @@ By default, `CHCSVParser` will not sanitize the output of the fields; in other w
 - `recognizesLeadingEqualSign` allows quoted fields to begin with an `=`. Some programs use a leading equal sign to indicate that the contents of the field should be interpreted explicitly, and things like insignificant digits should not be removed. This option is disabled by default.
 
 ###Writing
-A `CHCSVWriter` has several methods for constructing CSV files:
+A `CSVWriter` has several methods for constructing CSV files:
 
 `-writeField:` accepts an object and writes its `-description` (after being properly escaped) out to the CSV file.  It will also write field separator (`,`) if necessary.  You may pass an empty string (`@""`) or `nil` to write an empty field.
 
@@ -54,21 +54,21 @@ A `CHCSVWriter` has several methods for constructing CSV files:
 
 `-writeComment:` accepts a string and writes it out to the file as a CSV-style comment.
 
-If you wish to write CSV directly into an `NSString`, you should create an `NSOutputStream` for writing to memory and use that as the output stream of the `CHCSVWriter`.  For an example of how to do this, see the `-[NSArray(CHCSVAdditions) CSVString]` method.
+If you wish to write CSV directly into an `NSString`, you should create an `NSOutputStream` for writing to memory and use that as the output stream of the `CSVWriter`.  For an example of how to do this, see the `-[NSArray(CSVAdditions) CSVString]` method.
 
-Like `CHCSVParser`, `CHCSVWriter` can be customized with a delimiter other than `,` during initialization.
+Like `CSVParser`, `CSVWriter` can be customized with a delimiter other than `,` during initialization.
 
 ###Convenience Methods
 
 There are a couple of category methods on `NSArray` and `NSString` to simplify the common reading and writing of delimited files.
 
-In addition, the convenience APIs allow for additional parsing options beyond what is provided by `CHCSVParser`. When you specify the `CHCSVParserOptionUsesFirstLineAsKeys` option, parsing will return an array of `CHCSVOrderedDictionary` instances, instead of an array of arrays of strings.
+In addition, the convenience APIs allow for additional parsing options beyond what is provided by `CSVParser`. When you specify the `CSVParserOptionUsesFirstLineAsKeys` option, parsing will return an array of `CSVOrderedDictionary` instances, instead of an array of arrays of strings.
 
-A `CHCSVOrderedDictionary` is an `NSDictionary` subclass that maintains a specific order to its key-value pairs, and allows you to look up keys and values by index.
+A `CSVOrderedDictionary` is an `NSDictionary` subclass that maintains a specific order to its key-value pairs, and allows you to look up keys and values by index.
 
 
 ##Data Encoding
-`CHCSVParser` relies on knowing the encoding of the content.  It should work with pretty much any kind of file encoding, if you can provide what that encoding is.  If you do not know the encoding of the file, then `CHCSVParser` can make a naïve guess.  `CHCSVParser` will try to guess the encoding of the file from among these options:
+`CSVParser` relies on knowing the encoding of the content.  It should work with pretty much any kind of file encoding, if you can provide what that encoding is.  If you do not know the encoding of the file, then `CSVParser` can make a naïve guess.  `CSVParser` will try to guess the encoding of the file from among these options:
 
  - MacOS Roman (`NSMacOSRomanStringEncoding`; the default/fallback encoding)
  - UTF-8 (`NSUTF8StringEncoding`)
@@ -79,20 +79,20 @@ A `CHCSVOrderedDictionary` is an `NSDictionary` subclass that maintains a specif
  - ISO 2022-KR (`kCFStringEncodingISO_2022_KR`)
  
 ##Performance
-`CHCSVParser` is conscious of low-memory environments, such as the iPhone or iPad.  It can safely parse very large CSV files, because it only loads portions of the file into memory at a single time.
+`CSVParser` is conscious of low-memory environments, such as the iPhone or iPad.  It can safely parse very large CSV files, because it only loads portions of the file into memory at a single time.
  
 ##Credits & Contributors
 
-`CHCSVParser` was written by [Dave DeLong][1] and has accepted patches from [several other contributors](https://github.com/davedelong/CHCSVParser/graphs/contributors).
+`CSVParser` was written by [Dave DeLong][1] and has accepted patches from [several other contributors](https://github.com/davedelong/CSVParser/graphs/contributors).
 
-`CHCSVParser` uses code to discover file encoding that was provided by [Rainer Brockerhoff][2].
+`CSVParser` uses code to discover file encoding that was provided by [Rainer Brockerhoff][2].
 
   [1]: http://davedelong.com
   [2]: http://brockerhoff.net
   
 ##License
 
-`CHCSVParser` is licensed under the MIT license, which is reproduced in its entirety here:
+`CSVParser` is licensed under the MIT license, which is reproduced in its entirety here:
 
 
 >Copyright (c) 2014 Dave DeLong
