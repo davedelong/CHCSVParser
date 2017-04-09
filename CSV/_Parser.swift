@@ -12,7 +12,7 @@ extension Parser {
     internal final class State {
         let configuration: Parser.Configuration
         var characterIterator: CharacterIterator
-        var currentLine: UInt = 0
+        var currentRecord: UInt = 0
         var currentField: UInt = 0
         
         init(configuration: Parser.Configuration, characterIterator: CharacterIterator) {

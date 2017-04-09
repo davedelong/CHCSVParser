@@ -33,7 +33,7 @@ public extension Parser {
         
         public let kind: Kind
         public let progress: CSV.Progress
-        public var line: UInt? { return progress.line }
+        public var record: UInt? { return progress.record }
         public var field: UInt? { return progress.field }
         
         public var character: Character? {

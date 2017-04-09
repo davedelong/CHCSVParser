@@ -15,12 +15,12 @@ struct _FieldParser: _Parser {
         // check for more characters
         guard let peek = stream.peek() else {
             // no characters; report an empty field
-            return state.configuration.onReadField("", stream.progress(line: state.currentLine, field: state.currentField))
+            return state.configuration.onReadField("", stream.progress(record: state.currentRecord, field: state.currentField))
         }
         
         if peek == state.configuration.delimiter || state.configuration.recordTerminators.contains(peek) {
             // field terminator; report an empty field
-            return state.configuration.onReadField("", stream.progress(line: state.currentLine, field: state.currentField))
+            return state.configuration.onReadField("", stream.progress(record: state.currentRecord, field: state.currentField))
         }
         
         // consume the leading whitespace
@@ -51,7 +51,7 @@ struct _FieldParser: _Parser {
         // restore the whitespace around the field
         let final = state.configuration.trimWhitespace ? field.trimmingCharacters(in: .whitespaces) : leadingWS + field + trailingWS
         
-        return state.configuration.onReadField(final, stream.progress(line: state.currentLine, field: state.currentField))
+        return state.configuration.onReadField(final, stream.progress(record: state.currentRecord, field: state.currentField))
     }
     
     func parseWhitespace(_ state: Parser.State) -> String {
@@ -93,7 +93,7 @@ struct _FieldParser: _Parser {
         }
         
         if isBackslashEscaped == true {
-            throw Parser.Error(kind: .incompleteField, progress: stream.progress(line: state.currentLine, field: state.currentField))
+            throw Parser.Error(kind: .incompleteField, progress: stream.progress(record: state.currentRecord, field: state.currentField))
         }
         
         if let next = stream.peek() {
@@ -158,11 +158,11 @@ struct _FieldParser: _Parser {
         }
         
         guard isBackslashEscaped == false else {
-            throw Parser.Error(kind: .incompleteField, progress: stream.progress(line: state.currentLine, field: state.currentField))
+            throw Parser.Error(kind: .incompleteField, progress: stream.progress(record: state.currentRecord, field: state.currentField))
         }
         
         guard stream.peek() == Character.DoubleQuote else {
-            throw Parser.Error(kind: .unexpectedFieldTerminator(stream.peek()), progress: stream.progress(line: state.currentLine, field: state.currentField))
+            throw Parser.Error(kind: .unexpectedFieldTerminator(stream.peek()), progress: stream.progress(record: state.currentRecord, field: state.currentField))
         }
         
         raw.append(Character.DoubleQuote)

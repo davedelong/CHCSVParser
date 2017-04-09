@@ -21,11 +21,11 @@ internal struct _DocumentParser: _Parser {
             
             // if there are more characters to be read, make sure it's a record terminator
             if disposition == .continue && stream.peek() != nil {
-                state.currentLine += 1 // move to the next 0-based line
+                state.currentRecord += 1 // move to the next 0-based record
             }
         }
         
-        let progress = stream.progress(line: state.currentLine)
+        let progress = stream.progress(record: state.currentRecord)
         state.configuration.onEndDocument(progress, disposition.error)
         return disposition
     }

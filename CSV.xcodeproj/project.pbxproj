@@ -81,7 +81,7 @@
 		5598C0F01D9171A6006F3877 /* Progress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Progress.swift; sourceTree = "<group>"; };
 		5598C0F41D91B16D006F3877 /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.markdown; sourceTree = "<group>"; };
 		55B60C46180DB1F900B18D7C /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		8DD76FA10486AA7600D96B5E /* CHCSVParser */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CHCSVParser; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FA10486AA7600D96B5E /* CSV */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CSV; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,26 +125,26 @@
 			children = (
 				558D3E6C1BADC8A4002849FB /* CSV */,
 				558D3E781BADC8A4002849FB /* CSVTests */,
-				08FB779DFE84155DC02AAC07 /* External Frameworks and Libraries */,
+				08FB779DFE84155DC02AAC07 /* External Frameworks */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 			);
 			name = CHCSVParser;
 			sourceTree = "<group>";
 		};
-		08FB779DFE84155DC02AAC07 /* External Frameworks and Libraries */ = {
+		08FB779DFE84155DC02AAC07 /* External Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				55B60C46180DB1F900B18D7C /* XCTest.framework */,
 				557FCEB51203F938009FCDBA /* CoreServices.framework */,
 				08FB779EFE84155DC02AAC07 /* Foundation.framework */,
 			);
-			name = "External Frameworks and Libraries";
+			name = "External Frameworks";
 			sourceTree = "<group>";
 		};
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76FA10486AA7600D96B5E /* CHCSVParser */,
+				8DD76FA10486AA7600D96B5E /* CSV */,
 				557FD0531204A70D009FCDBA /* Unit Tests.xctest */,
 				558D3E6B1BADC8A4002849FB /* CSV.framework */,
 				558D3E741BADC8A4002849FB /* CSVTests.xctest */,
@@ -307,7 +307,7 @@
 			name = Demo;
 			productInstallPath = "$(HOME)/bin";
 			productName = CHCSVParser;
-			productReference = 8DD76FA10486AA7600D96B5E /* CHCSVParser */;
+			productReference = 8DD76FA10486AA7600D96B5E /* CSV */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -330,7 +330,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "CHCSVParser" */;
+			buildConfigurationList = 1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "CSV" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -466,7 +466,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_NAME = CHCSVParser;
+				PRODUCT_NAME = CSV;
 				SWIFT_OBJC_BRIDGING_HEADER = "CHCSVParser/CHCSVParser/CHCSVParser-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -481,7 +481,7 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_NAME = CHCSVParser;
+				PRODUCT_NAME = CSV;
 				SWIFT_OBJC_BRIDGING_HEADER = "CHCSVParser/CHCSVParser/CHCSVParser-Bridging-Header.h";
 			};
 			name = Release;
@@ -801,7 +801,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "CHCSVParser" */ = {
+		1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "CSV" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB927908733DD40010E9CD /* Debug */,

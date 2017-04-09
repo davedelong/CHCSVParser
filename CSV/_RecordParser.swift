@@ -26,7 +26,7 @@ internal struct _RecordParser: _Parser {
     private func parseRecord(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator
         
-        var disposition = state.configuration.onBeginLine(stream.progress(line: state.currentLine))
+        var disposition = state.configuration.onBeginRecord(stream.progress(record: state.currentRecord))
         
         while disposition == .continue {
             disposition = fieldParser.parse(state)
@@ -43,7 +43,7 @@ internal struct _RecordParser: _Parser {
                     break // break out of the field-parsing loop
                 } else {
                     // not a field delimiter, and not a record terminator
-                    let error = Parser.Error(kind: .unexpectedDelimiter(peek), progress: stream.progress(line: state.currentLine, field: state.currentField))
+                    let error = Parser.Error(kind: .unexpectedDelimiter(peek), progress: stream.progress(record: state.currentRecord, field: state.currentField))
                     disposition = .error(error)
                 }
             } else {
@@ -51,7 +51,7 @@ internal struct _RecordParser: _Parser {
             }
         }
         
-        let endDisposition = state.configuration.onEndLine(stream.progress(line: state.currentLine))
+        let endDisposition = state.configuration.onEndRecord(stream.progress(record: state.currentRecord))
         if disposition == .continue { disposition = endDisposition }
         return disposition
     }

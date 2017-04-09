@@ -47,7 +47,7 @@ internal struct _CommentParser: _Parser {
             }
         }
         
-        let progress = stream.progress(line: state.currentLine, field: nil)
+        let progress = stream.progress(record: state.currentRecord, field: nil)
         if isBackslashEscaped == true {
             // technically this should only happen if the final character of the stream is a backslash, and we're allowing backslashes
             let error = Parser.Error(kind: .incompleteField, progress: progress)

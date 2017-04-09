@@ -62,33 +62,33 @@ public struct Record: Sequence, ExpressibleByArrayLiteral, ExpressibleByDictiona
 }
 
 extension String {
-    public func delimitedComponents(_ configuration: Parser.Configuration = Parser.Configuration(), useFirstLineAsKeys: Bool = false) throws -> Array<Record> {
-        let aggregator = Aggregator(useFirstLineAsKeys: useFirstLineAsKeys)
+    public func delimitedComponents(_ configuration: Parser.Configuration = Parser.Configuration(), useFirstRecordAsKeys: Bool = false) throws -> Array<Record> {
+        let aggregator = Aggregator(useFirstRecordAsKeys: useFirstRecordAsKeys)
         
         var config = configuration
         config.onBeginDocument = aggregator.beginDocument
         config.onEndDocument = aggregator.endDocument
-        config.onBeginLine = aggregator.beginLine
-        config.onEndLine = aggregator.endLine
+        config.onBeginRecord = aggregator.beginRecord
+        config.onEndRecord = aggregator.endRecord
         config.onReadComment = aggregator.readComment
         config.onReadField = aggregator.readField
         
         let parser = Parser(characters: self.characters, configuration: config)
         try parser.parse()
         
-        return aggregator.lines
+        return aggregator.records
     }
 }
 
 private class Aggregator {
-    let useFirstLineAsKeys: Bool
+    let useFirstRecordAsKeys: Bool
     var keys: Array<String>? = nil
-    var lines = Array<Record>()
+    var records = Array<Record>()
     
-    var currentLine: Array<String>? = nil
+    var currentRecord: Array<String>? = nil
     
-    init(useFirstLineAsKeys keys: Bool) {
-        useFirstLineAsKeys = keys
+    init(useFirstRecordAsKeys keys: Bool) {
+        useFirstRecordAsKeys = keys
     }
     
     func beginDocument() -> Parser.Disposition {
@@ -97,44 +97,44 @@ private class Aggregator {
     
     func endDocument(_ progress: Progress, _ error: Parser.Error?) { }
     
-    func beginLine(_ progress: CSV.Progress) -> Parser.Disposition {
-        currentLine = []
+    func beginRecord(_ progress: CSV.Progress) -> Parser.Disposition {
+        currentRecord = []
         return .continue
     }
     
-    func endLine(_ progress: CSV.Progress) -> Parser.Disposition {
-        guard let line = progress.line else {
-            fatalError("Got an end-of-line callback, but no line")
+    func endRecord(_ progress: CSV.Progress) -> Parser.Disposition {
+        guard let record = progress.record else {
+            fatalError("Got an end-of-record callback, but no record")
         }
         
-        if let fields = currentLine {
-            if line == 0 && useFirstLineAsKeys {
-                keys = currentLine
+        if let fields = currentRecord {
+            if record == 0 && useFirstRecordAsKeys {
+                keys = currentRecord
             } else {
-                if useFirstLineAsKeys {
+                if useFirstRecordAsKeys {
                     guard keys?.count == fields.count else {
                         let field = max(fields.count - 1, 0)
-                        let newProgress = CSV.Progress(bytesRead: progress.bytesRead, charactersRead: progress.charactersRead, line: line, field: UInt(field))
+                        let newProgress = CSV.Progress(byteCount: progress.byteCount, characterCount: progress.characterCount, record: record, field: UInt(field))
                         let error = Parser.Error(kind: .illegalNumberOfFields, progress: newProgress)
                         return .error(error)
                     }
                 }
-                let record = Record(index: line, array: fields, keys: keys)
-                lines.append(record)
+                let record = Record(index: record, array: fields, keys: keys)
+                records.append(record)
             }
         }
-        currentLine = nil
+        currentRecord = nil
         return .continue
     }
     
     func readField(_ field: String, progress: CSV.Progress) -> Parser.Disposition {
-        currentLine?.append(field)
+        currentRecord?.append(field)
         return .continue
     }
     
     func readComment(_ comment: String, progress: CSV.Progress) -> Parser.Disposition {
-        if currentLine?.isEmpty == true {
-            currentLine = nil
+        if currentRecord?.isEmpty == true {
+            currentRecord = nil
         }
         return .continue
     }

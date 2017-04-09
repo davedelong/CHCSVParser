@@ -35,7 +35,7 @@ public final class Writer {
     
     private var currentRecord = 0
     private var currentField = 0
-    private var firstLineKeys = Array<String>()
+    private var firstRecordKeys = Array<String>()
     
     public init(outputStream: OutputStream, encoding: String.Encoding = .utf8, configuration: Writer.Configuration) throws {
         self.output = outputStream
@@ -115,7 +115,7 @@ public final class Writer {
     
     public func write(field: String) {
         if currentRecord == 0 {
-            firstLineKeys.append(field)
+            firstRecordKeys.append(field)
         }
         if currentField > 0 { writeDelimiter() }
         // TODO: escape the field
@@ -157,7 +157,7 @@ public final class Writer {
         
         finishRecordIfNecessary()
         
-        for key in firstLineKeys {
+        for key in firstRecordKeys {
             guard let field = fields[key] else {
                 throw Writer.Error(kind: .missingField(key))
             }

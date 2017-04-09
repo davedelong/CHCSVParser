@@ -44,8 +44,8 @@ public final class Parser {
         public var onBeginDocument: (Void) -> Disposition = { _ in return .continue }
         public var onEndDocument: (CSV.Progress, Parser.Error?) -> Void = { _ in }
         
-        public var onBeginLine: (CSV.Progress) -> Disposition = { _ in return .continue }
-        public var onEndLine: (CSV.Progress) -> Disposition = { _ in return .continue }
+        public var onBeginRecord: (CSV.Progress) -> Disposition = { _ in return .continue }
+        public var onEndRecord: (CSV.Progress) -> Disposition = { _ in return .continue }
         
         public var onReadField: (String, CSV.Progress) -> Disposition = { _ in return .continue }
         public var onReadComment: (String, CSV.Progress) -> Disposition = { _ in return .continue }

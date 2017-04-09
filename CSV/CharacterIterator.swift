@@ -48,10 +48,10 @@ internal final class CharacterIterator: IteratorProtocol {
         return nil
     }
     
-    func progress(line: UInt? = nil, field: UInt? = nil) -> CSV.Progress {
+    func progress(record: UInt? = nil, field: UInt? = nil) -> CSV.Progress {
         if let reporter = iterator as? ByteReporting {
-            return CSV.Progress(bytesRead: reporter.bytesRead, charactersRead: currentIndex, line: line, field: field)
+            return CSV.Progress(byteCount: reporter.bytesRead, characterCount: currentIndex, record: record, field: field)
         }
-        return CSV.Progress(bytesRead: 0, charactersRead: currentIndex, line: line, field: field)
+        return CSV.Progress(byteCount: 0, characterCount: currentIndex, record: record, field: field)
     }
 }
