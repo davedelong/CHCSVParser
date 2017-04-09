@@ -21,4 +21,10 @@ extension String.Encoding {
         return aData.subdata(in: bomRange)
     }
     
+    internal var name: String? {
+        let cfEncoding = CFStringConvertNSStringEncodingToEncoding(self.rawValue)
+        let cfString = CFStringGetNameOfEncoding(cfEncoding)
+        return cfString.flatMap { $0 as String }
+    }
+    
 }

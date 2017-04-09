@@ -8,61 +8,8 @@
 
 import Foundation
 
-public struct Field {
-    public let index: UInt
-    public let key: String?
-    public let value: String
-}
-
-public struct Record: Sequence, ExpressibleByArrayLiteral, ExpressibleByDictionaryLiteral {
-    public let index: UInt
-    public let fields: Array<Field>
-    
-    public init(arrayLiteral elements: String...) {
-        index = 0
-        fields = Array(elements.enumerated()).map { (index, element) in
-            Field(index: UInt(index), key: nil, value: element)
-        }
-    }
-
-    public init(dictionaryLiteral elements: (String, String)...) {
-        index = 0
-        fields = Array(elements.enumerated()).map { (index, element) in
-            Field(index: UInt(index), key: element.0, value: element.1)
-        }
-    }
-    
-    fileprivate init(index i: UInt, array: Array<String>, keys: Array<String>? = nil) {
-        index = i
-        if let keys = keys {
-            let keyValue = zip(keys, array)
-            fields = Array(keyValue.enumerated()).map { (index, element) in
-                Field(index: UInt(index), key: element.0, value: element.1)
-            }
-        } else {
-            fields = Array(array.enumerated()).map { (index, element) in
-                Field(index: UInt(index), key: nil, value: element)
-            }
-        }
-    }
-    
-    public subscript (index: Int) -> String? {
-        if index < 0 || index >= fields.count { return nil }
-        return fields[index].value
-    }
-    
-    public subscript (index: String) -> String? {
-        let match = fields.filter { $0.key == index }
-        return match.first?.value
-    }
-    
-    public func makeIterator() -> AnyIterator<Field> {
-        return AnyIterator(fields.makeIterator())
-    }
-}
-
 extension String {
-    public func delimitedComponents(_ configuration: Parser.Configuration = Parser.Configuration(), useFirstRecordAsKeys: Bool = false) throws -> Array<Record> {
+    public func delimitedComponents(_ configuration: Parser.Configuration = Parser.Configuration(), useFirstRecordAsKeys: Bool = false) throws -> Document {
         let aggregator = Aggregator(useFirstRecordAsKeys: useFirstRecordAsKeys)
         
         var config = configuration
@@ -76,7 +23,7 @@ extension String {
         let parser = Parser(characters: self.characters, configuration: config)
         try parser.parse()
         
-        return aggregator.records
+        return Document(records: aggregator.records)
     }
 }
 

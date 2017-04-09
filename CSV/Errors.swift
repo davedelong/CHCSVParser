@@ -60,6 +60,7 @@ public extension Writer {
     public struct Error: Swift.Error, Equatable {
         
         public enum Kind {
+            case invalidOutputStream
             case illegalDelimiter
             case illegalRecordTerminator
             case invalidRecord

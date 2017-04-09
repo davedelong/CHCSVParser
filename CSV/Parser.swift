@@ -50,9 +50,15 @@ public final class Parser {
         public var onReadField: (String, CSV.Progress) -> Disposition = { _ in return .continue }
         public var onReadComment: (String, CSV.Progress) -> Disposition = { _ in return .continue }
         
-        public init(delimiter d: Character = ",", recordTerminators: Set<Character> = Character.Newlines) {
+        public init(delimiter d: Character = ",", recordTerminators: Set<Character> = Character.Newlines, recognizeBackslashAsEscape: Bool = false, sanitizeFields: Bool = false, recognizeComments: Bool = false, trimWhitespace: Bool = false, recognizeLeadingEqualSign: Bool = false) {
             self.delimiter = d
             self.recordTerminators = recordTerminators
+            
+            self.recognizeBackslashAsEscape = recognizeBackslashAsEscape
+            self.sanitizeFields = sanitizeFields
+            self.recognizeComments = recognizeComments
+            self.trimWhitespace = trimWhitespace
+            self.recognizeLeadingEqualSign = recognizeLeadingEqualSign
         }
         
     }

@@ -23,30 +23,18 @@ public final class Writer {
         }
     }
     
-    private let output: OutputStream
-    private let encoding: String.Encoding
-    private let bom: Data
+    private var outputStream: TextOutputStream
     private let configuration: Writer.Configuration
     
-    private let pendingBuffer = NSMutableData()
+    private let delimiter: String
+    private let recordTerminator: String
     
-    private let rawDelimiter: Data
-    private let rawRecordTerminator: Data
-    
-    private var currentRecord = 0
-    private var currentField = 0
+    private var currentRecord: UInt = 0
+    private var currentField: UInt = 0
     private var firstRecordKeys = Array<String>()
+    private var canWrite = true
     
-    public init(outputStream: OutputStream, encoding: String.Encoding = .utf8, configuration: Writer.Configuration) throws {
-        self.output = outputStream
-        self.encoding = encoding
-        self.bom = encoding.bom
-        self.configuration = configuration
-        
-        self.rawDelimiter = String(configuration.delimiter).data(using: encoding)!.removing(prefix: self.bom)
-        self.rawRecordTerminator = String(configuration.recordTerminator).data(using: encoding)!.removing(prefix: self.bom)
-        
-        
+    public init(stream: TextOutputStream, configuration: Writer.Configuration) throws {
         guard configuration.delimiter != configuration.recordTerminator else {
             throw Writer.Error(kind: .illegalRecordTerminator)
         }
@@ -63,53 +51,39 @@ public final class Writer {
             throw Writer.Error(kind: .illegalRecordTerminator)
         }
         
+        self.outputStream = stream
+        self.configuration = configuration
         
-        self.pendingBuffer.append(self.bom)
+        self.delimiter = String(configuration.delimiter)
+        self.recordTerminator = String(configuration.recordTerminator)
+    }
+    
+    public convenience init(outputStream: OutputStream, encoding: String.Encoding = .utf8, configuration: Writer.Configuration) throws {
+        let streamWrapper = OutputStreamWrapper(outputStream: outputStream, encoding: encoding)
+        try self.init(stream: streamWrapper, configuration: configuration)
     }
     
     deinit {
         close()
     }
     
-    private func writeToStreamIfNecessary(flush: Bool = false) {
-        repeat {
-            // if there's nothing to write, immediately return
-            guard pendingBuffer.length > 0 else { return }
-            
-            // open the stream if it's not already
-            if output.streamStatus == .notOpen { output.open() }
-            
-            // make sure the stream is in a state where it can receive bytes
-            guard [.opening, .open, .writing].contains(output.streamStatus) else { return }
-            
-            // only write if we have 1K or we want to flush
-            guard pendingBuffer.length >= 1024 || flush == true else { return }
-            
-            // make sure there's space in the stream for the bytes
-            guard output.hasSpaceAvailable || flush == true else { return }
-            
-            // write!
-            let buffer = pendingBuffer.bytes.bindMemory(to: UInt8.self, capacity: pendingBuffer.length)
-            let writtenLength = output.write(buffer, maxLength: pendingBuffer.length)
-            pendingBuffer.replaceBytes(in: NSMakeRange(0, writtenLength), withBytes: [])
-        } while flush == true
-    }
-    
-    private func write(data: Data) {
-        pendingBuffer.append(data)
-        writeToStreamIfNecessary()
+    private func write(rawString: String) {
+        guard canWrite == true else {
+            fatalError("Cannot write to a stream that is closed")
+        }
+        outputStream.write(rawString)
     }
     
     private func finishRecordIfNecessary() {
         if currentField > 0 {
-            write(data: rawRecordTerminator)
+            write(rawString: recordTerminator)
         }
         currentField = 0
         currentRecord += 1
     }
     
     private func writeDelimiter() {
-        write(data: rawDelimiter)
+        write(rawString: delimiter)
         currentField += 1
     }
     
@@ -120,8 +94,7 @@ public final class Writer {
         if currentField > 0 { writeDelimiter() }
         // TODO: escape the field
         
-        let fieldData = field.data(using: encoding)!.removing(prefix: bom)
-        write(data: fieldData)
+        write(rawString: field)
     }
     
     public func write(field: Field) {
@@ -129,7 +102,7 @@ public final class Writer {
     }
     
     public func finishRecord() {
-        write(data: rawRecordTerminator)
+        write(rawString: recordTerminator)
         currentField = 0
         currentRecord += 1
     }
@@ -172,19 +145,13 @@ public final class Writer {
         
         finishRecordIfNecessary()
         
-        let lines = comment.components(separatedBy: String(configuration.recordTerminator))
-        for (index, line) in lines.enumerated() {
-            let string = "#" + line
-            let fieldData = string.data(using: encoding)!.removing(prefix: bom)
-            write(data: fieldData)
-            
-            if index != lines.count - 1 { write(data: rawRecordTerminator) }
-        }
+        // TODO: escape any record terminators in the comments
+        let rawComment = "#" + comment
+        write(rawString: rawComment)
     }
     
     public func close() {
-        writeToStreamIfNecessary(flush: true)
-        if output.streamStatus != .closed { output.close() }
+        canWrite = false
     }
     
 }
