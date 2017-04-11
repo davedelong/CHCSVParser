@@ -84,6 +84,10 @@ public final class Parser {
             throw Parser.Error(kind: .illegalDelimiter(configuration.delimiter), progress: CSV.Progress())
         }
         
+        if configuration.recordTerminators.isEmpty {
+            throw Parser.Error(kind: .illegalRecordTerminator, progress: CSV.Progress())
+        }
+        
         let documentParser = _DocumentParser()
         let stream = CharacterIterator(iterator: sequence.makeIterator())
         

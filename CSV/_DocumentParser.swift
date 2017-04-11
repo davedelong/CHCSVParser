@@ -15,13 +15,14 @@ internal struct _DocumentParser: _Parser {
         let stream = state.characterIterator
         
         var disposition = state.configuration.onBeginDocument()
-        
-        while disposition == .continue && stream.peek() != nil {
-            disposition = recordParser.parse(state)
             
-            // if there are more characters to be read, make sure it's a record terminator
-            if disposition == .continue && stream.peek() != nil {
-                state.currentRecord += 1 // move to the next 0-based record
+        while disposition == .continue {
+            disposition = recordParser.parse(state)
+            state.currentRecord += 1 // move to the next 0-based record
+            
+            if stream.peek() == nil {
+                state.currentRecord -= 1
+                break
             }
         }
         

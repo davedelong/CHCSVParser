@@ -11,13 +11,11 @@ import Foundation
 public struct Document: Sequence, ExpressibleByArrayLiteral {
     public let records: Array<Record>
     
-    public init(records: Array<Record>) {
-        self.records = records.enumerated().map { (i, r) -> Record in
-            return Record(index: UInt(i), fields: r.fields)
-        }
+    public init(_ records: Array<Record>) {
+        self.records = records
     }
     public init(arrayLiteral elements: Record...) {
-        self.init(records: elements)
+        self.init(elements)
     }
     
     public subscript (index: Int) -> Record? {
@@ -30,60 +28,74 @@ public struct Document: Sequence, ExpressibleByArrayLiteral {
     }
 }
 
-public struct Field {
-    public let index: UInt
-    public let key: String?
-    public let value: String
-}
-
-public struct Record: Sequence, ExpressibleByArrayLiteral, ExpressibleByDictionaryLiteral {
-    public let index: UInt
-    public let fields: Array<Field>
+public enum Record: Sequence, ExpressibleByArrayLiteral, ExpressibleByDictionaryLiteral {
+    case comment(String)
+    case fields(Array<Field>)
+    
+    public var comment: String? {
+        guard case .comment(let c) = self else { return nil }
+        return c
+    }
+    
+    public var fields: Array<Field>? {
+        guard case .fields(let f) = self else { return nil }
+        return f
+    }
     
     public init(arrayLiteral elements: String...) {
-        index = 0
-        fields = Array(elements.enumerated()).map { (index, element) in
-            Field(index: UInt(index), key: nil, value: element)
-        }
+        self = .fields(elements.map { Field($0) })
     }
     
     public init(dictionaryLiteral elements: (String, String)...) {
-        index = 0
-        fields = Array(elements.enumerated()).map { (index, element) in
-            Field(index: UInt(index), key: element.0, value: element.1)
-        }
+        self = .fields(elements.map { Field(key: $0.0, value: $0.1) })
     }
     
-    internal init(index i: UInt, fields: Array<Field>) {
-        index = i
-        self.fields = fields
+    public init(_ fields: Array<Field>) {
+        self = .fields(fields)
     }
     
-    internal init(index i: UInt, array: Array<String>, keys: Array<String>? = nil) {
-        index = i
+    public init(comment: String) {
+        self = .comment(comment)
+    }
+    
+    internal init(array: Array<String>, keys: Array<String>? = nil) {
         if let keys = keys {
             let keyValue = zip(keys, array)
-            fields = Array(keyValue.enumerated()).map { (index, element) in
-                Field(index: UInt(index), key: element.0, value: element.1)
-            }
+            self = .fields(keyValue.map { Field(key: $0.0, value: $0.1) })
         } else {
-            fields = Array(array.enumerated()).map { (index, element) in
-                Field(index: UInt(index), key: nil, value: element)
-            }
+            self = .fields(array.map { Field($0) })
         }
     }
     
     public subscript (index: Int) -> Field? {
+        guard let fields = self.fields else { return nil }
         if index < 0 || index >= fields.count { return nil }
         return fields[index]
     }
     
     public subscript (index: String) -> Field? {
+        guard let fields = self.fields else { return nil }
         let match = fields.filter { $0.key == index }
         return match.first
     }
     
     public func makeIterator() -> AnyIterator<Field> {
+        guard let fields = self.fields else { return AnyIterator([].makeIterator()) }
         return AnyIterator(fields.makeIterator())
+    }
+}
+
+public struct Field {
+    public let key: String?
+    public let value: String
+    
+    public init(key: String?, value: String) {
+        self.key = key
+        self.value = value
+    }
+    
+    public init(_ value: String) {
+        self.key = nil
+        self.value = value
     }
 }

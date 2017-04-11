@@ -37,8 +37,8 @@ let QUOTED_FIELD3 = DOUBLEQUOTE + FIELD3 + DOUBLEQUOTE
 let MULTILINE_FIELD = FIELD1 + NEWLINE + FIELD2
 
 func parse(_ csv: String, _ expected: Array<Record>, _ configuration: CSV.Parser.Configuration = CSV.Parser.Configuration(), file: StaticString = #file, line: UInt = #line) -> Bool {
-    guard let parsed = XCTAssertNoThrows(try csv.delimitedComponents(configuration, useFirstLineAsKeys: false), file: file, line: line) else { return false }
-    return XCTAssertEqualRecordArrays(parsed, expected, file: file, line: line)
+    guard let parsed = XCTAssertNoThrows(try csv.delimitedComponents(configuration, useFirstRecordAsKeys: false), file: file, line: line) else { return false }
+    return XCTAssertEqualRecordArrays(parsed.records, expected, file: file, line: line)
 }
 
 func XCTAssertEqualRecordArrays(_ actual: Array<Record>, _ expected: Array<Record>, file: StaticString = #file, line: UInt = #line) -> Bool {
@@ -46,11 +46,26 @@ func XCTAssertEqualRecordArrays(_ actual: Array<Record>, _ expected: Array<Recor
     guard actual.count == expected.count else { return false }
     
     for (a, e) in zip(actual, expected) {
-        XCTAssertEqual(a.fields.count, e.fields.count, "incorrect number of fields on line \(a.index)", file: file, line: line)
-        guard a.fields.count == e.fields.count else { return false }
-        for (pf, ef) in zip(a.fields, e.fields) {
-            XCTAssertEqual(pf.value, ef.value, "mismatched field #\(pf.index) on line \(a.index)", file: file, line: line)
-            guard pf.value == ef.value else { return false }
+        switch (a, e) {
+            case (.comment(let l), .fields(let r)):
+                XCTFail("Expected \(r.count) fields, but got comment \"\(l)\"", file: file, line: line); return false
+            
+            case (.fields(let l), .comment(let r)):
+                XCTFail("Expected comment \"\(r)\", but for \(l.count) fields", file: file, line: line); return false
+            
+            case (.comment(let l), .comment(let r)):
+                XCTAssertEqual(l, r, file: file, line: line);
+                guard l == r else { return false }
+            
+            case (.fields(let l), .fields(let r)):
+                guard l.count == r.count else {
+                    XCTFail("expected \(r.count) fields but got \(l.count)", file: file, line: line)
+                    return false
+                }
+                for (lField, rField) in zip(l, r) {
+                    XCTAssertEqual(lField.value, rField.value, file: file, line: line)
+                    guard lField.value == rField.value else { return false }
+                }
         }
     }
     
@@ -105,11 +120,13 @@ func XCTAssertNoThrows<T>(_ expression: @autoclosure () throws -> T, _ message: 
     return t
 }
 
-func XCTAssertThrows<T>(_ expression: @autoclosure () throws -> T, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
+func XCTAssertThrows<T>(_ expression: @autoclosure () throws -> T, _ message: String = "", file: StaticString = #file, line: UInt = #line) -> Bool {
     do {
         let _ = try expression()
         XCTFail("Expected thrown error", file: file, line: line)
+        return false
     } catch _ {
+        return true
     }
 }
 

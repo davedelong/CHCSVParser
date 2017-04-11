@@ -115,10 +115,21 @@ public final class Writer {
         finishRecord()
     }
     
+    public func write(fields: Array<Field>) {
+        // TODO: useFirstRecordAsKeys?
+        
+        finishRecordIfNecessary()
+        for field in fields {
+            write(field: field)
+        }
+        finishRecord()
+    }
+    
     public func write(record: Record) {
         finishRecordIfNecessary()
-        for field in record.fields {
-            write(field: field.value)
+        switch record {
+            case .comment(let c): write(comment: c)
+            case .fields(let f): write(fields: f)
         }
         finishRecord()
     }

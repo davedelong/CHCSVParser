@@ -13,6 +13,7 @@ public extension Parser {
     public struct Error: Swift.Error, Equatable {
         
         public enum Kind: Equatable {
+            case illegalRecordTerminator
             case illegalDelimiter(Character)
             case unexpectedFieldTerminator(Character?)
             case unexpectedDelimiter(Character)
@@ -21,6 +22,7 @@ public extension Parser {
             
             public static func ==(lhs: Kind, rhs: Kind) -> Bool {
                 switch (lhs, rhs) {
+                    case (.illegalRecordTerminator, .illegalRecordTerminator): return true
                     case (.illegalDelimiter(let l), .illegalDelimiter(let r)): return l == r
                     case (.unexpectedFieldTerminator(let l), .unexpectedFieldTerminator(let r)): return l == r
                     case (.unexpectedDelimiter(let l), .unexpectedDelimiter(let r)): return l == r

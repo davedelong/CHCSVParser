@@ -17,7 +17,7 @@ class GithubIssues: XCTestCase {
         var config = CSV.Parser.Configuration()
         config.recognizeBackslashAsEscape = true
         
-        XCTAssertThrows(try csv.delimitedComponents(config))
+        _ = XCTAssertThrows(try csv.delimitedComponents(config))
     }
     
     func testIssue16() {

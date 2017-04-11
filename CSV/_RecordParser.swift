@@ -28,27 +28,29 @@ internal struct _RecordParser: _Parser {
         
         var disposition = state.configuration.onBeginRecord(stream.progress(record: state.currentRecord))
         
-        while disposition == .continue {
-            disposition = fieldParser.parse(state)
-            
-            if let peek = stream.peek() {
-                if peek == state.configuration.delimiter {
-                    // there are more fields
-                    _ = stream.next() // consume the delimiter
-                    state.currentField += 1
-                } else if state.configuration.recordTerminators.contains(peek) {
-                    // we've reached the end of the record
-                    _ = stream.next() // consume the record terminator
-                    
-                    break // break out of the field-parsing loop
+        if disposition == .continue {
+            repeat {
+                disposition = fieldParser.parse(state)
+                
+                if let peek = stream.peek() {
+                    if peek == state.configuration.delimiter {
+                        // there are more fields
+                        _ = stream.next() // consume the delimiter
+                        state.currentField += 1
+                    } else if state.configuration.recordTerminators.contains(peek) {
+                        // we've reached the end of the record
+                        _ = stream.next() // consume the record terminator
+                        
+                        break // break out of the field-parsing loop
+                    } else {
+                        // not a field delimiter, and not a record terminator
+                        let error = Parser.Error(kind: .unexpectedDelimiter(peek), progress: stream.progress(record: state.currentRecord, field: state.currentField))
+                        disposition = .error(error)
+                    }
                 } else {
-                    // not a field delimiter, and not a record terminator
-                    let error = Parser.Error(kind: .unexpectedDelimiter(peek), progress: stream.progress(record: state.currentRecord, field: state.currentField))
-                    disposition = .error(error)
+                    break
                 }
-            } else {
-                break
-            }
+            } while disposition == .continue
         }
         
         let endDisposition = state.configuration.onEndRecord(stream.progress(record: state.currentRecord))

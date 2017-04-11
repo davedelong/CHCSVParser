@@ -19,7 +19,6 @@ class IteratorTests: XCTestCase {
             let name = String.localizedName(of: encoding)
             
             guard string.canBeConverted(to: encoding) else {
-                print("\t~~Cannot convert to \(name) (\(encoding))")
                 continue
             }
             
@@ -36,9 +35,7 @@ class IteratorTests: XCTestCase {
             let sequence = FileSequence(file: url, encoding: encoding)
             
             let message = String(format: "Failed to correctly read with encoding \(name) (%x)", encoding.rawValue)
-            guard XCTAssertEqualSequences(sequence, string.characters, message, file: file, line: line) else { continue }
-            
-            print("\tCorrectly parsed \(name) (\(encoding))")
+            _ = XCTAssertEqualSequences(sequence, string.characters, message, file: file, line: line)
         }
     }
     

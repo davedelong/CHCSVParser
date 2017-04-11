@@ -23,16 +23,16 @@ extension String {
         let parser = Parser(characters: self.characters, configuration: config)
         try parser.parse()
         
-        return Document(records: aggregator.records)
+        return Document(aggregator.records)
     }
 }
 
 private class Aggregator {
     let useFirstRecordAsKeys: Bool
     var keys: Array<String>? = nil
-    var records = Array<Record>()
     
-    var currentRecord: Array<String>? = nil
+    var records = Array<Record>()
+    var currentRecord: Array<Field>? = nil
     
     init(useFirstRecordAsKeys keys: Bool) {
         useFirstRecordAsKeys = keys
@@ -55,8 +55,9 @@ private class Aggregator {
         }
         
         if let fields = currentRecord {
-            if record == 0 && useFirstRecordAsKeys {
-                keys = currentRecord
+            if keys == nil && useFirstRecordAsKeys {
+                // TODO: what if the currentRecord is all comments
+                keys = currentRecord?.flatMap { $0.value }
             } else {
                 if useFirstRecordAsKeys {
                     guard keys?.count == fields.count else {
@@ -66,7 +67,8 @@ private class Aggregator {
                         return .error(error)
                     }
                 }
-                let record = Record(index: record, array: fields, keys: keys)
+                
+                let record = Record(fields)
                 records.append(record)
             }
         }
@@ -75,7 +77,11 @@ private class Aggregator {
     }
     
     func readField(_ field: String, progress: CSV.Progress) -> Parser.Disposition {
-        currentRecord?.append(field)
+        var key: String? = nil
+        if useFirstRecordAsKeys == true {
+            key = keys?[currentRecord?.count ?? 0]
+        }
+        currentRecord?.append(Field(key: key, value: field))
         return .continue
     }
     
