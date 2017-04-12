@@ -16,45 +16,47 @@ internal struct _RecordParser: _Parser {
         let stream = state.characterIterator
         state.currentField = 0
         
+        var disposition = state.configuration.onBeginRecord(stream.progress(record: state.currentRecord))
+        
         if stream.peek() == Character.Octothorpe && state.configuration.recognizeComments {
-            return commentParser.parse(state)
+            disposition = commentParser.parse(state)
         } else {
-            return parseRecord(state)
+            disposition = parseRecord(state)
         }
+        
+        let endDisposition = state.configuration.onEndRecord(stream.progress(record: state.currentRecord))
+        if disposition == .continue { disposition = endDisposition }
+        return disposition
     }
     
     private func parseRecord(_ state: Parser.State) -> Parser.Disposition {
         let stream = state.characterIterator
         
-        var disposition = state.configuration.onBeginRecord(stream.progress(record: state.currentRecord))
+        var disposition: Parser.Disposition = .continue
         
-        if disposition == .continue {
-            repeat {
-                disposition = fieldParser.parse(state)
-                
-                if let peek = stream.peek() {
-                    if peek == state.configuration.delimiter {
-                        // there are more fields
-                        _ = stream.next() // consume the delimiter
-                        state.currentField += 1
-                    } else if state.configuration.recordTerminators.contains(peek) {
-                        // we've reached the end of the record
-                        _ = stream.next() // consume the record terminator
-                        
-                        break // break out of the field-parsing loop
-                    } else {
-                        // not a field delimiter, and not a record terminator
-                        let error = Parser.Error(kind: .unexpectedDelimiter(peek), progress: stream.progress(record: state.currentRecord, field: state.currentField))
-                        disposition = .error(error)
-                    }
+        repeat {
+            disposition = fieldParser.parse(state)
+            
+            if let peek = stream.peek() {
+                if peek == state.configuration.delimiter {
+                    // there are more fields
+                    _ = stream.next() // consume the delimiter
+                    state.currentField += 1
+                } else if state.configuration.recordTerminators.contains(peek) {
+                    // we've reached the end of the record
+                    // don't consume the record terminator; that's handled by the document parser
+                    
+                    break // break out of the field-parsing loop
                 } else {
-                    break
+                    // not a field delimiter, and not a record terminator
+                    let error = Parser.Error(kind: .unexpectedDelimiter(peek), progress: stream.progress(record: state.currentRecord, field: state.currentField))
+                    disposition = .error(error)
                 }
-            } while disposition == .continue
-        }
+            } else {
+                break
+            }
+        } while disposition == .continue
         
-        let endDisposition = state.configuration.onEndRecord(stream.progress(record: state.currentRecord))
-        if disposition == .continue { disposition = endDisposition }
         return disposition
     }
 }

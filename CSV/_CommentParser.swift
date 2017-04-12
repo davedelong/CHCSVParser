@@ -30,8 +30,7 @@ internal struct _CommentParser: _Parser {
                     _ = stream.next()
                     
                 } else if state.configuration.recordTerminators.contains(next) {
-                    // consume the record terminator
-                    _ = stream.next()
+                    // don't consume the record terminator; that's handled by the document parser
                     break
                     
                 } else {

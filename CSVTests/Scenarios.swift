@@ -234,7 +234,7 @@ let trailingWhitespaceScenarios: Array<Scenario> = [
     
     Scenario(name: "TrailingNewline",
              csv: "a,b\n",
-             document: Document([Record([Field("a"), Field("b")])])
+             document: Document([Record([Field("a"), Field("b")]), Record([Field("")])])
     ),
     
     Scenario(name: "TrailingSpace",

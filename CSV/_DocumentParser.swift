@@ -17,6 +17,13 @@ internal struct _DocumentParser: _Parser {
         var disposition = state.configuration.onBeginDocument()
             
         while disposition == .continue {
+            if state.currentRecord > 0 {
+                guard let peek = stream.peek(), state.configuration.recordTerminators.contains(peek) else {
+                    fatalError("Starting a subsequent record, but no record terminator??")
+                }
+                _ = stream.next()
+            }
+            
             disposition = recordParser.parse(state)
             state.currentRecord += 1 // move to the next 0-based record
             
