@@ -204,22 +204,6 @@ TEST_ARRAYS(_parsed, _expected); \
 }
 
 - (void)testGithubIssue65 {
-//    NSString *csv = FIELD1 @"æ" COMMA FIELD2 @"ø" COMMA FIELD3 @"å";
-//    NSArray *expected = @[@[FIELD1 @"æ", FIELD2 @"ø", FIELD3 @"å"]];
-//    TEST(csv, expected);
-//    
-//    NSArray *csvComponents = [csv CSVComponents];
-//    TEST_ARRAYS(csvComponents, expected);
-//    
-//    csv = @"148" COMMA @"S†TTERLIN Jasha" COMMA @"MOV" COMMA @"MOVISTAR TEAM";
-//    expected = @[@[@"148", @"S†TTERLIN Jasha", @"MOV", @"MOVISTAR TEAM"]];
-//    TEST(csv, expected);
-//    
-//    csv = @"148" COMMA @"SÜTTERLIN Jasha" COMMA @"MOV" COMMA @"MOVISTAR TEAM";
-//    expected = @[@[@"148", @"SÜTTERLIN Jasha", @"MOV", @"MOVISTAR TEAM"]];
-//    TEST(csv, expected);
-    
-    
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSURL *fileURL = [bundle URLForResource:@"Issue65" withExtension:@"csv"];
     

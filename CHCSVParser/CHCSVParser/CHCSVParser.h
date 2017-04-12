@@ -165,6 +165,12 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
  */
 @property (readonly) NSUInteger totalBytesRead;
 
+
+/**
+ * This method is unavailable, because there is nothing supplied to parse.
+ */
+- (instancetype)init NS_UNAVAILABLE;
+
 /**
  *  The designated initializer
  *
@@ -241,6 +247,11 @@ typedef NS_ENUM(NSInteger, CHCSVErrorCode) {
 @end
 
 @interface CHCSVWriter : NSObject
+
+/**
+ * This method is unavailable, because there is no way to extract the written CSV.
+ */
+- (instancetype)init NS_UNAVAILABLE;
 
 /**
  *  Initializes a @c CHCSVWriter to write to the provided file path. Assumes @c NSUTF8Encoding and the comma delimiter
