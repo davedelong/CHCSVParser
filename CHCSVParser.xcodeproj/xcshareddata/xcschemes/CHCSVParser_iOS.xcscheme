@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4D61F4091F157DF9000D1E7C"
-               BuildableName = "CHCSVParser-iOS.framework"
-               BlueprintName = "CHCSVParser-iOS"
+               BuildableName = "CHCSVParser_iOS.framework"
+               BlueprintName = "CHCSVParser_iOS"
                ReferencedContainer = "container:CHCSVParser.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,8 +46,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4D61F4091F157DF9000D1E7C"
-            BuildableName = "CHCSVParser-iOS.framework"
-            BlueprintName = "CHCSVParser-iOS"
+            BuildableName = "CHCSVParser_iOS.framework"
+            BlueprintName = "CHCSVParser_iOS"
             ReferencedContainer = "container:CHCSVParser.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -64,8 +64,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4D61F4091F157DF9000D1E7C"
-            BuildableName = "CHCSVParser-iOS.framework"
-            BlueprintName = "CHCSVParser-iOS"
+            BuildableName = "CHCSVParser_iOS.framework"
+            BlueprintName = "CHCSVParser_iOS"
             ReferencedContainer = "container:CHCSVParser.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

@@ -23,7 +23,7 @@
 /* Begin PBXFileReference section */
 		08FB7796FE84155DC02AAC07 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		4D61F40A1F157DF9000D1E7C /* CHCSVParser-iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "CHCSVParser-iOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D61F40A1F157DF9000D1E7C /* CHCSVParser_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CHCSVParser_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D61F40C1F157DF9000D1E7C /* CHCSVParser-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CHCSVParser-iOS.h"; sourceTree = "<group>"; };
 		4D61F40D1F157DF9000D1E7C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		550ED4271973491500E7D173 /* Issue64.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Issue64.csv; sourceTree = "<group>"; };
@@ -106,7 +106,7 @@
 			children = (
 				8DD76FA10486AA7600D96B5E /* CHCSVParser */,
 				557FD0531204A70D009FCDBA /* Unit Tests.xctest */,
-				4D61F40A1F157DF9000D1E7C /* CHCSVParser-iOS.framework */,
+				4D61F40A1F157DF9000D1E7C /* CHCSVParser_iOS.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -157,9 +157,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		4D61F4091F157DF9000D1E7C /* CHCSVParser-iOS */ = {
+		4D61F4091F157DF9000D1E7C /* CHCSVParser_iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4D61F4111F157DF9000D1E7C /* Build configuration list for PBXNativeTarget "CHCSVParser-iOS" */;
+			buildConfigurationList = 4D61F4111F157DF9000D1E7C /* Build configuration list for PBXNativeTarget "CHCSVParser_iOS" */;
 			buildPhases = (
 				4D61F4051F157DF9000D1E7C /* Sources */,
 				4D61F4061F157DF9000D1E7C /* Frameworks */,
@@ -170,9 +170,9 @@
 			);
 			dependencies = (
 			);
-			name = "CHCSVParser-iOS";
+			name = CHCSVParser_iOS;
 			productName = "CHCSVParser-iOS";
-			productReference = 4D61F40A1F157DF9000D1E7C /* CHCSVParser-iOS.framework */;
+			productReference = 4D61F40A1F157DF9000D1E7C /* CHCSVParser_iOS.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		557FD0521204A70D009FCDBA /* Unit Tests */ = {
@@ -238,7 +238,7 @@
 			projectRoot = "";
 			targets = (
 				8DD76F960486AA7600D96B5E /* CHCSVParser */,
-				4D61F4091F157DF9000D1E7C /* CHCSVParser-iOS */,
+				4D61F4091F157DF9000D1E7C /* CHCSVParser_iOS */,
 				557FD0521204A70D009FCDBA /* Unit Tests */,
 			);
 		};
@@ -407,7 +407,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.davedelong.CHCSVParser-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.davedelong.CHCSVParser_iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -449,7 +449,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.davedelong.CHCSVParser-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.davedelong.CHCSVParser_iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -537,7 +537,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4D61F4111F157DF9000D1E7C /* Build configuration list for PBXNativeTarget "CHCSVParser-iOS" */ = {
+		4D61F4111F157DF9000D1E7C /* Build configuration list for PBXNativeTarget "CHCSVParser_iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4D61F40F1F157DF9000D1E7C /* Debug */,
