@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4D61F40E1F157DF9000D1E7C /* CHCSVParser-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D61F40C1F157DF9000D1E7C /* CHCSVParser-iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4D61F4121F16BA4B000D1E7C /* CHCSVParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 55B9931F160E376100D6548A /* CHCSVParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		550ED4281973491500E7D173 /* Issue64.csv in Resources */ = {isa = PBXBuildFile; fileRef = 550ED4271973491500E7D173 /* Issue64.csv */; };
 		5515D4461AAB72FF00DC1D5B /* Issue79.csv in Resources */ = {isa = PBXBuildFile; fileRef = 5515D4451AAB72FF00DC1D5B /* Issue79.csv */; };
 		557FCEB61203F938009FCDBA /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557FCEB51203F938009FCDBA /* CoreServices.framework */; };
@@ -151,6 +152,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D61F40E1F157DF9000D1E7C /* CHCSVParser-iOS.h in Headers */,
+				4D61F4121F16BA4B000D1E7C /* CHCSVParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -544,6 +546,7 @@
 				4D61F4101F157DF9000D1E7C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		557FD0571204A70E009FCDBA /* Build configuration list for PBXNativeTarget "Unit Tests" */ = {
 			isa = XCConfigurationList;
