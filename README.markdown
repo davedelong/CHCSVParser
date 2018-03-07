@@ -1,13 +1,13 @@
-#CHCSVParser
+# CHCSVParser
 
 `CHCSVParser` is an Objective-C parser for CSV files.
 
-##Supported Platforms
+## Supported Platforms
 
 - Mac OS X 10.7+
 - iOS 6+
 
-##Usage
+## Usage
 
 In order to use `CHCSVParser`, you'll need to include the following two files in your project:
 
@@ -16,7 +16,7 @@ In order to use `CHCSVParser`, you'll need to include the following two files in
 
 `CHCSVParser` requires ARC.
 
-###Parsing
+### Parsing
 A `CHCSVParser` works very similarly to an `NSXMLParser`, in that it synchronously parses the data and invokes delegate callback methods to let you know that it has found a field, or has finished reading a line, or has encountered a syntax error.
 
 A `CHCSVParser` can be created in one of three ways:
@@ -37,7 +37,7 @@ By default, `CHCSVParser` will not sanitize the output of the fields; in other w
 
 - `recognizesLeadingEqualSign` allows quoted fields to begin with an `=`. Some programs use a leading equal sign to indicate that the contents of the field should be interpreted explicitly, and things like insignificant digits should not be removed. This option is disabled by default.
 
-###Writing
+### Writing
 A `CHCSVWriter` has several methods for constructing CSV files:
 
 `-writeField:` accepts an object and writes its `-description` (after being properly escaped) out to the CSV file.  It will also write field separator (`,`) if necessary.  You may pass an empty string (`@""`) or `nil` to write an empty field.
@@ -52,7 +52,7 @@ If you wish to write CSV directly into an `NSString`, you should create an `NSOu
 
 Like `CHCSVParser`, `CHCSVWriter` can be customized with a delimiter other than `,` during initialization.
 
-###Convenience Methods
+### Convenience Methods
 
 There are a couple of category methods on `NSArray` and `NSString` to simplify the common reading and writing of delimited files.
 
@@ -72,10 +72,10 @@ A `CHCSVOrderedDictionary` is an `NSDictionary` subclass that maintains a specif
  - UTF-32LE (`NSUTF32LittleEndianStringEncoding`)
  - ISO 2022-KR (`kCFStringEncodingISO_2022_KR`)
  
-##Performance
+## Performance
 `CHCSVParser` is conscious of low-memory environments, such as the iPhone or iPad.  It can safely parse very large CSV files, because it only loads portions of the file into memory at a single time.
  
-##Credits & Contributors
+## Credits & Contributors
 
 `CHCSVParser` was written by [Dave DeLong][1] and has accepted patches from [several other contributors](https://github.com/davedelong/CHCSVParser/graphs/contributors).
 
@@ -84,7 +84,7 @@ A `CHCSVOrderedDictionary` is an `NSDictionary` subclass that maintains a specif
   [1]: http://davedelong.com
   [2]: http://brockerhoff.net
   
-##License
+## License
 
 `CHCSVParser` is licensed under the MIT license, which is reproduced in its entirety here:
 
