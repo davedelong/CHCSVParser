@@ -400,6 +400,12 @@ TEST_ARRAYS(_parsed, _expected); \
     }];
 }
 
+- (void)testEmptyRecords {
+    NSString *csv = NEWLINE FIELD1 NEWLINE FIELD1 NEWLINE NEWLINE FIELD1 NEWLINE NEWLINE FIELD1 NEWLINE UTF8FIELD4;
+    NSArray *expected = @[@[EMPTY], @[FIELD1], @[FIELD1], @[EMPTY], @[FIELD1], @[EMPTY], @[FIELD1], @[UTF8FIELD4]];
+    TEST(csv, expected);
+}
+
 - (void)testEmptyFields {
     NSString *csv = COMMA COMMA;
     NSArray *expected = @[@[EMPTY, EMPTY, EMPTY]];

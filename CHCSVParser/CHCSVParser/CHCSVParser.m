@@ -311,7 +311,15 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     if (_cancelled) { return NO; }
     
     NSUInteger charCount = 0;
-    while ([[NSCharacterSet newlineCharacterSet] characterIsMember:[self _peekCharacter]]) {
+    unichar peek = [self _peekCharacter];
+    unichar peekPeek = [self _peekPeekCharacter];
+    
+    if (peek == '\r' && peekPeek == '\n') {
+        // assume \r\n is a single delimiter
+        charCount += 2;
+        [self _advance];
+        [self _advance];
+    } else if ([[NSCharacterSet newlineCharacterSet] characterIsMember:peek]) {
         charCount++;
         [self _advance];
     }
