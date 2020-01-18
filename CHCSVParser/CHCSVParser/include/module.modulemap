@@ -1,0 +1,5 @@
+module CHCSVParser {
+     umbrella header "CHCSVParser.h"
+     export *
+     module * { export * }
+ }
