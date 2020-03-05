@@ -638,8 +638,17 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 - (void)_writeString:(NSString *)string {
     NSData *stringData = [string dataUsingEncoding:_streamEncoding];
+    NSRange subRange = NSMakeRange(0, stringData.length);
     if ([_bom length] > 0) {
-        stringData = [stringData subdataWithRange:NSMakeRange([_bom length], [stringData length] - [_bom length])];
+        subRange.location = _bom.length;
+        subRange.length -= _bom.length;
+    }
+    const int8_t *bytes = stringData.bytes;
+    if (bytes[subRange.location + subRange.length - 1] == NULLCHAR) {
+        subRange.length -= 1;
+    }
+    if (subRange.length != stringData.length) {
+        stringData = [stringData subdataWithRange:subRange];
     }
     [self _writeData:stringData];
 }
