@@ -643,10 +643,14 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
         subRange.location = _bom.length;
         subRange.length -= _bom.length;
     }
+    if (stringData.length <= 0) { return; }
+    
     const int8_t *bytes = stringData.bytes;
     if (bytes[subRange.location + subRange.length - 1] == NULLCHAR) {
         subRange.length -= 1;
     }
+    
+    if (stringData.length <= 0) { return; }
     if (subRange.length != stringData.length) {
         stringData = [stringData subdataWithRange:subRange];
     }
