@@ -795,9 +795,9 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 @end
 
-NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions options, unichar delimiter, NSError *__autoreleasing *error);
-NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions options, unichar delimiter, NSError *__autoreleasing *error) {
-    CHCSVParser *parser = [[CHCSVParser alloc] initWithInputStream:inputStream usedEncoding:nil delimiter:delimiter];
+NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions options, NSStringEncoding *usedEncoding, unichar delimiter, NSError *__autoreleasing *error);
+NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions options, NSStringEncoding *usedEncoding, unichar delimiter, NSError *__autoreleasing *error) {
+    CHCSVParser *parser = [[CHCSVParser alloc] initWithInputStream:inputStream usedEncoding:usedEncoding delimiter:delimiter];
     
     BOOL usesFirstLineAsKeys = !!(options & CHCSVParserOptionsUsesFirstLineAsKeys);
     _CHCSVAggregator *aggregator = usesFirstLineAsKeys ? [[_CHCSVKeyedAggregator alloc] init] : [[_CHCSVAggregator alloc] init];
@@ -843,7 +843,14 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
     NSParameterAssert(fileURL);
     NSInputStream *stream = [NSInputStream inputStreamWithURL:fileURL];
     
-    return _CHCSVParserParse(stream, options, delimiter, error);
+    return _CHCSVParserParse(stream, options, nil, delimiter, error);
+}
+
++ (instancetype)arrayWithContentsOfDelimitedURL:(NSURL *)fileURL options:(CHCSVParserOptions)options usedEncoding:(inout NSStringEncoding *)usedEncoding delimiter:(unichar)delimiter error:(NSError *__autoreleasing *)error {
+    NSParameterAssert(fileURL);
+    NSInputStream *stream = [NSInputStream inputStreamWithURL:fileURL];
+    
+    return _CHCSVParserParse(stream, options, usedEncoding, delimiter, error);
 }
 
 - (NSString *)CSVString {
@@ -884,7 +891,7 @@ NSArray *_CHCSVParserParse(NSInputStream *inputStream, CHCSVParserOptions option
     NSData *csvData = [self dataUsingEncoding:NSUTF8StringEncoding];
     NSInputStream *stream = [NSInputStream inputStreamWithData:csvData];
     
-    return _CHCSVParserParse(stream, options, delimiter, error);
+    return _CHCSVParserParse(stream, options, nil, delimiter, error);
 }
 
 @end
