@@ -43,6 +43,10 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 @property (assign) NSUInteger totalBytesRead;
 @end
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
+#pragma clang diagnostic ignored "-Wno-objc-designated-initializers"
+
 @implementation CHCSVParser {
     NSInputStream *_stream;
     NSStringEncoding _streamEncoding;
@@ -63,6 +67,8 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     NSUInteger _currentRecord;
     BOOL _cancelled;
 }
+
+#pragma clang diagnostic pop
 
 - (id)initWithCSVString:(NSString *)csv {
     return [self initWithDelimitedString:csv delimiter:COMMA];
@@ -571,6 +577,10 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
 
 @end
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
+#pragma clang diagnostic ignored "-Wno-objc-designated-initializers"
+
 @implementation CHCSVWriter {
     NSOutputStream *_stream;
     NSStringEncoding _streamEncoding;
@@ -583,6 +593,8 @@ NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
     NSUInteger _currentField;
     NSMutableArray *_firstLineKeys;
 }
+
+#pragma clang diagnostic pop
 
 - (instancetype)initForWritingToCSVFile:(NSString *)path {
     NSOutputStream *stream = [NSOutputStream outputStreamToFileAtPath:path append:NO];
