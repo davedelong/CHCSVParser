@@ -6,6 +6,7 @@
 
 - Mac OS X 10.7+
 - iOS 6+
+- watchOS 1.0+
 
 ## Usage
 
